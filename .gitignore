@@ -1,3 +1,6 @@
+# Ignore JetBrains settings 
+.idea
+
 # Ignore Gradle project-specific cache directory
 .gradle
 
