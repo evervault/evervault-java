@@ -6,9 +6,9 @@ package EverVault;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class LibraryTest {
-    @Test void someLibraryMethodReturnsTrue() {
-        Library classUnderTest = new Library();
+class EverVaultTest {
+    @Test void () {
+        EverVault classUnderTest = new EverVault("test");
         assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
     }
 }
