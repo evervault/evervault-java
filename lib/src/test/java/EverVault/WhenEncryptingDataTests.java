@@ -7,12 +7,17 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WhenEncryptingDataTests {
-    @Test void EncryptingNumberGeneratesEvNumberType() {
+    @Test void EncryptingNumberGeneratesEvNumberType() throws Exception {
         final int data = 1;
 
         EverVault everVault = new EverVault("test");
         var encryptedData = everVault.Encrypt(data);
         assertEverVaultNumber(encryptedData);
+    }
+
+    @Test void TryingToEncryptNullThrows() {
+        EverVault everVault = new EverVault("test");
+        assertThrows(UndefinedDataException.class, () -> everVault.Encrypt(null));
     }
 
     void assertEverVaultString(String data) {

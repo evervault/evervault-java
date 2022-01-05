@@ -9,7 +9,10 @@ public class EverVault {
     public EverVault(String apiKey) {
     }
 
-    public <TDataType> String Encrypt(TDataType data) {
+    public <TDataType> String Encrypt(TDataType data) throws Exception {
+        if ( data == null ){
+            throw new UndefinedDataException();
+        }
         return "Test";
     }
 
