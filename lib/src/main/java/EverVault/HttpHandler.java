@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.HashMap;
 
 public class HttpHandler {
 
@@ -31,5 +32,9 @@ public class HttpHandler {
                 .build();
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    public void get(String urlPath, HashMap<String, String> headerMap) {
+
     }
 }
