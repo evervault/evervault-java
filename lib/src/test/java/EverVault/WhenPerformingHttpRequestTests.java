@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URI;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -16,14 +15,20 @@ public class WhenPerformingHttpRequestTests {
     public void httpHeadersAreIncludedForGets(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException {
         final String endpoint = "/Foo";
         final String userAgentHeaderRegex = "evervault-java/1.0";
+        final String contentType = "application/json";
+        final String apiKey = "Foo";
 
-        var client = new HttpHandler();
+        var client = new HttpHandler(apiKey);
 
-        var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + endpoint;
+        final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + endpoint;
 
-        client.get(URI.create(urlPath));
+        client.get(urlPath);
 
         verify(getRequestedFor(urlEqualTo(endpoint))
-                .withHeader("User-Agent", equalTo(userAgentHeaderRegex)));
+                .withHeader("User-Agent", equalTo(userAgentHeaderRegex))
+                .withHeader("AcceptEncoding", equalTo("gzip, deflate"))
+                .withHeader("Accept", equalTo(contentType))
+                .withHeader("Content-Type", equalTo(contentType))
+                .withHeader("Api-Key", equalTo(apiKey)));
     }
 }
