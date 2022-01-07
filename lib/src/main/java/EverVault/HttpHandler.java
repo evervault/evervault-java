@@ -20,7 +20,11 @@ public class HttpHandler {
     }
 
     public void get(String url) throws IOException, InterruptedException {
-        var request = HttpRequest.newBuilder()
+        this.get(url, null);
+    }
+
+    public void get(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException {
+        var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofMinutes(10))
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
@@ -28,13 +32,17 @@ public class HttpHandler {
                 .setHeader("Accept", CONTENT_TYPE)
                 .setHeader("Content-Type", CONTENT_TYPE)
                 .setHeader("Api-Key", apiKey)
-                .GET()
-                .build();
+                .GET();
+
+        if (headerMap != null) {
+            for (HashMap.Entry<String, String> set :
+                    headerMap.entrySet()) {
+                requestBuilder.setHeader(set.getKey(), set.getValue());
+            }
+        }
+
+        var request = requestBuilder.build();
 
         client.send(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    public void get(String urlPath, HashMap<String, String> headerMap) {
-
     }
 }

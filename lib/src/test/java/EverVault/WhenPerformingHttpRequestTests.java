@@ -33,7 +33,7 @@ public class WhenPerformingHttpRequestTests {
                 .withHeader("Api-Key", equalTo(apiKey)));
     }
 
-    @Test void AdditionalHeadersAreIncluded(WireMockRuntimeInfo wireMockRuntimeInfo) {
+    @Test void additionalHeadersAreIncluded(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException {
         final String endpoint = "/Foo";
         final String userAgentHeader = "evervault-java/1.0";
         final String contentType = "application/json";
@@ -45,6 +45,7 @@ public class WhenPerformingHttpRequestTests {
 
         var headerMap = new HashMap<String, String>();
         headerMap.put("Foo", "Bar");
+        headerMap.put("Bar", "Foo");
 
         client.get(urlPath, headerMap);
 
