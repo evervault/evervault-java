@@ -1,17 +1,20 @@
 package EverVault;
 
+import EverVault.ReadModels.CagePublicKey;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
+import com.google.gson.Gson;
 
 public class HttpHandler {
 
     private final java.net.http.HttpClient client;
-    private final String VERSION_PREFIX = "evervault-java/";
-    private final String CONTENT_TYPE = "application/json";
+    private final static String VERSION_PREFIX = "evervault-java/";
+    private final static String CONTENT_TYPE = "application/json";
     private final String apiKey;
 
     public HttpHandler(String apiKey) {
@@ -19,11 +22,11 @@ public class HttpHandler {
         client = java.net.http.HttpClient.newHttpClient();
     }
 
-    public void get(String url) throws IOException, InterruptedException {
-        this.get(url, null);
+    public CagePublicKey get(String url) throws IOException, InterruptedException {
+        return this.get(url, null);
     }
 
-    public void get(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException {
+    public CagePublicKey get(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofMinutes(10))
@@ -43,6 +46,8 @@ public class HttpHandler {
 
         var request = requestBuilder.build();
 
-        client.send(request, HttpResponse.BodyHandlers.ofString());
+         var result = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+         return new Gson().fromJson(result.body(), CagePublicKey.class);
     }
 }
