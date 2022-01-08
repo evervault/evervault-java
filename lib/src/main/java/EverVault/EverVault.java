@@ -6,7 +6,6 @@ package EverVault;
 import EverVault.Exceptions.UndefinedDataException;
 
 import java.util.Dictionary;
-import java.util.Base64;
 
 public class EverVault {
     public EverVault(String apiKey) {

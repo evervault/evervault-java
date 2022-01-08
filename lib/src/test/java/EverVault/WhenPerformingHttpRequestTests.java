@@ -1,7 +1,6 @@
 package EverVault;
 
 import EverVault.Exceptions.HttpFailureException;
-import EverVault.ReadModels.CagePublicKey;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;

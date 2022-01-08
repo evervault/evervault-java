@@ -5,10 +5,12 @@ package EverVault;
 
 import EverVault.Exceptions.UndefinedDataException;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class WhenEncryptingDataTests {
-    @Test void encryptingNumberGeneratesEvNumberType() throws Exception {
+    @Test
+    void encryptingNumberGeneratesEvNumberType() throws Exception {
         final int data = 1;
 
         EverVault everVault = new EverVault("test");
@@ -16,7 +18,8 @@ class WhenEncryptingDataTests {
         assertEverVaultNumber(encryptedData);
     }
 
-    @Test void tryingToEncryptNullThrows() {
+    @Test
+    void tryingToEncryptNullThrows() {
         EverVault everVault = new EverVault("test");
         assertThrows(UndefinedDataException.class, () -> everVault.Encrypt(null));
     }
