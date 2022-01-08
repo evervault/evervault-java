@@ -1,5 +1,6 @@
 package EverVault;
 
+import EverVault.Exceptions.HttpFailureException;
 import EverVault.ReadModels.CagePublicKey;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ public class HttpHandler {
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
     private final static String CONTENT_TYPE = "application/json";
+    private final static int OK_HTTP_STATUS_CODE = 200;
     private final String apiKey;
 
     public HttpHandler(String apiKey) {
@@ -22,11 +24,11 @@ public class HttpHandler {
         client = java.net.http.HttpClient.newHttpClient();
     }
 
-    public CagePublicKey get(String url) throws IOException, InterruptedException {
+    public CagePublicKey get(String url) throws IOException, InterruptedException, HttpFailureException {
         return this.get(url, null);
     }
 
-    public CagePublicKey get(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException {
+    public CagePublicKey get(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofMinutes(10))
@@ -47,6 +49,10 @@ public class HttpHandler {
         var request = requestBuilder.build();
 
          var result = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+         if (result.statusCode() != OK_HTTP_STATUS_CODE) {
+             throw new HttpFailureException(result.statusCode());
+         }
 
          return new Gson().fromJson(result.body(), CagePublicKey.class);
     }
