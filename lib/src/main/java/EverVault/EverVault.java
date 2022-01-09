@@ -7,6 +7,7 @@ import EverVault.Exceptions.UndefinedDataException;
 
 import java.util.Dictionary;
 
+/// TODO
 public class EverVault {
     public EverVault(String apiKey) {
     }
@@ -18,12 +19,7 @@ public class EverVault {
         return "Test";
     }
 
-//    private void FetchCageKey() {
-//        var decoder = Base64.getDecoder();
-//
-//    }
-
     public void Run(String cageName, Dictionary<String, String> data, Dictionary<String, String> options) {
-
+        /// TODO
     }
 }

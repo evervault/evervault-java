@@ -1,5 +1,6 @@
 package EverVault;
 
+import EverVault.Contracts.IHttpHandlerService;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.ReadModels.CagePublicKey;
 
@@ -11,7 +12,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import com.google.gson.Gson;
 
-public class HttpHandler {
+public class HttpHandlerService implements IHttpHandlerService {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -19,16 +20,16 @@ public class HttpHandler {
     private final static int OK_HTTP_STATUS_CODE = 200;
     private final String apiKey;
 
-    public HttpHandler(String apiKey) {
+    public HttpHandlerService(String apiKey) {
         this.apiKey = apiKey;
         client = java.net.http.HttpClient.newHttpClient();
     }
 
-    public CagePublicKey get(String url) throws IOException, InterruptedException, HttpFailureException {
-        return this.get(url, null);
+    public CagePublicKey getCagePublicKey(String url) throws IOException, InterruptedException, HttpFailureException {
+        return this.getCagePublicKey(url, null);
     }
 
-    public CagePublicKey get(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
+    public CagePublicKey getCagePublicKey(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofMinutes(10))
