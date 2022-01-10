@@ -3,6 +3,8 @@ package EverVault;
 import EverVault.Contracts.IProvideECPublicKey;
 import EverVault.Contracts.IProvideSharedKey;
 import EverVault.ReadModels.GeneratedSharedKey;
+import org.bouncycastle.crypto.engines.AESEngine;
+import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -44,5 +46,9 @@ public class EncryptionService implements IProvideECPublicKey, IProvideSharedKey
         result.SharedKey = agreement.generateSecret();
 
         return result;
+    }
+
+    public void Whatever() {
+        var cipher = new GCMBlockCipher(new AESEngine());
     }
 }
