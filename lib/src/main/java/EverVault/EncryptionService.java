@@ -2,11 +2,13 @@ package EverVault;
 
 import EverVault.Contracts.IProvideECPublicKey;
 import EverVault.Contracts.IProvideSharedKey;
+import EverVault.ReadModels.GeneratedSharedKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
 
+import javax.crypto.KeyAgreement;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
@@ -26,14 +28,21 @@ public class EncryptionService implements IProvideECPublicKey, IProvideSharedKey
     }
 
     @Override
-    public byte[] generateSharedKeyBasedOn(PublicKey teamCagePublickey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, new BouncyCastleProvider());
+    public GeneratedSharedKey generateSharedKeyBasedOn(PublicKey teamCagePublickey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
+        var provider = new BouncyCastleProvider();
+        var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, provider);
         var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
         keyPairGenerator.initialize(genParameter, new SecureRandom());
-        var keypair = keyPairGenerator.generateKeyPair();
+        var keyPair = keyPairGenerator.generateKeyPair();
 
-        var encodedPublicKey = keypair.getPublic().getEncoded();
+        var agreement = KeyAgreement.getInstance("ECDH", provider);
+        agreement.init(keyPair.getPrivate());
+        agreement.doPhase(keyPair.getPublic(), true);
 
-       // AgreementUtilities
+        var result = new GeneratedSharedKey();
+        result.GeneratedEcdhKey = keyPair.getPublic().getEncoded();
+        result.SharedKey = agreement.generateSecret();
+
+        return result;
     }
 }
