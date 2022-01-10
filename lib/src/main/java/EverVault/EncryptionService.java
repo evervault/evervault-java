@@ -1,6 +1,7 @@
 package EverVault;
 
 import EverVault.Contracts.IEncryptionService;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
@@ -19,7 +20,8 @@ public class EncryptionService implements IEncryptionService {
         var point = curve.decodePoint(key);
         var parameterSpec = new ECParameterSpec(curve, point, curve.getOrder());
         var spec = new ECPublicKeySpec(point, parameterSpec);
-        return KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM).generatePublic(spec);
+
+        return KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM, new BouncyCastleProvider()).generatePublic(spec);
     }
 
 //    public void Generate() {
