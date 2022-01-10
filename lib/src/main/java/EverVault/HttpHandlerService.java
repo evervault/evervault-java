@@ -1,6 +1,6 @@
 package EverVault;
 
-import EverVault.Contracts.IHttpHandlerService;
+import EverVault.Contracts.IProvideCagePublicKey;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.ReadModels.CagePublicKey;
 
@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import com.google.gson.Gson;
 
-public class HttpHandlerService implements IHttpHandlerService {
+public class HttpHandlerService implements IProvideCagePublicKey {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
