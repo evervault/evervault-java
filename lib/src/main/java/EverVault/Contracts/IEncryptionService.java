@@ -1,7 +1,9 @@
 package EverVault.Contracts;
 
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 
 public interface IEncryptionService {
-    ECPublicKeySpec GetEllipticCurvePublicKeyFromEncodedString(String encodedKey);
+    PublicKey GetEllipticCurvePublicKeyFrom(byte[] key) throws NoSuchAlgorithmException, InvalidKeySpecException;
 }
