@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -87,7 +88,11 @@ public class WhenUsingEncryptionServiceTests {
 
         verify(encryptFormatProvider, times(1)).format(everVaultVersionCapture.capture(), dataHeaderTypeCapture.capture(), ivCapture.capture(), publicKeyCapture.capture(), encryptedPayloadCapture.capture());
 
-        assert everVaultVersionCapture.getValue().equals("DUB");
+        var encoder = Base64.getEncoder();
+
+        var version = new String(encoder.encode("DUB".getBytes(StandardCharsets.UTF_8)), StandardCharsets.US_ASCII);
+
+        assert everVaultVersionCapture.getValue().equals(version);
         assert dataHeaderTypeCapture.getValue().equals(DataHeader.String);
     }
 }
