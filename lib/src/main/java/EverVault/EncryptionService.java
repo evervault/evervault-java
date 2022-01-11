@@ -70,11 +70,9 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
         cipher.init(true, parameters);
 
         var cipherText = new byte[cipher.getOutputSize(data.length)];
-        cipher.processBytes(data, 0, data.length, cipherText, 0);
-        cipher.doFinal(cipherText, cipherText.length);
+        var len = cipher.processBytes(data, 0, data.length, cipherText, 0);
+        cipher.doFinal(cipherText, len);
 
-        var formattedContent = encryptFormatProvider.format(encodeBase64(everVaultVersion.getBytes(StandardCharsets.UTF_8)), header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
-
-        return formattedContent;
+        return encryptFormatProvider.format(encodeBase64(everVaultVersion.getBytes(StandardCharsets.UTF_8)), header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
     }
 }

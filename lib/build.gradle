@@ -20,6 +20,7 @@ dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
+    testImplementation "org.mockito:mockito-core:3.+"
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api 'org.apache.commons:commons-math3:3.6.1'

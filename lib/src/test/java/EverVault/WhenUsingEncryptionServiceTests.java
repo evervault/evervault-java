@@ -1,27 +1,51 @@
 package EverVault;
 
 import EverVault.Contracts.DataHeader;
+import EverVault.Contracts.IProvideEncryptedFormat;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 
 import javax.crypto.KeyAgreement;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Objects;
-import java.util.stream.Stream;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class WhenUsingEncryptionServiceTests {
     private final EncryptionService service;
+    private final IProvideEncryptedFormat encryptFormatProvider;
+
+    private static class EncryptSetup {
+        private final String ALGORITHM = "EC";
+        private final String STDNAME = "secp256k1";
+        private final String KEYAGREEMENT_ALGORITHM = "ECDH";
+
+        public KeyPair keyPair;
+        public byte[] sharedKey;
+
+        public EncryptSetup() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
+            var provider = new BouncyCastleProvider();
+            var keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, provider);
+            var genParameter = new ECGenParameterSpec(STDNAME);
+            keyPairGenerator.initialize(genParameter, new SecureRandom());
+            keyPair = keyPairGenerator.generateKeyPair();
+
+            var agreement = KeyAgreement.getInstance(KEYAGREEMENT_ALGORITHM, provider);
+            agreement.init(keyPair.getPrivate());
+            agreement.doPhase(keyPair.getPublic(), true);
+
+            sharedKey = agreement.generateSecret();
+        }
+    }
 
     public WhenUsingEncryptionServiceTests() {
-        var format = new StdEncryptionOutputFormat();
-        service = new EncryptionService(format);
+        encryptFormatProvider = mock(IProvideEncryptedFormat.class);
+        service = new EncryptionService(encryptFormatProvider);
     }
 
     @Test
@@ -37,27 +61,33 @@ public class WhenUsingEncryptionServiceTests {
     }
 
     @Test
+    void encryptStringReturnsOutputOfFormat() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherTextException {
+        var setup = new EncryptSetup();
+        final String result = "Foo";
+
+        when(encryptFormatProvider.format(any(), any(), any(), any(), any())).thenReturn(result);
+
+        assert service.encryptData("DUB", DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey).equals(result);
+    }
+
+    @Test
     void encryptStringProvidesCorrectContent() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException {
-        final String algorithm = "EC";
-        final String stdName = "secp256k1";
-        final String toEncrypt = "Evervault";
+        final String result = "Foo";
 
-        var provider = new BouncyCastleProvider();
-        var keyPairGenerator = KeyPairGenerator.getInstance(algorithm, provider);
-        var genParameter = new ECGenParameterSpec(stdName);
-        keyPairGenerator.initialize(genParameter, new SecureRandom());
-        var keyPair = keyPairGenerator.generateKeyPair();
+        var setup = new EncryptSetup();
+        var everVaultVersionCapture = ArgumentCaptor.forClass(String.class);
+        var dataHeaderTypeCapture = ArgumentCaptor.forClass(DataHeader.class);
+        var ivCapture = ArgumentCaptor.forClass(String.class);
+        var publicKeyCapture = ArgumentCaptor.forClass(String.class);
+        var encryptedPayloadCapture = ArgumentCaptor.forClass(String.class);
 
-        var agreement = KeyAgreement.getInstance("ECDH", provider);
-        agreement.init(keyPair.getPrivate());
-        agreement.doPhase(keyPair.getPublic(), true);
+        when(encryptFormatProvider.format(any(), any(), any(), any(), any())).thenReturn(result);
 
-        var sharedKey = agreement.generateSecret();
+        service.encryptData("DUB", DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey);
 
-        var encryptedText = service.encryptData("DUB", DataHeader.String, keyPair.getPublic().getEncoded(), toEncrypt.getBytes(StandardCharsets.UTF_8), sharedKey);
+        verify(encryptFormatProvider, times(1)).format(everVaultVersionCapture.capture(), dataHeaderTypeCapture.capture(), ivCapture.capture(), publicKeyCapture.capture(), encryptedPayloadCapture.capture());
 
-        var splitted = encryptedText.split(":");
-
-        assert Objects.equals(splitted[0], "ev");
+        assert everVaultVersionCapture.getValue().equals("DUB");
+        assert dataHeaderTypeCapture.getValue().equals(DataHeader.String);
     }
 }
