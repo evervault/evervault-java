@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.crypto.KeyAgreement;
 import java.nio.charset.StandardCharsets;
@@ -64,16 +63,16 @@ public class WhenUsingEncryptionServiceTests {
     @ParameterizedTest
     @MethodSource("formattingParameters")
     void formattingEncryptedDataMustReturnDataInCorrectFormat(String expectedResult, DataHeader header, String iv, String publicKey, String payLoad) {
-        assert service.format(header, iv, publicKey, payLoad).equals(expectedResult);
+        assert service.format("DUB", header, iv, publicKey, payLoad).equals(expectedResult);
     }
 
     static Stream<Arguments> formattingParameters() {
         return Stream.of(
-                Arguments.of("ev:EV:PK:PL:$", DataHeader.String, "IV", "PK", "PL"),
-                Arguments.of("ev:boolean:EV:PK:PL:$", DataHeader.Boolean, "IV", "PK", "PL"),
-                Arguments.of("ev:number:EV:PK:PL:$", DataHeader.Number, "IV", "PK", "PL"),
-                Arguments.of("ev:EV:PK:PL:$", DataHeader.String, "IV====", "PK==", "PL===="),
-                Arguments.of("ev:boolean:EV:PK:PL:$", DataHeader.Boolean, "IV==", "PK=", "PL"),
-                Arguments.of("ev:number:EV:PK:PL:$", DataHeader.Number, "IV==", "PK=", "PL=========="));
+                Arguments.of("ev:DUB:IV:PK:PL:$", DataHeader.String, "IV", "PK", "PL"),
+                Arguments.of("ev:DUB:boolean:IV:PK:PL:$", DataHeader.Boolean, "IV", "PK", "PL"),
+                Arguments.of("ev:DUB:number:IV:PK:PL:$", DataHeader.Number, "IV", "PK", "PL"),
+                Arguments.of("ev:DUB:IV:PK:PL:$", DataHeader.String, "IV====", "PK==", "PL===="),
+                Arguments.of("ev:DUB:boolean:IV:PK:PL:$", DataHeader.Boolean, "IV==", "PK=", "PL"),
+                Arguments.of("ev:DUB:number:IV:PK:PL:$", DataHeader.Number, "IV==", "PK=", "PL=========="));
     }
 }

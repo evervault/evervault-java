@@ -22,7 +22,7 @@ public abstract class Base64Handler {
 
     /// Should this be here? Python's SDK has it names as __base_64_remove_padding
     protected String removePadding(String content) {
-        int i = content.length();
+        int i = content.length() - 1;
 
         for (; i > 0; i--) {
             if (content.charAt(i) != '=') {

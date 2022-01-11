@@ -74,12 +74,12 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
     }
 
     @Override
-    public String format(DataHeader header, String iv, String publicKey, String encryptedPayload) {
+    public String format(String everVaultVersion, DataHeader header, String iv, String publicKey, String encryptedPayload) {
         var prefix = "";
         if ( header != DataHeader.String) {
-            prefix = String.format("f:{%s}", header.name());
+            prefix = String.format(":%s", header.toString());
         }
 
-        return "Test";//String.format(ENCRYPTED_FIELD_FORMAT, header.name(), prefix, removePadding(iv), removePadding(publicKey), removePadding(encryptedPayload));
+        return String.format(ENCRYPTED_FIELD_FORMAT, everVaultVersion, prefix, removePadding(iv), removePadding(publicKey), removePadding(encryptedPayload));
     }
 }
