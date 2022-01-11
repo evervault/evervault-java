@@ -13,16 +13,21 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
 
 import javax.crypto.KeyAgreement;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 
-public class EncryptionService extends Base64Handler implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption, IProvideEncryptedFormat {
+public class EncryptionService extends Base64Handler implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption {
     private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
     private static final String SECP256K1_NAME = "secp256k1";
     private static final int DEFAULT_MAC_BIT_SIZE = 128;
     private static final String KEY_AGREEMENT_ALGORITHM = "ECDH";
-    private static final String ENCRYPTED_FIELD_FORMAT = "ev:%s%s:%s:%s:%s:$";
+    private final IProvideEncryptedFormat encryptFormatProvider;
+
+    public EncryptionService(IProvideEncryptedFormat encryptFormatProvider) {
+        this.encryptFormatProvider = encryptFormatProvider;
+    }
 
     @Override
     public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -55,7 +60,7 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
     }
 
     @Override
-    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException {
+    public String encryptData(String everVaultVersion, DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException {
         var random = new SecureRandom();
         var iv = new byte[12];
         random.nextBytes(iv);
@@ -68,18 +73,8 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
         cipher.processBytes(data, 0, data.length, cipherText, 0);
         cipher.doFinal(cipherText, cipherText.length);
 
-        //return String.format("", header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(cipherText));
+        var formattedContent = encryptFormatProvider.format(encodeBase64(everVaultVersion.getBytes(StandardCharsets.UTF_8)), header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
 
-        return "Test";
-    }
-
-    @Override
-    public String format(String everVaultVersion, DataHeader header, String iv, String publicKey, String encryptedPayload) {
-        var prefix = "";
-        if ( header != DataHeader.String) {
-            prefix = String.format(":%s", header.toString());
-        }
-
-        return String.format(ENCRYPTED_FIELD_FORMAT, everVaultVersion, prefix, removePadding(iv), removePadding(publicKey), removePadding(encryptedPayload));
+        return formattedContent;
     }
 }

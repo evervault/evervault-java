@@ -20,7 +20,8 @@ public class WhenUsingEncryptionServiceTests {
     private final EncryptionService service;
 
     public WhenUsingEncryptionServiceTests() {
-        service = new EncryptionService();
+        var format = new StdEncryptionOutputFormat();
+        service = new EncryptionService(format);
     }
 
     @Test
@@ -53,26 +54,10 @@ public class WhenUsingEncryptionServiceTests {
 
         var sharedKey = agreement.generateSecret();
 
-        var encryptedText = service.encryptData(DataHeader.String, keyPair.getPublic().getEncoded(), toEncrypt.getBytes(StandardCharsets.UTF_8), sharedKey);
+        var encryptedText = service.encryptData("DUB", DataHeader.String, keyPair.getPublic().getEncoded(), toEncrypt.getBytes(StandardCharsets.UTF_8), sharedKey);
 
         var splitted = encryptedText.split(":");
 
         assert Objects.equals(splitted[0], "ev");
-    }
-
-    @ParameterizedTest
-    @MethodSource("formattingParameters")
-    void formattingEncryptedDataMustReturnDataInCorrectFormat(String expectedResult, DataHeader header, String iv, String publicKey, String payLoad) {
-        assert service.format("DUB", header, iv, publicKey, payLoad).equals(expectedResult);
-    }
-
-    static Stream<Arguments> formattingParameters() {
-        return Stream.of(
-                Arguments.of("ev:DUB:IV:PK:PL:$", DataHeader.String, "IV", "PK", "PL"),
-                Arguments.of("ev:DUB:boolean:IV:PK:PL:$", DataHeader.Boolean, "IV", "PK", "PL"),
-                Arguments.of("ev:DUB:number:IV:PK:PL:$", DataHeader.Number, "IV", "PK", "PL"),
-                Arguments.of("ev:DUB:IV:PK:PL:$", DataHeader.String, "IV====", "PK==", "PL===="),
-                Arguments.of("ev:DUB:boolean:IV:PK:PL:$", DataHeader.Boolean, "IV==", "PK=", "PL"),
-                Arguments.of("ev:DUB:number:IV:PK:PL:$", DataHeader.Number, "IV==", "PK=", "PL=========="));
     }
 }
