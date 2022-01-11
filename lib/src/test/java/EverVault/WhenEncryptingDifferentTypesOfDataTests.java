@@ -20,7 +20,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var encryptionProvider = mock(IProvideEncryption.class);
 
         var encryptObjectService = new EncryptObjectService(new IDataHandler[] {
-                new StringDataHandler(encryptionProvider)
+                new StringDataHandler(encryptionProvider, setup.keyPair.getPublic().getEncoded(), setup.sharedKey)
         });
 
         var someString = "Foo";

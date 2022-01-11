@@ -1,14 +1,22 @@
 package EverVault;
 
+import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;
+import org.bouncycastle.crypto.InvalidCipherTextException;
+
+import java.nio.charset.StandardCharsets;
 
 public class StringDataHandler implements IDataHandler {
     private IProvideEncryption encryptionProvider;
+    private byte[] generatedEcdhKey;
+    private byte[] sharedKey;
 
-    public StringDataHandler(IProvideEncryption encryptionProvider)
+    public StringDataHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey)
     {
         this.encryptionProvider = encryptionProvider;
+        this.generatedEcdhKey = generatedEcdhKey;
+        this.sharedKey = sharedKey;
     }
 
     @Override
@@ -17,7 +25,8 @@ public class StringDataHandler implements IDataHandler {
     }
 
     @Override
-    public String encrypt(Object data) {
-        return null;
+    public String encrypt(Object data) throws InvalidCipherTextException {
+        var content = (String)data;
+        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, content.getBytes(StandardCharsets.UTF_8), sharedKey);
     }
 }
