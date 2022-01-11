@@ -13,7 +13,6 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
 
 import javax.crypto.KeyAgreement;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
@@ -60,7 +59,7 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
     }
 
     @Override
-    public String encryptData(String everVaultVersion, DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException {
+    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException {
         var random = new SecureRandom();
         var iv = new byte[12];
         random.nextBytes(iv);
@@ -73,6 +72,6 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
         var len = cipher.processBytes(data, 0, data.length, cipherText, 0);
         cipher.doFinal(cipherText, len);
 
-        return encryptFormatProvider.format(encodeBase64(everVaultVersion.getBytes(StandardCharsets.UTF_8)), header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
+        return encryptFormatProvider.format(header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
     }
 }
