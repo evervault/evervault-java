@@ -3,10 +3,9 @@ package EverVault;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class Base64Handler {
-
-    private Base64.Decoder decoder;
-    private Base64.Encoder encoder;
+public abstract class Base64Handler {
+    private final Base64.Decoder decoder;
+    private final Base64.Encoder encoder;
 
     public Base64Handler() {
         decoder = Base64.getDecoder();
@@ -19,5 +18,18 @@ public class Base64Handler {
 
     protected String encodeBase64(byte[] byteArray) {
         return new String(encoder.encode(byteArray), StandardCharsets.UTF_8);
+    }
+
+    /// Should this be here? Python's SDK has it names as __base_64_remove_padding
+    protected String removePadding(String content) {
+        int i = content.length();
+
+        for (; i > 0; i--) {
+            if (content.charAt(i) != '=') {
+                break;
+            }
+        }
+
+        return content.substring(0, ++i);
     }
 }

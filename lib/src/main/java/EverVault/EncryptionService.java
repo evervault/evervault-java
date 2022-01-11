@@ -1,9 +1,6 @@
 package EverVault;
 
-import EverVault.Contracts.DataHeader;
-import EverVault.Contracts.IProvideECPublicKey;
-import EverVault.Contracts.IProvideEncryption;
-import EverVault.Contracts.IProvideSharedKey;
+import EverVault.Contracts.*;
 import EverVault.ReadModels.GeneratedSharedKey;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -20,10 +17,12 @@ import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 
-public class EncryptionService extends Base64Handler implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption {
+public class EncryptionService extends Base64Handler implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption, IProvideEncryptedFormat {
     private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
     private static final String SECP256K1_NAME = "secp256k1";
     private static final int DEFAULT_MAC_BIT_SIZE = 128;
+    private static final String KEY_AGREEMENT_ALGORITHM = "ECDH";
+    private static final String ENCRYPTED_FIELD_FORMAT = "ev:%s%s:%s:%s:%s:$";
 
     @Override
     public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -37,14 +36,14 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
     }
 
     @Override
-    public GeneratedSharedKey generateSharedKeyBasedOn(PublicKey teamCagePublickey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public GeneratedSharedKey generateSharedKeyBasedOn(PublicKey teamCagePublicKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
         var provider = new BouncyCastleProvider();
         var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, provider);
         var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
         keyPairGenerator.initialize(genParameter, new SecureRandom());
         var keyPair = keyPairGenerator.generateKeyPair();
 
-        var agreement = KeyAgreement.getInstance("ECDH", provider);
+        var agreement = KeyAgreement.getInstance(KEY_AGREEMENT_ALGORITHM, provider);
         agreement.init(keyPair.getPrivate());
         agreement.doPhase(keyPair.getPublic(), true);
 
@@ -72,5 +71,15 @@ public class EncryptionService extends Base64Handler implements IProvideECPublic
         //return String.format("", header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(cipherText));
 
         return "Test";
+    }
+
+    @Override
+    public String format(DataHeader header, String iv, String publicKey, String encryptedPayload) {
+        var prefix = "";
+        if ( header != DataHeader.String) {
+            prefix = String.format("f:{%s}", header.name());
+        }
+
+        return "Test";//String.format(ENCRYPTED_FIELD_FORMAT, header.name(), prefix, removePadding(iv), removePadding(publicKey), removePadding(encryptedPayload));
     }
 }
