@@ -5,6 +5,5 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
 public interface IProvideECPublicKey {
-    PublicKey getEllipticCurvePublicKeyFrom(byte[] key) throws NoSuchAlgorithmException, InvalidKeySpecException;
-
+    PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException;
 }

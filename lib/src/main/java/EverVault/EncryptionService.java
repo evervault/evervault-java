@@ -1,10 +1,15 @@
 package EverVault;
 
+import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IProvideECPublicKey;
+import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideSharedKey;
 import EverVault.ReadModels.GeneratedSharedKey;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
@@ -15,12 +20,14 @@ import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 
-public class EncryptionService implements IProvideECPublicKey, IProvideSharedKey {
+public class EncryptionService extends Base64Handler implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption {
     private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
     private static final String SECP256K1_NAME = "secp256k1";
+    private static final int DEFAULT_MAC_BIT_SIZE = 128;
 
     @Override
-    public PublicKey getEllipticCurvePublicKeyFrom(byte[] key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        var key = decodeBase64String(base64key);
         var curve = new SecP256K1Curve();
         var point = curve.decodePoint(key);
         var parameterSpec = new ECParameterSpec(curve, point, curve.getOrder());
@@ -48,7 +55,22 @@ public class EncryptionService implements IProvideECPublicKey, IProvideSharedKey
         return result;
     }
 
-    public void Whatever() {
+    @Override
+    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException {
+        var random = new SecureRandom();
+        var iv = new byte[12];
+        random.nextBytes(iv);
+
         var cipher = new GCMBlockCipher(new AESEngine());
+        var parameters = new AEADParameters(new KeyParameter(sharedKey), DEFAULT_MAC_BIT_SIZE, iv);
+        cipher.init(true, parameters);
+
+        var cipherText = new byte[cipher.getOutputSize(data.length)];
+        cipher.processBytes(data, 0, data.length, cipherText, 0);
+        cipher.doFinal(cipherText, cipherText.length);
+
+        //return String.format("", header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(cipherText));
+
+        return "Test";
     }
 }
