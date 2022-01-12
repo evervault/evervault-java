@@ -7,16 +7,14 @@ import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
-import java.nio.ByteBuffer;
-
-public class IntegerHandler implements IDataHandler {
-    private static final int BUFFER_SIZE = 4;
+public class ByteHandler implements IDataHandler {
+    private static final int BUFFER_SIZE = 1;
 
     private final IProvideEncryption encryptionProvider;
     private final byte[] generatedEcdhKey;
     private final byte[] sharedKey;
 
-    public IntegerHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey) {
+    public ByteHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey) {
         this.encryptionProvider = encryptionProvider;
         this.generatedEcdhKey = generatedEcdhKey;
         this.sharedKey = sharedKey;
@@ -24,13 +22,11 @@ public class IntegerHandler implements IDataHandler {
 
     @Override
     public boolean canEncrypt(Object data) {
-        return data instanceof Integer;
+        return data instanceof Byte;
     }
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException {
-        var bytes = ByteBuffer.allocate(BUFFER_SIZE).putInt((int) data).array();
-
-        return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey);
+        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, new byte[] { (Byte)data }, sharedKey);
     }
 }
