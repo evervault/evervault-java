@@ -37,7 +37,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var key = setup.keyPair.getPublic().getEncoded();
         testSetup.encryptionService =  new EncryptObjectService(new IDataHandler[] {
                 new StringDataHandler(encryptionProvider, key, setup.sharedKey),
-                new MapHandler(encryptionProvider, key, setup.sharedKey)
+                new MapHandler()
         });
         testSetup.encryptionProvider = encryptionProvider;
 
