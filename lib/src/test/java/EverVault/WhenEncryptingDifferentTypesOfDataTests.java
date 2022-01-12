@@ -4,6 +4,8 @@ import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.DataHandlers.ArrayHandler;
+import EverVault.DataHandlers.BooleanHandler;
 import EverVault.DataHandlers.MapHandler;
 import EverVault.DataHandlers.StringDataHandler;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
@@ -37,7 +39,9 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var key = setup.keyPair.getPublic().getEncoded();
         testSetup.encryptionService =  new EncryptObjectService(new IDataHandler[] {
                 new StringDataHandler(encryptionProvider, key, setup.sharedKey),
-                new MapHandler()
+                new MapHandler(),
+                new ArrayHandler(),
+                new BooleanHandler(encryptionProvider, key, setup.sharedKey),
         });
         testSetup.encryptionProvider = encryptionProvider;
 
@@ -71,12 +75,41 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         map.put("Foo", "Bar");
         map.put("Ever", "Vault");
 
-        when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Bar".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Foo");
-        when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Vault".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Ever");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq("Bar".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Foo");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq("Vault".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Ever");
 
         var encrypted = (HashMap<String, String>)testSetup.encryptionService.encrypt(map);
 
         assert "Foo".equals(encrypted.get("Foo"));
         assert "Ever".equals(encrypted.get("Ever"));
+    }
+
+    @Test
+    void handlesBooleanCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException {
+        var testSetup = getService();
+
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[] { 1 }), any())).thenReturn("true");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+
+        assert "true".equals(testSetup.encryptionService.encrypt(true));
+        assert "false".equals(testSetup.encryptionService.encrypt(false));
+    }
+
+    @Test
+    void handlesArrayCorrectly() throws NotPossibleToHandleDataTypeException, InvalidCipherTextException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
+        var testSetup = getService();
+
+        var sampleArray = new String[] {
+                "Foo",
+                "Ever"
+        };
+
+        when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Foo".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Bar");
+        when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Ever".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Vault");
+
+        var encrypted = (String[])testSetup.encryptionService.encrypt(sampleArray);
+
+        assert "Bar".equals(encrypted[0]);
+        assert "Vault".equals(encrypted[1]);
     }
 }
