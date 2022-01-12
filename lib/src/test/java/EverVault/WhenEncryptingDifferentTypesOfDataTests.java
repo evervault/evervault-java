@@ -232,7 +232,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(byteArray), any())).thenReturn("Bar");
 
-        var encrypted = testSetup.encryptionService.encrypt(byteArray);
+        var encrypted = testSetup.encryptionService.encrypt(someInstance);
 
         assert encrypted.equals("Bar");
     }
