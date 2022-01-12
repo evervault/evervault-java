@@ -27,7 +27,6 @@ public class StringDataHandler implements IDataHandler {
 
     @Override
     public String encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException {
-        var content = (String)data;
-        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, content.getBytes(StandardCharsets.UTF_8), sharedKey);
+        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, ((String)data).getBytes(StandardCharsets.UTF_8), sharedKey);
     }
 }

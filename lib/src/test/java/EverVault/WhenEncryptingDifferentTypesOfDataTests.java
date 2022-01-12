@@ -9,7 +9,6 @@ import EverVault.DataHandlers.StringDataHandler;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +51,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var someString = "Foo";
         var someReturn = "Bar";
 
-        when(testSetup.encryptionProvider.encryptData(ArgumentMatchers.eq(DataHeader.String), any(), ArgumentMatchers.eq(someString.getBytes(StandardCharsets.UTF_8)), any())).thenReturn(someReturn);
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(someString.getBytes(StandardCharsets.UTF_8)), any())).thenReturn(someReturn);
 
         assert testSetup.encryptionService.encrypt(someString).equals(someReturn);
     }
@@ -71,14 +71,12 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         map.put("Foo", "Bar");
         map.put("Ever", "Vault");
 
-        for (var item : map.entrySet()) {
-            when(testSetup.encryptionProvider.encryptData(ArgumentMatchers.eq(DataHeader.String), any(), ArgumentMatchers.eq(item.getKey().getBytes(StandardCharsets.UTF_8)), any())).thenReturn(item.getValue());
-        }
+        when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Bar".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Foo");
+        when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Vault".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Ever");
 
-        var result = (HashMap<String, String>)testSetup.encryptionService.encrypt(map);
+        var encrypted = (HashMap<String, String>)testSetup.encryptionService.encrypt(map);
 
-        for (var item : map.entrySet()) {
-            assert item.getValue().equals(result.get(item.getKey()));
-        }
+        assert "Foo".equals(encrypted.get("Foo"));
+        assert "Ever".equals(encrypted.get("Ever"));
     }
 }
