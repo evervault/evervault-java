@@ -4,14 +4,12 @@ import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideEncryptionForObject;
-import EverVault.DataHandlers.ArrayHandler;
-import EverVault.DataHandlers.BooleanHandler;
-import EverVault.DataHandlers.MapHandler;
-import EverVault.DataHandlers.StringDataHandler;
+import EverVault.DataHandlers.*;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -42,6 +40,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
                 new MapHandler(),
                 new ArrayHandler(),
                 new BooleanHandler(encryptionProvider, key, setup.sharedKey),
+                new IntegerHandler(encryptionProvider, key, setup.sharedKey),
         });
         testSetup.encryptionProvider = encryptionProvider;
 
@@ -93,6 +92,19 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         assert "true".equals(testSetup.encryptionService.encrypt(true));
         assert "false".equals(testSetup.encryptionService.encrypt(false));
+    }
+
+    @Test
+    void handlesIntegerCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException {
+        var testSetup = getService();
+
+        int someInt = 132;
+        var bytes = ByteBuffer.allocate(4).putInt(someInt).array();
+        final String result = "onetwothree";
+
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+
+        assert result.equals(testSetup.encryptionService.encrypt(someInt));
     }
 
     @Test
