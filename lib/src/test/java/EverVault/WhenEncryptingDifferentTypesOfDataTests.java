@@ -1,14 +1,13 @@
 package EverVault;
 
 import EverVault.Contracts.DataHeader;
-import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideEncryptionForObject;
-import EverVault.DataHandlers.*;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -71,7 +70,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq("Bar".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Foo");
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq("Vault".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Ever");
 
-        var encrypted = (HashMap<String, String>)testSetup.encryptionService.encrypt(map);
+        var encrypted = (HashMap<String, String>) testSetup.encryptionService.encrypt(map);
 
         assert "Foo".equals(encrypted.get("Foo"));
         assert "Ever".equals(encrypted.get("Ever"));
@@ -81,8 +80,8 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     void handlesBooleanCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException {
         var testSetup = getService();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[] { 1 }), any())).thenReturn("true");
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[]{1}), any())).thenReturn("true");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[]{0}), any())).thenReturn("false");
 
         assert "true".equals(testSetup.encryptionService.encrypt(true));
         assert "false".equals(testSetup.encryptionService.encrypt(false));
@@ -96,7 +95,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var bytes = ByteBuffer.allocate(4).putInt(someInt).array();
         final String result = "onetwothree";
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);
 
         assert result.equals(testSetup.encryptionService.encrypt(someInt));
     }
@@ -110,7 +109,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         var bytes = ByteBuffer.allocate(1).put(someByte).array();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any())).thenReturn(result);
 
         assert result.equals(testSetup.encryptionService.encrypt(someByte));
     }
@@ -123,7 +122,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         final String result = "onetwothree";
         var bytes = ByteBuffer.allocate(2).putShort(someShort).array();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);
 
         assert result.equals(testSetup.encryptionService.encrypt(someShort));
     }
@@ -136,7 +135,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         final String result = "onetwothree";
         var bytes = ByteBuffer.allocate(8).putLong(someLong).array();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);
 
         assert result.equals(testSetup.encryptionService.encrypt(someLong));
     }
@@ -149,7 +148,8 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         final String result = "onetwothree";
         var bytes = ByteBuffer.allocate(4).putFloat(someFloat).array();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);
+
 
         assert result.equals(testSetup.encryptionService.encrypt(someFloat));
     }
@@ -162,21 +162,32 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         final String result = "onetwothree";
         var bytes = ByteBuffer.allocate(8).putDouble(someDouble).array();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(new byte[] { 0 }), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);
 
         assert result.equals(testSetup.encryptionService.encrypt(someDouble));
     }
 
-//    private static class SomeClass implements Serializable {
-//        public String Name;
-//
-//        @Override
-//        public String toString() {
-//            return "SomeClass{" +
-//                    "Name='" + Name + '\'' +
-//                    '}';
-//        }
-//    }
+    @Test
+    void handlesCharCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException {
+        var testSetup = getService();
+
+        final char someChar = 'a';
+        final String result = "onetwothree";
+        var bytes = ByteBuffer.allocate(2).putChar(someChar).array();
+
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any())).thenReturn(result);
+    }
+
+    private static class SomeClass implements Serializable {
+        public String Name;
+
+        @Override
+        public String toString() {
+            return "SomeClass{" +
+                    "Name='" + Name + '\'' +
+                    '}';
+        }
+    }
 
 //    @Test
 //    void handlesCustomClass() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {
@@ -198,7 +209,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     void handlesArrayCorrectly() throws NotPossibleToHandleDataTypeException, InvalidCipherTextException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
         var testSetup = getService();
 
-        var sampleArray = new String[] {
+        var sampleArray = new String[]{
                 "Foo",
                 "Ever"
         };
@@ -206,7 +217,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Foo".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Bar");
         when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Ever".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Vault");
 
-        var encrypted = (String[])testSetup.encryptionService.encrypt(sampleArray);
+        var encrypted = (String[]) testSetup.encryptionService.encrypt(sampleArray);
 
         assert "Bar".equals(encrypted[0]);
         assert "Vault".equals(encrypted[1]);

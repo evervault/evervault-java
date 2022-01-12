@@ -7,6 +7,8 @@ import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
+import java.nio.ByteBuffer;
+
 public class BooleanHandler implements IDataHandler {
     private final IProvideEncryption encryptionProvider;
     private final byte[] generatedEcdhKey;
