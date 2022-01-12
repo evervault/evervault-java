@@ -4,6 +4,8 @@ import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.DataHandlers.MapHandler;
+import EverVault.DataHandlers.StringDataHandler;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
@@ -32,8 +34,10 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var encryptionProvider = mock(IProvideEncryption.class);
 
         var testSetup = new TestSetup();
+        var key = setup.keyPair.getPublic().getEncoded();
         testSetup.encryptionService =  new EncryptObjectService(new IDataHandler[] {
-                new StringDataHandler(encryptionProvider, setup.keyPair.getPublic().getEncoded(), setup.sharedKey)
+                new StringDataHandler(encryptionProvider, key, setup.sharedKey),
+                new MapHandler(encryptionProvider, key, setup.sharedKey)
         });
         testSetup.encryptionProvider = encryptionProvider;
 
