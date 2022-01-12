@@ -242,7 +242,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Foo".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Bar");
         when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Ever".getBytes(StandardCharsets.UTF_8)), any())).thenReturn("Vault");
 
-        var encrypted = (String[]) testSetup.encryptionService.encrypt(sampleArray);
+        var encrypted = (Object[])testSetup.encryptionService.encrypt(sampleArray);
 
         assert "Bar".equals(encrypted[0]);
         assert "Vault".equals(encrypted[1]);
