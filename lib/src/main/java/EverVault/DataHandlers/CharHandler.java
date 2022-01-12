@@ -32,6 +32,6 @@ public class CharHandler implements IDataHandler {
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException {
         var bytes = ByteBuffer.allocate(BUFFER_SIZE).putChar((char) data).array();
 
-        return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey);
+        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, bytes, sharedKey);
     }
 }

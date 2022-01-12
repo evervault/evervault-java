@@ -7,13 +7,13 @@ import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -150,7 +150,6 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any())).thenReturn(result);
 
-
         assert result.equals(testSetup.encryptionService.encrypt(someFloat));
     }
 
@@ -168,7 +167,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesCharCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException {
+    void handlesCharCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException {
         var testSetup = getService();
 
         final char someChar = 'a';
@@ -176,18 +175,44 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         var bytes = ByteBuffer.allocate(2).putChar(someChar).array();
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any())).thenReturn(result);
+
+        var content = (String)testSetup.encryptionService.encrypt(someChar);
+
+        assert result.equals(content);
     }
 
-    private static class SomeClass implements Serializable {
-        public String Name;
+    @Test
+    void handlesVectorCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException {
+        var testSetup = getService();
 
-        @Override
-        public String toString() {
-            return "SomeClass{" +
-                    "Name='" + Name + '\'' +
-                    '}';
-        }
+        var list = new Vector<Integer>();
+        list.add(1);
+        list.add(2);
+
+        var bytesFirstItem = ByteBuffer.allocate(4).putInt(1).array();
+        var bytesSecondItem = ByteBuffer.allocate(4).putInt(2).array();
+        final var firstTrans = "one";
+        final var secTrans = "two";
+
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytesFirstItem), any())).thenReturn(firstTrans);
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytesSecondItem), any())).thenReturn(secTrans);
+
+        var result = (Vector<String>)testSetup.encryptionService.encrypt(list);
+
+        assert result.get(0).equals(firstTrans);
+        assert result.get(1).equals(secTrans);
     }
+
+//    private static class SomeClass implements Serializable {
+//        public String Name;
+//
+//        @Override
+//        public String toString() {
+//            return "SomeClass{" +
+//                    "Name='" + Name + '\'' +
+//                    '}';
+//        }
+//    }
 
 //    @Test
 //    void handlesCustomClass() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {

@@ -16,6 +16,7 @@ public class EverVaultEncryptionService extends EncryptObjectService {
                 new LongHandler(encryptionProvider, generatedEcdhKey, sharedKey),
                 new ByteHandler(encryptionProvider, generatedEcdhKey, sharedKey),
                 new CharHandler(encryptionProvider, generatedEcdhKey, sharedKey),
+                new VectorHandler(),
                 new MapHandler(),
                 new ArrayHandler(),
         });
