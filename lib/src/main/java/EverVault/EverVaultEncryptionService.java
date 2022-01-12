@@ -19,6 +19,9 @@ public class EverVaultEncryptionService extends EncryptObjectService {
                 new VectorHandler(),
                 new MapHandler(),
                 new ArrayHandler(),
+
+                /// This has to be the last one, otherwise other structures will not work
+                new SerializableHandler(encryptionProvider, generatedEcdhKey, sharedKey)
         });
     }
 }

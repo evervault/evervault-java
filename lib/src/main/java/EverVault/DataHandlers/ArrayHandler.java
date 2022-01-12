@@ -5,6 +5,7 @@ import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
+import java.io.IOException;
 import java.util.Vector;
 
 public class ArrayHandler implements IDataHandler {
@@ -14,7 +15,7 @@ public class ArrayHandler implements IDataHandler {
     }
 
     @Override
-    public Object encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException {
+    public Object encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
         var itemList = new Vector<>();
 
         for (var item: (Object[]) data) {

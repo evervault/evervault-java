@@ -5,6 +5,8 @@ import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
+import java.io.IOException;
+
 public class EncryptObjectService implements IProvideEncryptionForObject {
     private final IDataHandler[] dataHandlers;
 
@@ -13,7 +15,7 @@ public class EncryptObjectService implements IProvideEncryptionForObject {
     }
 
     @Override
-    public Object encrypt(Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException {
+    public Object encrypt(Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
         for (var handler: dataHandlers) {
             if (handler.canEncrypt(data)){
                 return handler.encrypt(this, data);
