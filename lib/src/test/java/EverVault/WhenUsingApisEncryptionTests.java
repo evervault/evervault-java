@@ -30,12 +30,24 @@ class WhenUsingApisEncryptionTests {
     private final IProvideECPublicKey ecPublicKeyProvider;
     private final IProvideSharedKey sharedKeyProvider;
     private final IProvideEncryptionForObject encryptionForObjects;
+    private final EverVault everVaultService;
+
+    private class EverVault extends EverVaultService {
+        public void setupWrapper(IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider,
+                             IProvideECPublicKey ecPublicKeyProvider,
+                             IProvideSharedKey sharedKeyProvider,
+                             IProvideEncryptionForObject encryptionProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider);
+            this.setupEncryption(encryptionProvider);
+        }
+    }
 
     public WhenUsingApisEncryptionTests() {
         cagePublicKeyProvider = mock(IProvideCagePublicKeyFromEndpoint.class);
         ecPublicKeyProvider = mock(IProvideECPublicKey.class);
         sharedKeyProvider = mock(IProvideSharedKey.class);
         encryptionForObjects = mock(IProvideEncryptionForObject.class);
+        everVaultService = new EverVault();
     }
 
     @Test
@@ -52,7 +64,7 @@ class WhenUsingApisEncryptionTests {
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
     }
 
     @Test
@@ -69,16 +81,19 @@ class WhenUsingApisEncryptionTests {
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        var everVaultApi = new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
-        assertThrows(UndefinedDataException.class, () -> everVaultApi.encrypt(null));
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
+        assertThrows(UndefinedDataException.class, () -> everVaultService.encrypt(null));
     }
 
     @Test
     void newInstanceThrowsSpecificExceptionForLackingParameter() {
-        assertThrows(NullPointerException.class, () -> new EverVaultService(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects));
-        assertThrows(NullPointerException.class, () -> new EverVaultService(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects));
-        assertThrows(NullPointerException.class, () -> new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects));
-        assertThrows(NullPointerException.class, () -> new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects));
+        assertThrows(NullPointerException.class, () -> {
+            everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null);
+            everVaultService.encrypt("Foo");
+        });
     }
 
     @Test
@@ -97,10 +112,11 @@ class WhenUsingApisEncryptionTests {
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+        when(encryptionForObjects.encrypt(any())).thenReturn(encryptedString);
 
-        var everVaultApi = new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
 
-        var result = (String) everVaultApi.encrypt(someString);
+        var result = (String) everVaultService.encrypt(someString);
 
         assert result.equals(encryptedString);
     }

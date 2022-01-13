@@ -29,15 +29,25 @@ public class EverVaultService {
 
     protected static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
 
-    public EverVaultService(IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider,
+    protected void setupKeyProviders(IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider,
                             IProvideECPublicKey ecPublicKeyProvider,
-                            IProvideSharedKey sharedKeyProvider,
-                            IProvideEncryptionForObject encryptionProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+                            IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
         this.cagePublicKeyFromEndpointProvider = cagePublicKeyFromEndpointProvider;
         this.ecPublicKeyProvider = ecPublicKeyProvider;
         this.sharedKeyProvider = sharedKeyProvider;
-        this.encryptionProvider = encryptionProvider;
 
+        setupKeys();
+    }
+
+    protected void setupEncryption(IProvideEncryptionForObject encryptionProvider) {
+        if (encryptionProvider == null) {
+            throw new NullPointerException(IProvideSharedKey.class.getName());
+        }
+
+        this.encryptionProvider = encryptionProvider;
+    }
+
+    private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
         if (cagePublicKeyFromEndpointProvider == null) {
             throw new NullPointerException(IProvideCagePublicKeyFromEndpoint.class.getName());
         }
@@ -50,14 +60,6 @@ public class EverVaultService {
             throw new NullPointerException(IProvideSharedKey.class.getName());
         }
 
-        if (encryptionProvider == null) {
-            throw new NullPointerException(IProvideSharedKey.class.getName());
-        }
-
-        setupKeys();
-    }
-
-    private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
         var cageKey = cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(EVERVAULT_BASE_URL);
 
         this.ecdhKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(cageKey.ecdhKey);
