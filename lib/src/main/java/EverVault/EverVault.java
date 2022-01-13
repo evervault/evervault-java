@@ -3,20 +3,39 @@
  */
 package EverVault;
 
+import EverVault.Contracts.IProvideCagePublicKey;
+import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Exceptions.UndefinedDataException;
 
 import java.util.Dictionary;
 
 /// TODO
 public class EverVault {
-    public EverVault(String apiKey) {
+    private final String everVaultApi;
+    private final String apiKey;
+    private final IProvideCagePublicKey cagePublicKeyProvider;
+    private final IProvideEncryptionForObject encryptionProvider;
+
+    public EverVault(String everVaultApi,
+                     String apiKey,
+                     IProvideCagePublicKey providesCagePublicKey,
+                     IProvideEncryptionForObject provideEncryption) {
+        this.everVaultApi = everVaultApi;
+        this.apiKey = apiKey;
+        this.cagePublicKeyProvider = providesCagePublicKey;
+        this.encryptionProvider = provideEncryption;
     }
 
-    public <TDataType> String Encrypt(TDataType data) throws Exception {
-        if ( data == null ){
+    public Object encrypt(Object data) throws Exception {
+        if (data == null) {
             throw new UndefinedDataException();
         }
-        return "Test";
+
+        var cagePublicKey = cagePublicKeyProvider.getCagePublicKey(everVaultApi);
+
+        encryptionProvider.encrypt(data);
+
+        return new String("Test");
     }
 
     public void Run(String cageName, Dictionary<String, String> data, Dictionary<String, String> options) {

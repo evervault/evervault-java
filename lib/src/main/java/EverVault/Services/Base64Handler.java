@@ -1,4 +1,4 @@
-package EverVault;
+package EverVault.Services;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

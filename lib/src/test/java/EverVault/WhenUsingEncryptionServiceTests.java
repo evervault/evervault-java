@@ -2,6 +2,7 @@ package EverVault;
 
 import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IProvideEncryptedFormat;
+import EverVault.Services.EncryptionService;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,12 @@ public final class WhenUsingEncryptionServiceTests {
     @Test
     void decodingStringIntoPublicKeyDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException {
         service.getEllipticCurvePublicKeyFrom("AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
+    }
+
+    @Test
+    void decodedPublicKeyMustMatchAlgorithm() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        var key = service.getEllipticCurvePublicKeyFrom("AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
+        assert ELLIPTIC_CURVE_ALGORITHM.equals(key.getAlgorithm());
     }
 
     @Test

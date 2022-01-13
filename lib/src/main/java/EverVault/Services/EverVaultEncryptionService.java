@@ -1,4 +1,4 @@
-package EverVault;
+package EverVault.Services;
 
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;

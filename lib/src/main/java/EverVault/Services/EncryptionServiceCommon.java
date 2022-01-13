@@ -1,4 +1,4 @@
-package EverVault;
+package EverVault.Services;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
