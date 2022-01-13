@@ -48,7 +48,7 @@ public class WhenPerformingHttpRequestTests {
 
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/Foo";
 
-        client.getCagePublicKey(urlPath);
+        client.getCagePublicKeyFromEndpoint(urlPath);
 
         assertHeaders(endpoint, API_KEY, new HashMap<>());
     }
@@ -70,7 +70,7 @@ public class WhenPerformingHttpRequestTests {
         headerMap.put("Foo", "Bar");
         headerMap.put("Bar", "Foo");
 
-        client.getCagePublicKey(urlPath, headerMap);
+        client.getCagePublicKeyFromEndpoint(urlPath, headerMap);
 
         assertHeaders(endpoint, API_KEY, headerMap);
     }
@@ -85,7 +85,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var cagesKey = client.getCagePublicKey(urlPath);
+        var cagesKey = client.getCagePublicKeyFromEndpoint(urlPath);
 
         assertEquals(cagesKey.key, "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo7+jkmJ1uZsmiA5omE96RaepPYj2J6DzlE0DNWPoVZZNVb/ShqxSA4zKfE9Kh4MuI6fKpg0/pMhf8Re398ac9s2xKsjDvQHOhLLOfmgcrQgZyLGvdsrllcb1JY8kLNTdgONpn3S/BQetdEPG7oFp1RRIw60Iyy+v2R+r092zItbqLUpb0Vpu2z2uMxylZFc33VuDVIFF+fc9vE0gVPFoHezZ+1+EmqiJdkH/1GcPoVswzCvg3djmCo3Zhx3GdiB464GOl2ZlujwSN9dPkFhndIUZYK9iJhlcItyGkKH1OV/HAl8k2u/7pKUDLFe4lMWX9yASuj6y3CLdrPcbAuky3QIDAQAB");
         assertEquals(cagesKey.ecdhKey, "AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
@@ -97,6 +97,6 @@ public class WhenPerformingHttpRequestTests {
         var client = new HttpHandlerService(API_KEY);
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/cages/key";
 
-        assertThrows(HttpFailureException.class, () -> client.getCagePublicKey(urlPath));
+        assertThrows(HttpFailureException.class, () -> client.getCagePublicKeyFromEndpoint(urlPath));
     }
 }

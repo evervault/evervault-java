@@ -3,31 +3,82 @@
  */
 package EverVault;
 
-import EverVault.Contracts.IProvideCagePublicKey;
+import EverVault.Contracts.IProvideCagePublicKeyFromEndpoint;
+import EverVault.Contracts.IProvideECPublicKey;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.Contracts.IProvideSharedKey;
+import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.UndefinedDataException;
 import EverVault.ReadModels.CagePublicKey;
+import EverVault.ReadModels.GeneratedSharedKey;
+import EverVault.Services.EverVaultService;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class WhenUsingApisEncryptionTests {
-    private final IProvideCagePublicKey cagePublicKeyProvider;
-    private final IProvideEncryptionForObject encryptionProvider;
-    private final EverVault everVaultApi;
+    private final IProvideCagePublicKeyFromEndpoint cagePublicKeyProvider;
+    private final IProvideECPublicKey ecPublicKeyProvider;
+    private final IProvideSharedKey sharedKeyProvider;
+    private final IProvideEncryptionForObject encryptionForObjects;
 
     public WhenUsingApisEncryptionTests() {
-        cagePublicKeyProvider = mock(IProvideCagePublicKey.class);
-        encryptionProvider = mock(IProvideEncryptionForObject.class);
-        everVaultApi = new EverVault("foo", "bar", cagePublicKeyProvider, encryptionProvider);
+        cagePublicKeyProvider = mock(IProvideCagePublicKeyFromEndpoint.class);
+        ecPublicKeyProvider = mock(IProvideECPublicKey.class);
+        sharedKeyProvider = mock(IProvideSharedKey.class);
+        encryptionForObjects = mock(IProvideEncryptionForObject.class);
     }
 
     @Test
-    void tryingToEncryptNullThrows() {
+    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+        var cagePublicKey = new CagePublicKey();
+        cagePublicKey.ecdhKey = "ecdhKey";
+        cagePublicKey.key = "key";
+        cagePublicKey.teamUuid = "teamUuid";
+
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[] {};
+
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+
+        new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
+    }
+
+    @Test
+    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+        var cagePublicKey = new CagePublicKey();
+        cagePublicKey.ecdhKey = "ecdhKey";
+        cagePublicKey.key = "key";
+        cagePublicKey.teamUuid = "teamUuid";
+
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[] {};
+
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+
+        var everVaultApi = new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
         assertThrows(UndefinedDataException.class, () -> everVaultApi.encrypt(null));
+    }
+
+    @Test
+    void newInstanceThrowsSpecificExceptionForLackingParameter() {
+        assertThrows(NullPointerException.class, () -> new EverVaultService(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects));
+        assertThrows(NullPointerException.class, () -> new EverVaultService(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects));
+        assertThrows(NullPointerException.class, () -> new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects));
+        assertThrows(NullPointerException.class, () -> new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null));
     }
 
     @Test
@@ -40,10 +91,16 @@ class WhenUsingApisEncryptionTests {
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        when(cagePublicKeyProvider.getCagePublicKey(any())).thenReturn(cagePublicKey);
-        when(encryptionProvider.encrypt(any())).thenReturn("Bar");
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[] {};
 
-        var result = (String)everVaultApi.encrypt(someString);
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+
+        var everVaultApi = new EverVaultService(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects);
+
+        var result = (String) everVaultApi.encrypt(someString);
 
         assert result.equals(encryptedString);
     }

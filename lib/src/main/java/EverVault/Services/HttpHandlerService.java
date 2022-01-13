@@ -1,6 +1,6 @@
 package EverVault.Services;
 
-import EverVault.Contracts.IProvideCagePublicKey;
+import EverVault.Contracts.IProvideCagePublicKeyFromEndpoint;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.ReadModels.CagePublicKey;
 
@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import com.google.gson.Gson;
 
-public class HttpHandlerService implements IProvideCagePublicKey {
+public class HttpHandlerService implements IProvideCagePublicKeyFromEndpoint {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -25,11 +25,11 @@ public class HttpHandlerService implements IProvideCagePublicKey {
         client = java.net.http.HttpClient.newHttpClient();
     }
 
-    public CagePublicKey getCagePublicKey(String url) throws IOException, InterruptedException, HttpFailureException {
-        return this.getCagePublicKey(url, null);
+    public CagePublicKey getCagePublicKeyFromEndpoint(String url) throws IOException, InterruptedException, HttpFailureException {
+        return this.getCagePublicKeyFromEndpoint(url, null);
     }
 
-    public CagePublicKey getCagePublicKey(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
+    public CagePublicKey getCagePublicKeyFromEndpoint(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofMinutes(10))
