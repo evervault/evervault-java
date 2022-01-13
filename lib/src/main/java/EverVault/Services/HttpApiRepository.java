@@ -1,18 +1,22 @@
 package EverVault.Services;
 
-import EverVault.Contracts.IProvideCagePublicKeyFromEndpoint;
+import EverVault.Contracts.IProvideCageExecution;
+import EverVault.Contracts.IProvideCagePublicKeyFromHttpApi;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.ReadModels.CagePublicKey;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gson.Gson;
 
-public class HttpHandlerService implements IProvideCagePublicKeyFromEndpoint {
+public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -20,7 +24,7 @@ public class HttpHandlerService implements IProvideCagePublicKeyFromEndpoint {
     private final static int OK_HTTP_STATUS_CODE = 200;
     private final String apiKey;
 
-    public HttpHandlerService(String apiKey) {
+    public HttpApiRepository(String apiKey) {
         this.apiKey = apiKey;
         client = java.net.http.HttpClient.newHttpClient();
     }
@@ -29,7 +33,7 @@ public class HttpHandlerService implements IProvideCagePublicKeyFromEndpoint {
         return this.getCagePublicKeyFromEndpoint(url, null);
     }
 
-    public CagePublicKey getCagePublicKeyFromEndpoint(String url, HashMap<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
+    public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofMinutes(10))
@@ -56,5 +60,10 @@ public class HttpHandlerService implements IProvideCagePublicKeyFromEndpoint {
          }
 
          return new Gson().fromJson(result.body(), CagePublicKey.class);
+    }
+
+    @Override
+    public void runCage(String cageName, Serializable data, boolean async, String version) throws HttpFailureException {
+        throw new HttpFailureException(550);
     }
 }

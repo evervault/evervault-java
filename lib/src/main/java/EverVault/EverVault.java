@@ -9,9 +9,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
-public class EverVault extends EverVaultService {
+public final class EverVault extends EverVaultService {
     public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
-        var httpHandler = new HttpHandlerService(apiKey);
+        var httpHandler = new HttpApiRepository(apiKey);
         var encryptService = new EncryptionService(new StdEncryptionOutputFormat());
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService);

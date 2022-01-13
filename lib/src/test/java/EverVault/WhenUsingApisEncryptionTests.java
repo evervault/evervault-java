@@ -3,7 +3,7 @@
  */
 package EverVault;
 
-import EverVault.Contracts.IProvideCagePublicKeyFromEndpoint;
+import EverVault.Contracts.IProvideCagePublicKeyFromHttpApi;
 import EverVault.Contracts.IProvideECPublicKey;
 import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Contracts.IProvideSharedKey;
@@ -26,24 +26,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class WhenUsingApisEncryptionTests {
-    private final IProvideCagePublicKeyFromEndpoint cagePublicKeyProvider;
+    private final IProvideCagePublicKeyFromHttpApi cagePublicKeyProvider;
     private final IProvideECPublicKey ecPublicKeyProvider;
     private final IProvideSharedKey sharedKeyProvider;
     private final IProvideEncryptionForObject encryptionForObjects;
     private final EverVault everVaultService;
 
     private class EverVault extends EverVaultService {
-        public void setupWrapper(IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider,
-                             IProvideECPublicKey ecPublicKeyProvider,
-                             IProvideSharedKey sharedKeyProvider,
-                             IProvideEncryptionForObject encryptionProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+        public void setupWrapper(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
+                                 IProvideECPublicKey ecPublicKeyProvider,
+                                 IProvideSharedKey sharedKeyProvider,
+                                 IProvideEncryptionForObject encryptionProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
             this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider);
             this.setupEncryption(encryptionProvider);
         }
     }
 
     public WhenUsingApisEncryptionTests() {
-        cagePublicKeyProvider = mock(IProvideCagePublicKeyFromEndpoint.class);
+        cagePublicKeyProvider = mock(IProvideCagePublicKeyFromHttpApi.class);
         ecPublicKeyProvider = mock(IProvideECPublicKey.class);
         sharedKeyProvider = mock(IProvideSharedKey.class);
         encryptionForObjects = mock(IProvideEncryptionForObject.class);

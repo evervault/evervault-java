@@ -3,7 +3,7 @@
  */
 package EverVault.Services;
 
-import EverVault.Contracts.IProvideCagePublicKeyFromEndpoint;
+import EverVault.Contracts.IProvideCagePublicKeyFromHttpApi;
 import EverVault.Contracts.IProvideECPublicKey;
 import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Contracts.IProvideSharedKey;
@@ -16,11 +16,10 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
-public class EverVaultService {
-    protected IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider;
+public abstract class EverVaultService {
+    protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
     protected IProvideECPublicKey ecPublicKeyProvider;
     protected IProvideSharedKey sharedKeyProvider;
     protected IProvideEncryptionForObject encryptionProvider;
@@ -29,10 +28,11 @@ public class EverVaultService {
     protected byte[] sharedKey;
 
     protected static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
+    protected static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
 
-    protected void setupKeyProviders(IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider,
-                            IProvideECPublicKey ecPublicKeyProvider,
-                            IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+    protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
+                                     IProvideECPublicKey ecPublicKeyProvider,
+                                     IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
         this.cagePublicKeyFromEndpointProvider = cagePublicKeyFromEndpointProvider;
         this.ecPublicKeyProvider = ecPublicKeyProvider;
         this.sharedKeyProvider = sharedKeyProvider;
@@ -50,7 +50,7 @@ public class EverVaultService {
 
     private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
         if (cagePublicKeyFromEndpointProvider == null) {
-            throw new NullPointerException(IProvideCagePublicKeyFromEndpoint.class.getName());
+            throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
         }
 
         if (ecPublicKeyProvider == null) {

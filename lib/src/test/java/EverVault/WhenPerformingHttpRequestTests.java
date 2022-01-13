@@ -1,13 +1,14 @@
 package EverVault;
 
 import EverVault.Exceptions.HttpFailureException;
-import EverVault.Services.HttpHandlerService;
+import EverVault.Services.HttpApiRepository;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Vector;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +45,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpHandlerService(API_KEY);
+        var client = new HttpApiRepository(API_KEY);
 
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/Foo";
 
@@ -62,7 +63,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpHandlerService(API_KEY);
+        var client = new HttpApiRepository(API_KEY);
 
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/Foo";
 
@@ -77,7 +78,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCagePublicKeyEndpointParsesItCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException, HttpFailureException {
-        var client = new HttpHandlerService(API_KEY);
+        var client = new HttpApiRepository(API_KEY);
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/cages/key";
 
         stubFor(get(urlEqualTo("/cages/key"))
@@ -94,9 +95,23 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void httpStatusNotOkMustThrow(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        var client = new HttpHandlerService(API_KEY);
+        var client = new HttpApiRepository(API_KEY);
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/cages/key";
 
         assertThrows(HttpFailureException.class, () -> client.getCagePublicKeyFromEndpoint(urlPath));
+    }
+
+    @Test
+    void hittingCageRunEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException {
+        var client = new HttpApiRepository(API_KEY);
+        final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl();
+
+        stubFor(post(urlEqualTo("/")).willReturn(aResponse().withStatus(200)));
+
+        var data = new Vector<String>();
+        data.add("Foo");
+        data.add("Bar");
+
+        client.runCage("testing-cage", data, true, "1.0.0");
     }
 }
