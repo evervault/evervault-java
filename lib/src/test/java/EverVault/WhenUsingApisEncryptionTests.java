@@ -53,7 +53,7 @@ class WhenUsingApisEncryptionTests {
     @Test
     void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
         var cagePublicKey = new CagePublicKey();
-        cagePublicKey.ecdhKey = "ecdhKey";
+        cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
@@ -70,7 +70,7 @@ class WhenUsingApisEncryptionTests {
     @Test
     void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
         var cagePublicKey = new CagePublicKey();
-        cagePublicKey.ecdhKey = "ecdhKey";
+        cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
@@ -102,7 +102,7 @@ class WhenUsingApisEncryptionTests {
         final var encryptedString = "Bar";
 
         var cagePublicKey = new CagePublicKey();
-        cagePublicKey.ecdhKey = "ecdhKey";
+        cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 

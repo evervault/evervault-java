@@ -3,11 +3,13 @@
  */
 package EverVault.Services;
 
-import EverVault.Contracts.*;
+import EverVault.Contracts.IProvideCagePublicKeyFromEndpoint;
+import EverVault.Contracts.IProvideECPublicKey;
+import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.Contracts.IProvideSharedKey;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.Exceptions.UndefinedDataException;
-import EverVault.ReadModels.GeneratedSharedKey;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import java.io.IOException;
@@ -18,13 +20,13 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
 public class EverVaultService {
-    private IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider;
-    private IProvideECPublicKey ecPublicKeyProvider;
-    private IProvideSharedKey sharedKeyProvider;
-    private IProvideEncryptionForObject encryptionProvider;
+    protected IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider;
+    protected IProvideECPublicKey ecPublicKeyProvider;
+    protected IProvideSharedKey sharedKeyProvider;
+    protected IProvideEncryptionForObject encryptionProvider;
 
-    protected PublicKey ecdhKey;
-    protected GeneratedSharedKey sharedKey;
+    protected byte[] generatedEcdhKey;
+    protected byte[] sharedKey;
 
     protected static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
 
@@ -59,11 +61,14 @@ public class EverVaultService {
             throw new NullPointerException(IProvideSharedKey.class.getName());
         }
 
-        var cageKey = cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(EVERVAULT_BASE_URL);
+        var teamEcdhKey = cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(EVERVAULT_BASE_URL);
 
-        this.ecdhKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(cageKey.ecdhKey);
+        var teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
 
-        this.sharedKey = sharedKeyProvider.generateSharedKeyBasedOn(this.ecdhKey);
+        var generated = sharedKeyProvider.generateSharedKeyBasedOn(teamKey);
+
+        this.sharedKey = generated.SharedKey;
+        this.generatedEcdhKey = generated.GeneratedEcdhKey;
     }
 
     public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherTextException, IOException, UndefinedDataException {
