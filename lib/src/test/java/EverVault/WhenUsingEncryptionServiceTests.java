@@ -3,19 +3,21 @@ package EverVault;
 import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IProvideEncryptedFormat;
 import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class WhenUsingEncryptionServiceTests {
+public final class WhenUsingEncryptionServiceTests {
+    private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
+    private  static final String SECP256K1_NAME = "secp256k1";
     private final EncryptionService service;
     private final IProvideEncryptedFormat encryptFormatProvider;
 
@@ -30,9 +32,20 @@ public class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    void generateSharedKeyWithDecodedStringDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
         var publicKey = service.getEllipticCurvePublicKeyFrom("AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
-        var generated = service.generateSharedKeyBasedOn(publicKey);
+        service.generateSharedKeyBasedOn(publicKey);
+    }
+
+    @Test
+    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+        var provider = new BouncyCastleProvider();
+        var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, provider);
+        var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
+        keyPairGenerator.initialize(genParameter, new SecureRandom());
+        var keyPair = keyPairGenerator.generateKeyPair();
+
+        var generated = service.generateSharedKeyBasedOn(keyPair.getPublic());
         assert generated.SharedKey.length > 0;
     }
 
