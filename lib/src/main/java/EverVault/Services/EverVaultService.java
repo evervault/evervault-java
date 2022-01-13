@@ -17,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 
-/// TODO
 public class EverVaultService {
     private IProvideCagePublicKeyFromEndpoint cagePublicKeyFromEndpointProvider;
     private IProvideECPublicKey ecPublicKeyProvider;
