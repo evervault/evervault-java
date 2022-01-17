@@ -4,9 +4,10 @@ import EverVault.Contracts.IProvideCageExecution;
 import EverVault.Contracts.IProvideCagePublicKeyFromHttpApi;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.ReadModels.CagePublicKey;
+import EverVault.ReadModels.CageRunResult;
+import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -15,16 +16,14 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-import EverVault.ReadModels.CageRunResult;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-
 public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
     private final static String CONTENT_TYPE = "application/json";
     private final static int OK_HTTP_STATUS_CODE = 200;
+    private final static String HEADER_FOR_ASYNC_FIELD = "x-async";
+    private final static String HEADER_FOR_VERSION_FIELD = "x-version-id";
     private final String apiKey;
 
     public HttpApiRepository(String apiKey) {
@@ -73,6 +72,14 @@ public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IPro
                 .uri(URI.create(url + "/" + cageName))
                 .timeout(Duration.ofMinutes(10))
                 .POST(BodyPublishers.ofString(serializedData));
+
+        if (async) {
+            requestBuilder.setHeader(HEADER_FOR_ASYNC_FIELD, "true");
+        }
+
+        if (version != null) {
+            requestBuilder.setHeader(HEADER_FOR_VERSION_FIELD, version);
+        }
 
         var request = requestBuilder.build();
 

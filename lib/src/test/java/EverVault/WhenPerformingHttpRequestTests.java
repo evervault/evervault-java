@@ -6,9 +6,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.gson.internal.LinkedTreeMap;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -143,10 +140,10 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void validatesAsyncTrueHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
-        final String cageName = "/test-cage";
+        final String cageNameEndpoint = "/test-cage";
         var client = new HttpApiRepository(API_KEY);
 
-        stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
+        stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
                 .withStatus(200)));
@@ -156,15 +153,19 @@ public class WhenPerformingHttpRequestTests {
 
         client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, true, "1.0.0");
 
-        assertHeadersForCageRun(wireMockRuntimeInfo.getHttpBaseUrl() + cageName, true, "1.0.0");
+        var pattern = postRequestedFor(urlEqualTo(cageNameEndpoint))
+                .withHeader("x-async", equalTo("true"))
+                .withHeader("x-version-id", equalTo("1.0.0"));
+
+        verify(pattern);
     }
 
     @Test
     void validatesAsyncFalseHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
-        final String cageName = "/test-cage";
+        final String cageNameEndpoint = "/test-cage";
         var client = new HttpApiRepository(API_KEY);
 
-        stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
+        stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
                 .withStatus(200)));
@@ -172,15 +173,11 @@ public class WhenPerformingHttpRequestTests {
         var data = new SomeData();
         data.name = "test";
 
-        var result = client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0");
+        client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, null);
 
-        assertHeadersForCageRun(wireMockRuntimeInfo.getHttpBaseUrl() + cageName, false, "1.0.0");
-    }
-
-    private void assertHeadersForCageRun(String endpoint, boolean async, String version) {
-        var pattern = postRequestedFor(urlEqualTo(endpoint))
-                .withHeader("x-async", equalTo(async ? "true" : "false"))
-                .withHeader("x-version-id", equalTo(version));
+        var pattern = postRequestedFor(urlEqualTo(cageNameEndpoint))
+                .withoutHeader("x-async")
+                .withoutHeader("x-version-id");
 
         verify(pattern);
     }
