@@ -9,11 +9,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import EverVault.ReadModels.CageRunResult;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
@@ -53,17 +56,29 @@ public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IPro
 
         var request = requestBuilder.build();
 
-         var result = client.send(request, HttpResponse.BodyHandlers.ofString());
+        var result = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-         if (result.statusCode() != OK_HTTP_STATUS_CODE) {
-             throw new HttpFailureException(result.statusCode());
-         }
+        if (result.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(result.statusCode());
+        }
 
-         return new Gson().fromJson(result.body(), CagePublicKey.class);
+        return new Gson().fromJson(result.body(), CagePublicKey.class);
     }
 
     @Override
-    public void runCage(String cageName, Serializable data, boolean async, String version) throws HttpFailureException {
-        throw new HttpFailureException(550);
+    public <TResult extends Serializable> CageRunResult<TResult> runCage(String url, String cageName, Serializable data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
+        var serializedData = new Gson().toJson(data);
+
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(url + "/" + cageName))
+                .timeout(Duration.ofMinutes(10))
+                .POST(BodyPublishers.ofString(serializedData));
+
+        var request = requestBuilder.build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        var type = new TypeToken<CageRunResult<TResult>>(){}.getType();
+        return new Gson().fromJson(response.body(), type);
     }
 }

@@ -1,12 +1,16 @@
 package EverVault;
 
 import EverVault.Exceptions.HttpFailureException;
+import EverVault.ReadModels.CageRunResult;
 import EverVault.Services.HttpApiRepository;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.google.gson.internal.LinkedTreeMap;
 import org.junit.jupiter.api.Test;
 
+import javax.naming.Name;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -47,7 +51,7 @@ public class WhenPerformingHttpRequestTests {
 
         var client = new HttpApiRepository(API_KEY);
 
-        final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/Foo";
+        final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + endpoint;
 
         client.getCagePublicKeyFromEndpoint(urlPath);
 
@@ -101,17 +105,34 @@ public class WhenPerformingHttpRequestTests {
         assertThrows(HttpFailureException.class, () -> client.getCagePublicKeyFromEndpoint(urlPath));
     }
 
+    private static class SomeData implements Serializable {
+        public String name;
+    }
+
+    private static class NameData implements Serializable {
+        public String message;
+        public String runId;
+    }
+
     @Test
-    void hittingCageRunEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException {
+    void hittingCageRunEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String cageName = "/test-cage";
         var client = new HttpApiRepository(API_KEY);
-        final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl();
 
-        stubFor(post(urlEqualTo("/")).willReturn(aResponse().withStatus(200)));
+        stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
 
-        var data = new Vector<String>();
-        data.add("Foo");
-        data.add("Bar");
+        var data = new SomeData();
+        data.name = "test";
 
-        client.runCage("testing-cage", data, true, "1.0.0");
+        var result = client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0");
+
+        assertEquals("s0m3Str1ngW1thNumb3rs", result.runId);
+
+//        var map = (LinkedTreeMap<String, String>)result.result;
+//        assertEquals("someMessage", map.get("message"));
+//        assertEquals("someEncryptedData", map.get("name"));
     }
 }
