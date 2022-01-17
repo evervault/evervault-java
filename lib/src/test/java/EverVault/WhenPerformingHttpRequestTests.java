@@ -1,18 +1,18 @@
 package EverVault;
 
 import EverVault.Exceptions.HttpFailureException;
-import EverVault.ReadModels.CageRunResult;
 import EverVault.Services.HttpApiRepository;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.gson.internal.LinkedTreeMap;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import javax.naming.Name;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Vector;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +25,7 @@ public class WhenPerformingHttpRequestTests {
     private static final String API_KEY = "Foo";
     private static final String RAW_TEXT_CAGES_KEY_ENDPOINT = "{\"teamUuid\":\"de7350990fd7\",\"key\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo7+jkmJ1uZsmiA5omE96RaepPYj2J6DzlE0DNWPoVZZNVb/ShqxSA4zKfE9Kh4MuI6fKpg0/pMhf8Re398ac9s2xKsjDvQHOhLLOfmgcrQgZyLGvdsrllcb1JY8kLNTdgONpn3S/BQetdEPG7oFp1RRIw60Iyy+v2R+r092zItbqLUpb0Vpu2z2uMxylZFc33VuDVIFF+fc9vE0gVPFoHezZ+1+EmqiJdkH/1GcPoVswzCvg3djmCo3Zhx3GdiB464GOl2ZlujwSN9dPkFhndIUZYK9iJhlcItyGkKH1OV/HAl8k2u/7pKUDLFe4lMWX9yASuj6y3CLdrPcbAuky3QIDAQAB\",\"ecdhKey\":\"AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr\"}";
 
-    private void assertHeaders(String endpoint, String apiKey, HashMap<String, String> headerMap) {
+    private void assertHeadersForCageKey(String endpoint, String apiKey, HashMap<String, String> headerMap) {
         var pattern = getRequestedFor(urlEqualTo(endpoint))
                 .withHeader("User-Agent", equalTo(USER_AGENT_HEADER))
                 .withHeader("AcceptEncoding", equalTo("gzip, deflate"))
@@ -55,7 +55,7 @@ public class WhenPerformingHttpRequestTests {
 
         client.getCagePublicKeyFromEndpoint(urlPath);
 
-        assertHeaders(endpoint, API_KEY, new HashMap<>());
+        assertHeadersForCageKey(endpoint, API_KEY, new HashMap<>());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class WhenPerformingHttpRequestTests {
 
         client.getCagePublicKeyFromEndpoint(urlPath, headerMap);
 
-        assertHeaders(endpoint, API_KEY, headerMap);
+        assertHeadersForCageKey(endpoint, API_KEY, headerMap);
     }
 
     @Test
@@ -139,5 +139,49 @@ public class WhenPerformingHttpRequestTests {
         data.name = "test";
 
         assertThrows(HttpFailureException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0"));
+    }
+
+    @Test
+    void validatesAsyncTrueHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String cageName = "/test-cage";
+        var client = new HttpApiRepository(API_KEY);
+
+        stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, true, "1.0.0");
+
+        assertHeadersForCageRun(wireMockRuntimeInfo.getHttpBaseUrl() + cageName, true, "1.0.0");
+    }
+
+    @Test
+    void validatesAsyncFalseHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String cageName = "/test-cage";
+        var client = new HttpApiRepository(API_KEY);
+
+        stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        var result = client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0");
+
+        assertHeadersForCageRun(wireMockRuntimeInfo.getHttpBaseUrl() + cageName, false, "1.0.0");
+    }
+
+    private void assertHeadersForCageRun(String endpoint, boolean async, String version) {
+        var pattern = postRequestedFor(urlEqualTo(endpoint))
+                .withHeader("x-async", equalTo(async ? "true" : "false"))
+                .withHeader("x-version-id", equalTo(version));
+
+        verify(pattern);
     }
 }
