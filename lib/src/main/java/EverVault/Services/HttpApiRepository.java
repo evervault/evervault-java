@@ -66,7 +66,7 @@ public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IPro
     }
 
     @Override
-    public <TResult extends Serializable> CageRunResult<TResult> runCage(String url, String cageName, Serializable data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
+    public CageRunResult runCage(String url, String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
         var serializedData = new Gson().toJson(data);
 
         var requestBuilder = HttpRequest.newBuilder()
@@ -78,7 +78,10 @@ public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IPro
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        var type = new TypeToken<CageRunResult<TResult>>(){}.getType();
-        return new Gson().fromJson(response.body(), type);
+        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(response.statusCode());
+        }
+
+        return new Gson().fromJson(response.body(), CageRunResult.class);
     }
 }

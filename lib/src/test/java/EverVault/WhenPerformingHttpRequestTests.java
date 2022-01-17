@@ -109,11 +109,6 @@ public class WhenPerformingHttpRequestTests {
         public String name;
     }
 
-    private static class NameData implements Serializable {
-        public String message;
-        public String runId;
-    }
-
     @Test
     void hittingCageRunEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageName = "/test-cage";
@@ -130,9 +125,19 @@ public class WhenPerformingHttpRequestTests {
         var result = client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0");
 
         assertEquals("s0m3Str1ngW1thNumb3rs", result.runId);
+        var nested = (LinkedTreeMap<String, String>) result.result;
 
-//        var map = (LinkedTreeMap<String, String>)result.result;
-//        assertEquals("someMessage", map.get("message"));
-//        assertEquals("someEncryptedData", map.get("name"));
+        assertEquals("someMessage", nested.get("message"));
+        assertEquals("someEncryptedData", nested.get("name"));
+    }
+
+    @Test
+    void hittingCageRunEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        var client = new HttpApiRepository(API_KEY);
+
+        var data = new SomeData();
+        data.name = "test";
+
+        assertThrows(HttpFailureException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0"));
     }
 }
