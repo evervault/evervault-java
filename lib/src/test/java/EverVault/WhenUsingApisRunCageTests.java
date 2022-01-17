@@ -2,7 +2,7 @@ package EverVault;
 
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
-import EverVault.Exceptions.UndefinedDataException;
+import EverVault.Exceptions.MandatoryParameterException;
 import EverVault.ReadModels.CagePublicKey;
 import EverVault.ReadModels.CageRunResult;
 import EverVault.ReadModels.GeneratedSharedKey;
@@ -50,7 +50,7 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void callingToRunCageReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    void callingToRunCageReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, MandatoryParameterException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -77,7 +77,34 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void ifProviderIsNotSetThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+    void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+        var cagePublicKey = new CagePublicKey();
+        cagePublicKey.ecdhKey = "teamEcdhKey";
+        cagePublicKey.key = "key";
+        cagePublicKey.teamUuid = "teamUuid";
+
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[] {};
+
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+
+        var cageRunResult = new CageRunResult();
+
+        cageRunResult.result = "foo";
+        cageRunResult.runId = "bar";
+        when(cageExecutionProvider.runCage(anyString(), anyString(), any(), anyBoolean(), anyString())).thenReturn(cageRunResult);
+
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider);
+
+        assertThrows(MandatoryParameterException.class, () -> everVaultService.run(null, "somedata", true, "1"));
+        assertThrows(MandatoryParameterException.class, () -> everVaultService.run("", "somedata", true, "1"));
+        assertThrows(MandatoryParameterException.class, () -> everVaultService.run("somecage", null, true, "1"));
+    }
+
+    @Test
+    void providerNotSetThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";

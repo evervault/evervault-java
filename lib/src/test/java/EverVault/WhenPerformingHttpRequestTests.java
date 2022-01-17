@@ -1,7 +1,7 @@
 package EverVault;
 
 import EverVault.Exceptions.HttpFailureException;
-import EverVault.Services.HttpApiRepository;
+import EverVault.Services.HttpHandler;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.gson.internal.LinkedTreeMap;
@@ -46,7 +46,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + endpoint;
 
@@ -64,7 +64,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/Foo";
 
@@ -79,7 +79,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCagePublicKeyEndpointParsesItCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException, HttpFailureException {
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/cages/key";
 
         stubFor(get(urlEqualTo("/cages/key"))
@@ -96,7 +96,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void httpStatusNotOkMustThrow(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/cages/key";
 
         assertThrows(HttpFailureException.class, () -> client.getCagePublicKeyFromEndpoint(urlPath));
@@ -109,7 +109,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingCageRunEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageName = "/test-cage";
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -130,7 +130,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCageRunEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         var data = new SomeData();
         data.name = "test";
@@ -141,7 +141,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void validatesAsyncTrueHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -163,7 +163,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void validatesAsyncFalseHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -185,7 +185,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void asyncHeaderIsIgnoredWhenVersionIsEmpty(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpApiRepository(API_KEY);
+        var client = new HttpHandler(API_KEY);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")

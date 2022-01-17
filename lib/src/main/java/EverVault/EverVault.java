@@ -22,7 +22,7 @@ public final class EverVault extends EverVaultService {
     }
 
     public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
-        var httpHandler = new HttpApiRepository(apiKey);
+        var httpHandler = new HttpHandler(apiKey);
         var encryptService = new EncryptionService(new StdEncryptionOutputFormat());
 
         this.setupCageExecutionProvider(httpHandler);

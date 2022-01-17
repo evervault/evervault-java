@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -26,7 +26,7 @@ public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IPro
     private final static String HEADER_FOR_VERSION_FIELD = "x-version-id";
     private final String apiKey;
 
-    public HttpApiRepository(String apiKey) {
+    public HttpHandler(String apiKey) {
         this.apiKey = apiKey;
         client = java.net.http.HttpClient.newHttpClient();
     }

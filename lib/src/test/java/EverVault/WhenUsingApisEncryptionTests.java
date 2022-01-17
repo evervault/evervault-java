@@ -5,7 +5,7 @@ package EverVault;
 
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
-import EverVault.Exceptions.UndefinedDataException;
+import EverVault.Exceptions.MandatoryParameterException;
 import EverVault.ReadModels.CagePublicKey;
 import EverVault.ReadModels.GeneratedSharedKey;
 import EverVault.Services.EverVaultService;
@@ -83,7 +83,7 @@ class WhenUsingApisEncryptionTests {
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
         everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider);
-        assertThrows(UndefinedDataException.class, () -> everVaultService.encrypt(null));
+        assertThrows(MandatoryParameterException.class, () -> everVaultService.encrypt(null));
     }
 
     @Test

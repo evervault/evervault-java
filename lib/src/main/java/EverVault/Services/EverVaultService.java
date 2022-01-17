@@ -5,10 +5,9 @@ package EverVault.Services;
 
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
+import EverVault.Exceptions.MandatoryParameterException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
-import EverVault.Exceptions.UndefinedDataException;
 import EverVault.ReadModels.CageRunResult;
-import org.apache.commons.math3.exception.NullArgumentException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import java.io.IOException;
@@ -38,7 +37,7 @@ public abstract class EverVaultService {
     }
 
     protected void setupCageExecutionProvider(IProvideCageExecution cageExecutionProvider) {
-        if ( cageExecutionProvider == null) {
+        if (cageExecutionProvider == null) {
             throw new NullPointerException(IProvideCageExecution.class.getName());
         }
 
@@ -86,15 +85,23 @@ public abstract class EverVaultService {
         this.generatedEcdhKey = generated.GeneratedEcdhKey;
     }
 
-    public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherTextException, IOException, UndefinedDataException {
+    public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherTextException, IOException, MandatoryParameterException {
         if (data == null) {
-            throw new UndefinedDataException();
+            throw new MandatoryParameterException("data");
         }
 
         return this.encryptionProvider.encrypt(data);
     }
 
-    public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
+    public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException, MandatoryParameterException {
+        if (cageName == null || cageName == "") {
+            throw new MandatoryParameterException("cageName");
+        }
+
+        if ( data == null) {
+            throw new MandatoryParameterException("data");
+        }
+
         return cageExecutionProvider.runCage(getEverVaultRunUrl(), cageName, data, async, version);
     }
 }
