@@ -15,6 +15,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
 
@@ -77,7 +78,7 @@ public class HttpApiRepository implements IProvideCagePublicKeyFromHttpApi, IPro
             requestBuilder.setHeader(HEADER_FOR_ASYNC_FIELD, "true");
         }
 
-        if (version != null) {
+        if (version != null && !version.isEmpty()) {
             requestBuilder.setHeader(HEADER_FOR_VERSION_FIELD, version);
         }
 

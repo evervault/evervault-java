@@ -181,4 +181,26 @@ public class WhenPerformingHttpRequestTests {
 
         verify(pattern);
     }
+
+    @Test
+    void asyncHeaderIsIgnoredWhenVersionIsEmpty(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String cageNameEndpoint = "/test-cage";
+        var client = new HttpApiRepository(API_KEY);
+
+        stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "");
+
+        var pattern = postRequestedFor(urlEqualTo(cageNameEndpoint))
+                .withoutHeader("x-async")
+                .withoutHeader("x-version-id");
+
+        verify(pattern);
+    }
 }
