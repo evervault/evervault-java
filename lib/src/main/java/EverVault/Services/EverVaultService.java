@@ -3,13 +3,12 @@
  */
 package EverVault.Services;
 
-import EverVault.Contracts.IProvideCagePublicKeyFromHttpApi;
-import EverVault.Contracts.IProvideECPublicKey;
-import EverVault.Contracts.IProvideEncryptionForObject;
-import EverVault.Contracts.IProvideSharedKey;
+import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.Exceptions.UndefinedDataException;
+import EverVault.ReadModels.CageRunResult;
+import org.apache.commons.math3.exception.NullArgumentException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import java.io.IOException;
@@ -23,16 +22,44 @@ public abstract class EverVaultService {
     protected IProvideECPublicKey ecPublicKeyProvider;
     protected IProvideSharedKey sharedKeyProvider;
     protected IProvideEncryptionForObject encryptionProvider;
+    protected IProvideCageExecution cageExecutionProvider;
 
     protected byte[] generatedEcdhKey;
     protected byte[] sharedKey;
 
-    protected static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
-    protected static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
+    // Virtual method
+    protected String getEverVaultBaseUrl() {
+        return "";
+    }
+
+    // Virtual method
+    protected String getEverVaultRunUrl() {
+        return "";
+    }
+
+    protected void setupCageExecutionProvider(IProvideCageExecution cageExecutionProvider) {
+        if ( cageExecutionProvider == null) {
+            throw new NullPointerException(IProvideCageExecution.class.getName());
+        }
+
+        this.cageExecutionProvider = cageExecutionProvider;
+    }
 
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
                                      IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+        if (cagePublicKeyFromEndpointProvider == null) {
+            throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
+        }
+
+        if (ecPublicKeyProvider == null) {
+            throw new NullPointerException(IProvideECPublicKey.class.getName());
+        }
+
+        if (sharedKeyProvider == null) {
+            throw new NullPointerException(IProvideSharedKey.class.getName());
+        }
+
         this.cagePublicKeyFromEndpointProvider = cagePublicKeyFromEndpointProvider;
         this.ecPublicKeyProvider = ecPublicKeyProvider;
         this.sharedKeyProvider = sharedKeyProvider;
@@ -49,19 +76,7 @@ public abstract class EverVaultService {
     }
 
     private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
-        if (cagePublicKeyFromEndpointProvider == null) {
-            throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
-        }
-
-        if (ecPublicKeyProvider == null) {
-            throw new NullPointerException(IProvideECPublicKey.class.getName());
-        }
-
-        if (sharedKeyProvider == null) {
-            throw new NullPointerException(IProvideSharedKey.class.getName());
-        }
-
-        var teamEcdhKey = cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(EVERVAULT_BASE_URL);
+        var teamEcdhKey = cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEverVaultBaseUrl());
 
         var teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
 
@@ -77,5 +92,9 @@ public abstract class EverVaultService {
         }
 
         return this.encryptionProvider.encrypt(data);
+    }
+
+    public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
+        return cageExecutionProvider.runCage(getEverVaultRunUrl(), cageName, data, async, version);
     }
 }

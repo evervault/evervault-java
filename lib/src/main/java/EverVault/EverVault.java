@@ -10,9 +10,22 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 public final class EverVault extends EverVaultService {
+    private static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
+    private static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
+
+    public String getEverVaultBaseUrl() {
+        return EVERVAULT_BASE_URL;
+    }
+
+    public String getEverVaultRunUrl() {
+        return EVERVAULT_RUN_URL;
+    }
+
     public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
         var httpHandler = new HttpApiRepository(apiKey);
         var encryptService = new EncryptionService(new StdEncryptionOutputFormat());
+
+        this.setupCageExecutionProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService);
 
