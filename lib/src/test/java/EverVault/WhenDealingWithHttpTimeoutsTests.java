@@ -41,4 +41,18 @@ public class WhenDealingWithHttpTimeoutsTests {
 
         assertThrows(HttpTimeoutException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "Foo", "Foo", true, null));
     }
+
+//    @Test
+//    void retryWhenExceptionComesUp(WireMockRuntimeInfo wireMockRuntimeInfo) {
+//        final String endpoint = "/Foo";
+//
+//        stubFor(get(urlEqualTo(endpoint))
+//                .willReturn(aResponse()
+//                        .withHeader("Content-Type", "application/json")
+//                        .withFixedDelay(1)));
+//
+//        var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
+//
+//        client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + endpoint)
+//    }
 }
