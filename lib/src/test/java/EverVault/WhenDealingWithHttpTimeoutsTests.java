@@ -1,30 +1,44 @@
 package EverVault;
 
-import EverVault.Exceptions.HttpFailureException;
 import EverVault.Services.HttpHandler;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @WireMockTest
 public class WhenDealingWithHttpTimeoutsTests {
     private static final String API_KEY = "Foo";
 
     @Test
-    void mustTriggerTimeout(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+    void triggersExceptionWhenHittingPublicKeyEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) {
         final String endpoint = "/Foo";
 
         stubFor(get(urlEqualTo(endpoint))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
-                                .withFixedDelay(1)));
+                        .withFixedDelay(1)));
 
         var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
-        client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + endpoint);
+        assertThrows(HttpTimeoutException.class, () -> client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + endpoint));
+    }
+
+    @Test
+    void triggersExceptionWhenHittingRunCage(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        final String endpoint = "/Foo";
+
+        stubFor(get(urlEqualTo(endpoint))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withFixedDelay(1)));
+
+        var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
+
+        assertThrows(HttpTimeoutException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "Foo", "Foo", true, null));
     }
 }
