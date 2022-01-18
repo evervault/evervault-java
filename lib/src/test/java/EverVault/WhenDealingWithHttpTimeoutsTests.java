@@ -1,8 +1,10 @@
 package EverVault;
 
 import EverVault.Services.HttpHandler;
+import EverVault.Services.ResourceControl;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import org.eclipse.jetty.util.resource.Resource;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpTimeoutException;
@@ -40,6 +42,30 @@ public class WhenDealingWithHttpTimeoutsTests {
         var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
 
         assertThrows(HttpTimeoutException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "Foo", "Foo", true, null));
+    }
+
+    @Test
+    void blocksResourceAfterReachingLimit() {
+        var resourceControl = new ResourceControl();
+
+        for (int i = 0; i < 3; i++ ) {
+            resourceControl.timeOutOccurred();
+        }
+
+        assert resourceControl.getBlocked();
+    }
+
+    @Test
+    void releasesItAfterTimeCounterEnds() throws InterruptedException {
+        var resourceControl = new ResourceControl(1, 10, null);
+
+        resourceControl.timeOutOccurred();
+
+        assert resourceControl.getBlocked();
+
+        Thread.currentThread().wait(20);
+
+        assert !resourceControl.getBlocked();
     }
 
 //    @Test
