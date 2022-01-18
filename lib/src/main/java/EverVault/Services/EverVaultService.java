@@ -94,7 +94,7 @@ public abstract class EverVaultService {
     }
 
     public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException, MandatoryParameterException {
-        if (cageName == null || cageName == "") {
+        if (cageName == null || cageName.isEmpty()) {
             throw new MandatoryParameterException("cageName");
         }
 

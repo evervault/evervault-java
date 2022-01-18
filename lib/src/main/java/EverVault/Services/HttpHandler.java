@@ -24,10 +24,17 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     private final static int OK_HTTP_STATUS_CODE = 200;
     private final static String HEADER_FOR_ASYNC_FIELD = "x-async";
     private final static String HEADER_FOR_VERSION_FIELD = "x-version-id";
+    private final static long TIMEOUT_SECONDS_DEFAULT = 30;
     private final String apiKey;
+    private final Duration httpTimeout;
 
     public HttpHandler(String apiKey) {
+        this(apiKey, Duration.ofSeconds(TIMEOUT_SECONDS_DEFAULT));
+    }
+
+    public HttpHandler(String apiKey, Duration httpTimeout) {
         this.apiKey = apiKey;
+        this.httpTimeout = httpTimeout;
         client = java.net.http.HttpClient.newHttpClient();
     }
 
@@ -38,7 +45,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofMinutes(10))
+                .timeout(httpTimeout)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("AcceptEncoding", "gzip, deflate")
                 .setHeader("Accept", CONTENT_TYPE)
@@ -70,7 +77,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/" + cageName))
-                .timeout(Duration.ofMinutes(10))
+                .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
         if (async) {
