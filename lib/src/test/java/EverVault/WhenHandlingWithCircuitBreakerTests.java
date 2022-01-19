@@ -4,6 +4,8 @@ import EverVault.Contracts.IExecuteWithPossibleHttpTimeout;
 import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.Services.CircuitBreaker;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.net.http.HttpTimeoutException;
 
@@ -74,5 +76,32 @@ public class WhenHandlingWithCircuitBreakerTests {
         var result = circuitBreaker.execute(0, execution);
 
         assertEquals(returnContent, result);
+    }
+
+    @Test
+    void workingCorrectlyResetsCounter() throws HttpTimeoutException, MaxRetryReachedException {
+        var execution = mock(IExecuteWithPossibleHttpTimeout.class);
+        var sameExecId = mock(IExecuteWithPossibleHttpTimeout.class);
+
+        when(sameExecId.execute()).thenThrow(new HttpTimeoutException("Foo"));
+        when(execution.execute()).thenAnswer(new Answer<String>() {
+            private int nCall = 0;
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                if (nCall > 0) {
+                    return "Foo";
+                }
+                nCall++;
+
+                throw new HttpTimeoutException("test");
+            }
+        });
+
+        var circuitBreaker = new CircuitBreaker();
+        circuitBreaker.execute(0, execution);
+
+        assertThrows(MaxRetryReachedException.class, circuitBreaker.execute(0, sameExecId));
+
+        verify(sameExecId, times(2)).execute();
     }
 }

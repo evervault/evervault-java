@@ -29,6 +29,10 @@ public class ResourceControl {
         this(COUNT_LIMIT, CB_TIME_TO_FREE_MILLISECONDS);
     }
 
+    public void Clear() {
+        this.counter = 0;
+    }
+
     protected Future reset() {
         return executor.submit(() -> {
             try {
