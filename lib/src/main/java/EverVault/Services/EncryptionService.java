@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
+import org.bouncycastle.math.ec.custom.sec.SecP256R1Curve;
 
 import javax.crypto.KeyAgreement;
 import java.security.*;
@@ -27,7 +27,7 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
     @Override
     public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         var key = decodeBase64String(base64key);
-        var curve = new SecP256K1Curve();
+        var curve = new SecP256R1Curve();
         var point = curve.decodePoint(key);
 
         var parameterSpec = new ECParameterSpec(curve, point, curve.getOrder());

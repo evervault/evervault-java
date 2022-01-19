@@ -18,9 +18,11 @@ import static org.mockito.Mockito.*;
 
 public final class WhenUsingEncryptionServiceTests {
     private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
-    private  static final String SECP256K1_NAME = "secp256k1";
+    private  static final String SECP256K1_NAME = "secp256r1";
     private final EncryptionService service;
     private final IProvideEncryptedFormat encryptFormatProvider;
+
+    private final String KeySample = "AiQ2UlDc/tH8lUJDJJbd0JDMLww+R3/pamRIGGLtd4T/";
 
     public WhenUsingEncryptionServiceTests() {
         encryptFormatProvider = mock(IProvideEncryptedFormat.class);
@@ -29,23 +31,23 @@ public final class WhenUsingEncryptionServiceTests {
 
     @Test
     void decodingStringIntoPublicKeyDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        service.getEllipticCurvePublicKeyFrom("AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
+        service.getEllipticCurvePublicKeyFrom(KeySample);
     }
 
     @Test
     void decodedPublicKeyMustMatchAlgorithm() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        var key = service.getEllipticCurvePublicKeyFrom("AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
+        var key = service.getEllipticCurvePublicKeyFrom(KeySample);
         assert ELLIPTIC_CURVE_ALGORITHM.equals(key.getAlgorithm());
     }
 
     @Test
     void generateSharedKeyWithDecodedStringDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
-        var publicKey = service.getEllipticCurvePublicKeyFrom("AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr");
+        var publicKey = service.getEllipticCurvePublicKeyFrom(KeySample);
         service.generateSharedKeyBasedOn(publicKey);
     }
 
     @Test
-    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
         var provider = new BouncyCastleProvider();
         var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, provider);
         var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
