@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpTimeoutException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class WhenHandlingWithCircuitBreakerTests {
@@ -18,7 +17,7 @@ public class WhenHandlingWithCircuitBreakerTests {
 
         var circuitBreaker = new CircuitBreaker();
 
-        circuitBreaker.execute(execution);
+        circuitBreaker.execute(0, execution);
 
         verify(execution, times(1)).execute();
     }
@@ -31,7 +30,24 @@ public class WhenHandlingWithCircuitBreakerTests {
 
         var circuitBreaker = new CircuitBreaker(0, 10);
 
-        assertThrows(MaxRetryReachedException.class, circuitBreaker.execute(execution));
+        assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, execution));
+    }
+
+    @Test
+    void handlesDifferentMethodsOnDifferentResources() throws HttpTimeoutException {
+        var executionOne = mock(IExecuteWithPossibleHttpTimeout.class);
+        var executionTwo = mock(IExecuteWithPossibleHttpTimeout.class);
+
+        when(executionOne.execute()).thenThrow(new HttpTimeoutException("Foo"));
+        when(executionTwo.execute()).thenThrow(new HttpTimeoutException("Foo"));
+
+        var circuitBreaker = new CircuitBreaker(1, 10);
+
+        assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, executionOne));
+        assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(1, executionTwo));
+
+        verify(executionOne, times(2)).execute();
+        verify(executionTwo, times(2)).execute();
     }
 
     @Test
@@ -42,7 +58,7 @@ public class WhenHandlingWithCircuitBreakerTests {
 
         var circuitBreaker = new CircuitBreaker(1, 10);
 
-        assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(execution));
+        assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, execution));
 
         verify(execution, times(2)).execute();
     }
@@ -55,7 +71,7 @@ public class WhenHandlingWithCircuitBreakerTests {
         when(execution.execute()).thenReturn(returnContent);
         var circuitBreaker = new CircuitBreaker();
 
-        var result = circuitBreaker.execute(execution);
+        var result = circuitBreaker.execute(0, execution);
 
         assertEquals(returnContent, result);
     }

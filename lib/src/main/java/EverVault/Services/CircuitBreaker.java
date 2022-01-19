@@ -30,24 +30,22 @@ public class CircuitBreaker {
         return new ResourceControl();
     }
 
-    public <TReturn> TReturn execute(IExecuteWithPossibleHttpTimeout executable) throws MaxRetryReachedException {
+    public <TReturn> TReturn execute(int methodIdentifier, IExecuteWithPossibleHttpTimeout executable) throws MaxRetryReachedException {
         try {
             return executable.execute();
         } catch (HttpTimeoutException httpTimeoutException) {
-            var hashCode = executable.hashCode();
-
-            if (!control.containsKey(hashCode)) {
-                control.put(hashCode, GetNewResourceControl());
+            if (!control.containsKey(methodIdentifier)) {
+                control.put(methodIdentifier, GetNewResourceControl());
             }
 
-            var resourceControl = control.get(hashCode);
+            var resourceControl = control.get(methodIdentifier);
             resourceControl.timeOutOccurred();
 
             if (resourceControl.getBlocked()) {
                 throw new MaxRetryReachedException();
             }
 
-            return execute(executable);
+            return execute(methodIdentifier, executable);
         }
     }
 }
