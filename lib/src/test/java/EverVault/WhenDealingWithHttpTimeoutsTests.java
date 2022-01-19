@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.eclipse.jetty.util.resource.Resource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
@@ -46,26 +47,25 @@ public class WhenDealingWithHttpTimeoutsTests {
 
     @Test
     void blocksResourceAfterReachingLimit() {
-        var resourceControl = new ResourceControl();
+        var resourceControl = new ResourceControl(0, 3000);
 
-        for (int i = 0; i < 3; i++ ) {
-            resourceControl.timeOutOccurred();
-        }
+        resourceControl.timeOutOccurred();
 
         assert resourceControl.getBlocked();
     }
 
     @Test
+    @Timeout(1000)
     void releasesItAfterTimeCounterEnds() throws InterruptedException {
-        var resourceControl = new ResourceControl(1, 10, null);
+        var resourceControl = new ResourceControl(0, 100);
 
         resourceControl.timeOutOccurred();
 
         assert resourceControl.getBlocked();
 
-        Thread.currentThread().wait(20);
-
-        assert !resourceControl.getBlocked();
+        while (resourceControl.getBlocked()) {
+            Thread.sleep(10);
+        }
     }
 
 //    @Test
