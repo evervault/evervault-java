@@ -39,10 +39,10 @@ public class WhenUsingApisRunCageTests {
                                  IProvideEncryptionForObject encryptionProvider,
                                  IProvideCageExecution cageExecutionProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
+            this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
             this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider);
             this.setupEncryption(encryptionProvider);
-            this.setupCircuitBreaker(circuitBreakerProvider);
         }
     }
 
@@ -89,25 +89,6 @@ public class WhenUsingApisRunCageTests {
         var result = everVaultService.run("somecage", "somedata", true, "1");
 
         assert cageRunResult.equals(result);
-    }
-
-    @Test
-    void throwsMaxRetryWhenMultipleFailsOnCageRun() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
-        var cagePublicKey = new CagePublicKey();
-        cagePublicKey.ecdhKey = "teamEcdhKey";
-        cagePublicKey.key = "key";
-        cagePublicKey.teamUuid = "teamUuid";
-
-        var generated = new GeneratedSharedKey();
-        generated.SharedKey = new byte[]{};
-        generated.SharedKey = new byte[]{};
-
-        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
-        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
-
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider);
-
-        assertThrows(MaxRetryReachedException.class, () -> everVaultService.run("somecage", "somedata", true, "1"));
     }
 
     @Test

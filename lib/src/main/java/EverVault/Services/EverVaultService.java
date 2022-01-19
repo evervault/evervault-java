@@ -42,9 +42,9 @@ public abstract class EverVaultService {
     }
 
     protected void setupCircuitBreaker(IProvideCircuitBreaker provideCircuitBreaker) {
-//        if (provideCircuitBreaker == null) {
-//            throw new NullPointerException(IProvideCircuitBreaker.class.getName());
-//        }
+        if (provideCircuitBreaker == null) {
+            throw new NullPointerException(IProvideCircuitBreaker.class.getName());
+        }
 
         this.circuitBreakerProvider = provideCircuitBreaker;
     }
