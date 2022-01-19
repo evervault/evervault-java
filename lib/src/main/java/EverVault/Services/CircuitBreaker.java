@@ -1,12 +1,17 @@
 package EverVault.Services;
 
-import EverVault.Contracts.IExecuteWithPossibleHttpTimeout;
+import EverVault.Contracts.IExecute;
+import EverVault.Contracts.IProvideCircuitBreaker;
+import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MaxRetryReachedException;
+import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 
+import java.io.IOException;
 import java.net.http.HttpTimeoutException;
 import java.util.HashMap;
 
-public class CircuitBreaker {
+public class CircuitBreaker implements IProvideCircuitBreaker {
     private HashMap<Integer, ResourceControl> control;
     private long timeOutMilliseconds;
     private boolean useCustomTimes = false;
@@ -30,7 +35,7 @@ public class CircuitBreaker {
         return new ResourceControl();
     }
 
-    public <TReturn> TReturn execute(int methodIdentifier, IExecuteWithPossibleHttpTimeout executable) throws MaxRetryReachedException {
+    public <TReturn> TReturn execute(int methodIdentifier, IExecute<TReturn> executable) throws MaxRetryReachedException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, IOException, InterruptedException {
         if (!control.containsKey(methodIdentifier)) {
             control.put(methodIdentifier, GetNewResourceControl());
         }

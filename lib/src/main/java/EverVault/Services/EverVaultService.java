@@ -6,6 +6,7 @@ package EverVault.Services;
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MandatoryParameterException;
+import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.ReadModels.CageRunResult;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -23,6 +24,9 @@ public abstract class EverVaultService {
     protected IProvideEncryptionForObject encryptionProvider;
     protected IProvideCageExecution cageExecutionProvider;
     protected IProvideCircuitBreaker circuitBreakerProvider;
+
+    protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
+    protected final int runCageHash = "runCage".hashCode();
 
     protected byte[] generatedEcdhKey;
     protected byte[] sharedKey;
@@ -55,7 +59,7 @@ public abstract class EverVaultService {
 
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
-                                     IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+                                     IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
         if (cagePublicKeyFromEndpointProvider == null) {
             throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
         }
@@ -83,8 +87,8 @@ public abstract class EverVaultService {
         this.encryptionProvider = encryptionProvider;
     }
 
-    private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
-        var teamEcdhKey = cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEverVaultBaseUrl());
+    private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
+        var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEverVaultBaseUrl()));
 
         var teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
 
@@ -102,7 +106,7 @@ public abstract class EverVaultService {
         return this.encryptionProvider.encrypt(data);
     }
 
-    public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException, MandatoryParameterException {
+    public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException, MandatoryParameterException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
         if (cageName == null || cageName.isEmpty()) {
             throw new MandatoryParameterException("cageName");
         }
@@ -111,6 +115,6 @@ public abstract class EverVaultService {
             throw new MandatoryParameterException("data");
         }
 
-        return cageExecutionProvider.runCage(getEverVaultRunUrl(), cageName, data, async, version);
+        return circuitBreakerProvider.execute(runCageHash, () -> cageExecutionProvider.runCage(getEverVaultRunUrl(), cageName, data, async, version));
     }
 }

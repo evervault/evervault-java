@@ -1,12 +1,16 @@
 package EverVault;
 
-import EverVault.Contracts.IExecuteWithPossibleHttpTimeout;
+import EverVault.Contracts.IExecute;
+import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MaxRetryReachedException;
+import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.Services.CircuitBreaker;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
 import java.net.http.HttpTimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,8 +18,8 @@ import static org.mockito.Mockito.*;
 
 public class WhenHandlingWithCircuitBreakerTests {
     @Test
-    void triesToExecuteThePassedMethod() throws MaxRetryReachedException, HttpTimeoutException {
-        var execution = mock(IExecuteWithPossibleHttpTimeout.class);
+    void triesToExecuteThePassedMethod() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+        var execution = mock(IExecute.class);
 
         var circuitBreaker = new CircuitBreaker();
 
@@ -25,8 +29,8 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void throwsMaxRetriesReachedWhenReachesLimitOfTimeouts() throws HttpTimeoutException, MaxRetryReachedException {
-        var execution = mock(IExecuteWithPossibleHttpTimeout.class);
+    void throwsMaxRetriesReachedWhenReachesLimitOfTimeouts() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+        var execution = mock(IExecute.class);
 
         when(execution.execute()).thenThrow(new HttpTimeoutException("foo"));
 
@@ -36,9 +40,9 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void handlesDifferentMethodsOnDifferentResources() throws HttpTimeoutException {
-        var executionOne = mock(IExecuteWithPossibleHttpTimeout.class);
-        var executionTwo = mock(IExecuteWithPossibleHttpTimeout.class);
+    void handlesDifferentMethodsOnDifferentResources() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+        var executionOne = mock(IExecute.class);
+        var executionTwo = mock(IExecute.class);
 
         when(executionOne.execute()).thenThrow(new HttpTimeoutException("Foo"));
         when(executionTwo.execute()).thenThrow(new HttpTimeoutException("Foo"));
@@ -53,8 +57,8 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void retriesIfItFails() throws HttpTimeoutException {
-        var execution = mock(IExecuteWithPossibleHttpTimeout.class);
+    void retriesIfItFails() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+        var execution = mock(IExecute.class);
 
         when(execution.execute()).thenThrow(new HttpTimeoutException("foo"));
 
@@ -66,9 +70,9 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void returnTheContentFromExecuteBack() throws MaxRetryReachedException, HttpTimeoutException {
+    void returnTheContentFromExecuteBack() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
         final var returnContent = "Foo";
-        var execution = mock(IExecuteWithPossibleHttpTimeout.class);
+        var execution = mock(IExecute.class);
 
         when(execution.execute()).thenReturn(returnContent);
         var circuitBreaker = new CircuitBreaker();
@@ -79,13 +83,14 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void workingCorrectlyResetsCounter() throws HttpTimeoutException, MaxRetryReachedException {
-        var execution = mock(IExecuteWithPossibleHttpTimeout.class);
-        var sameExecId = mock(IExecuteWithPossibleHttpTimeout.class);
+    void workingCorrectlyResetsCounter() throws IOException, MaxRetryReachedException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+        var execution = mock(IExecute.class);
+        var sameExecId = mock(IExecute.class);
 
         when(sameExecId.execute()).thenThrow(new HttpTimeoutException("Foo"));
         when(execution.execute()).thenAnswer(new Answer<String>() {
             private int nCall = 0;
+
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 if (nCall > 0) {

@@ -1,7 +1,10 @@
 package EverVault;
 
 import EverVault.Exceptions.HttpFailureException;
+import EverVault.Exceptions.MaxRetryReachedException;
+import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.Services.*;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -21,7 +24,7 @@ public final class EverVault extends EverVaultService {
         return EVERVAULT_RUN_URL;
     }
 
-    public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+    public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
         var httpHandler = new HttpHandler(apiKey);
         var encryptService = new EncryptionService(new StdEncryptionOutputFormat());
 

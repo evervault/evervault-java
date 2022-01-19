@@ -7,11 +7,13 @@ import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MandatoryParameterException;
 import EverVault.Exceptions.MaxRetryReachedException;
+import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.ReadModels.CagePublicKey;
 import EverVault.ReadModels.GeneratedSharedKey;
 import EverVault.Services.EverVaultService;
 import EverVault.Services.HttpHandler;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -42,7 +44,7 @@ class WhenUsingApisEncryptionTests {
                                  IProvideECPublicKey ecPublicKeyProvider,
                                  IProvideSharedKey sharedKeyProvider,
                                  IProvideEncryptionForObject encryptionProvider,
-                                 IProvideCageExecution cageExecutionProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+                                 IProvideCageExecution cageExecutionProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
             this.setupCageExecutionProvider(cageExecutionProvider);
             this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider);
             this.setupEncryption(encryptionProvider);
@@ -59,15 +61,15 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
         var generated = new GeneratedSharedKey();
-        generated.SharedKey = new byte[] {};
-        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[]{};
+        generated.SharedKey = new byte[]{};
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
@@ -83,25 +85,25 @@ class WhenUsingApisEncryptionTests {
         cagePublicKey.teamUuid = "teamUuid";
 
         var generated = new GeneratedSharedKey();
-        generated.SharedKey = new byte[] {};
-        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[]{};
+        generated.SharedKey = new byte[]{};
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenThrow(HttpTimeoutException.class);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        assertThrows(MaxRetryReachedException.class, () ->  everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider));
+        assertThrows(MaxRetryReachedException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider));
     }
 
     @Test
-    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException {
+    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
         var generated = new GeneratedSharedKey();
-        generated.SharedKey = new byte[] {};
-        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[]{};
+        generated.SharedKey = new byte[]{};
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
@@ -132,8 +134,8 @@ class WhenUsingApisEncryptionTests {
         cagePublicKey.teamUuid = "teamUuid";
 
         var generated = new GeneratedSharedKey();
-        generated.SharedKey = new byte[] {};
-        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[]{};
+        generated.SharedKey = new byte[]{};
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
