@@ -1,35 +1,53 @@
 package EverVault.Services;
 
-import EverVault.Contracts.IProvideCagePublicKeyFromHttpApi;
-import EverVault.Contracts.IProvideCircuitBreaker;
-import EverVault.Contracts.IProvideECPublicKey;
+import EverVault.Contracts.IExecuteWithPossibleHttpTimeout;
+import EverVault.Exceptions.MaxRetryReachedException;
 
-import java.lang.reflect.Executable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.http.HttpTimeoutException;
 import java.util.HashMap;
 
-public class CircuitBreaker implements IProvideCircuitBreaker {
-    private final HashMap<String, ResourceControl> control;
+public class CircuitBreaker {
+    private HashMap<Integer, ResourceControl> control;
+    private long timeOutMilliseconds;
+    private boolean useCustomTimes = false;
+    private int countLimit;
 
     public CircuitBreaker() {
         control = new HashMap<>();
     }
 
-    public <TReturn> TReturn execute(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromHttpProvider) throws InvocationTargetException, IllegalAccessException {
-//        try {
-//            method.invoke(parameters);
-//        } catch (HttpTimeoutException _) {
-//            if (!control.containsKey(method.getName())) {
-//                control.put(method.getName(), new ResourceControl());
-//            }
-//
-//            var resourceControl = control.get(method.getName());
-//            resourceControl.timeOutOccurred();
-//
-//        }
+    public CircuitBreaker(int countLimit, long timeOutMilliseconds) {
+        this();
+        this.countLimit = countLimit;
+        this.useCustomTimes = true;
+        this.timeOutMilliseconds = timeOutMilliseconds;
+    }
 
-        return null;
+    private ResourceControl GetNewResourceControl() {
+        if (useCustomTimes) {
+            return new ResourceControl(countLimit, timeOutMilliseconds);
+        }
+        return new ResourceControl();
+    }
+
+    public <TReturn> TReturn execute(IExecuteWithPossibleHttpTimeout executable) throws MaxRetryReachedException {
+        try {
+            return executable.execute();
+        } catch (HttpTimeoutException httpTimeoutException) {
+            var hashCode = executable.hashCode();
+
+            if (!control.containsKey(hashCode)) {
+                control.put(hashCode, GetNewResourceControl());
+            }
+
+            var resourceControl = control.get(hashCode);
+            resourceControl.timeOutOccurred();
+
+            if (resourceControl.getBlocked()) {
+                throw new MaxRetryReachedException();
+            }
+
+            return execute(executable);
+        }
     }
 }
