@@ -16,13 +16,15 @@ public class CircuitBreaker {
 //        try {
 //            method.invoke(parameters);
 //        } catch (HttpTimeoutException _) {
-//            if (control.containsKey(method.getName())) {
-//                var controlInfo = control.get(method.getName());
+//            if (!control.containsKey(method.getName())) {
+//                control.put(method.getName(), new ResourceControl());
+//            }
 //
-//                if (controlInfo.blocked) {
+//            var resourceControl = control.get(method.getName());
 //
-//                }
-//            } else {
+//            resourceControl.timeOutOccurred();
+//
+//            if (!resourceControl.timeOutOccurred()) {
 //
 //            }
 //        }
