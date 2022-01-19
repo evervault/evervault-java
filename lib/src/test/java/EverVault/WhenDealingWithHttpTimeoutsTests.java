@@ -1,11 +1,9 @@
 package EverVault;
 
-import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.Services.HttpHandler;
 import EverVault.Services.ResourceControl;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import org.checkerframework.checker.units.qual.Time;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -122,33 +120,5 @@ public class WhenDealingWithHttpTimeoutsTests {
         var secondTimer = resourceControl.getResetTask().hashCode();
 
         assertNotEquals(originalTimer, secondTimer);
-    }
-
-    @Test
-    void throwsMaxRetryWhenMultipleFailsOnGettingThePublicKey(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        final String endpoint = "/Foo";
-
-        stubFor(get(urlEqualTo(endpoint))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withFixedDelay(1)));
-
-        var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
-
-        assertThrows(MaxRetryReachedException.class, () ->  client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + endpoint));
-    }
-
-    @Test
-    void throwsMaxRetryWhenMultipleFailsOnCageRun(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        final String endpoint = "/Foo";
-
-        stubFor(get(urlEqualTo(endpoint))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withFixedDelay(1)));
-
-        var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
-
-        assertThrows(MaxRetryReachedException.class, () ->  client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "Foo","Bar", false, "Foo"));
     }
 }

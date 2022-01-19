@@ -6,17 +6,24 @@ package EverVault;
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MandatoryParameterException;
+import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.ReadModels.CagePublicKey;
 import EverVault.ReadModels.GeneratedSharedKey;
 import EverVault.Services.EverVaultService;
+import EverVault.Services.HttpHandler;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.http.HttpTimeoutException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -66,6 +73,23 @@ class WhenUsingApisEncryptionTests {
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
         everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider);
+    }
+
+    @Test
+    void throwsMaxRetryWhenMultipleFailsOnGettingPublicKey() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
+        var cagePublicKey = new CagePublicKey();
+        cagePublicKey.ecdhKey = "teamEcdhKey";
+        cagePublicKey.key = "key";
+        cagePublicKey.teamUuid = "teamUuid";
+
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[] {};
+
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenThrow(HttpTimeoutException.class);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+
+        assertThrows(MaxRetryReachedException.class, () ->  everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider));
     }
 
     @Test

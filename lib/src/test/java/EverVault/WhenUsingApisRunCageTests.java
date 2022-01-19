@@ -3,6 +3,7 @@ package EverVault;
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MandatoryParameterException;
+import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.ReadModels.CagePublicKey;
 import EverVault.ReadModels.CageRunResult;
 import EverVault.ReadModels.GeneratedSharedKey;
@@ -74,6 +75,25 @@ public class WhenUsingApisRunCageTests {
         var result = everVaultService.run("somecage", "somedata", true, "1");
 
         assert cageRunResult.equals(result);
+    }
+
+    @Test
+    void throwsMaxRetryWhenMultipleFailsOnCageRun() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+        var cagePublicKey = new CagePublicKey();
+        cagePublicKey.ecdhKey = "teamEcdhKey";
+        cagePublicKey.key = "key";
+        cagePublicKey.teamUuid = "teamUuid";
+
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[] {};
+        generated.SharedKey = new byte[] {};
+
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider);
+
+        assertThrows(MaxRetryReachedException.class, () -> everVaultService.run("somecage", "somedata", true, "1"));
     }
 
     @Test

@@ -22,6 +22,7 @@ public abstract class EverVaultService {
     protected IProvideSharedKey sharedKeyProvider;
     protected IProvideEncryptionForObject encryptionProvider;
     protected IProvideCageExecution cageExecutionProvider;
+    protected IProvideCircuitBreaker circuitBreakerProvider;
 
     protected byte[] generatedEcdhKey;
     protected byte[] sharedKey;
@@ -34,6 +35,14 @@ public abstract class EverVaultService {
     // Virtual method
     protected String getEverVaultRunUrl() {
         return "";
+    }
+
+    protected void setupCircuitBreaker(IProvideCircuitBreaker provideCircuitBreaker) {
+//        if (provideCircuitBreaker == null) {
+//            throw new NullPointerException(IProvideCircuitBreaker.class.getName());
+//        }
+
+        this.circuitBreakerProvider = provideCircuitBreaker;
     }
 
     protected void setupCageExecutionProvider(IProvideCageExecution cageExecutionProvider) {
