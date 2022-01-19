@@ -29,7 +29,7 @@ public class ResourceControl {
         this(COUNT_LIMIT, CB_TIME_TO_FREE_MILLISECONDS);
     }
 
-    public void Clear() {
+    public void clear() {
         this.counter = 0;
     }
 

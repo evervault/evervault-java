@@ -97,10 +97,10 @@ public class WhenHandlingWithCircuitBreakerTests {
             }
         });
 
-        var circuitBreaker = new CircuitBreaker();
+        var circuitBreaker = new CircuitBreaker(1, 10);
         circuitBreaker.execute(0, execution);
 
-        assertThrows(MaxRetryReachedException.class, circuitBreaker.execute(0, sameExecId));
+        assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, sameExecId));
 
         verify(sameExecId, times(2)).execute();
     }
