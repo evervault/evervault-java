@@ -7,3 +7,5 @@ sudo apt install openjdk-17-jdk
 curl -s "https://get.sdkman.io" | bash
 
 sdk install gradle 7.3.3
+
+source "/root/.sdkman/bin/sdkman-init.sh"
