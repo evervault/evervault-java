@@ -12,3 +12,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
+      - name: build project
+        run: gradle build
