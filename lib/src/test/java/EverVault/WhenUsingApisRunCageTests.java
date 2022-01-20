@@ -1,4 +1,4 @@
-package EverVault.UnitTests;
+package EverVault;
 
 import EverVault.Contracts.*;
 import EverVault.Exceptions.HttpFailureException;

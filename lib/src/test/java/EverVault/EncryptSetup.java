@@ -1,4 +1,4 @@
-package EverVault.UnitTests;
+package EverVault;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 

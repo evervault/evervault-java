@@ -1,4 +1,4 @@
-package EverVault.UnitTests;
+package EverVault;
 
 import EverVault.Services.EncryptionServiceCommon;
 import org.junit.jupiter.api.Test;

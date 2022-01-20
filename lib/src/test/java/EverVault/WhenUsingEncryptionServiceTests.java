@@ -1,4 +1,4 @@
-package EverVault.UnitTests;
+package EverVault;
 
 import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IProvideEncryptedFormat;

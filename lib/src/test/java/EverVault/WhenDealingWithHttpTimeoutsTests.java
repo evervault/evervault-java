@@ -1,4 +1,4 @@
-package EverVault.UnitTests;
+package EverVault;
 
 import EverVault.Services.HttpHandler;
 import EverVault.Services.ResourceControl;
