@@ -15,6 +15,6 @@ jobs:
       - name: build project
         run: gradle build
       - name: unit tests
-        run: gradle test --tests 'EverVault.UnitTests*'
+        run: gradle test
       - name: integration tests
         run: gradle test --tests 'EverVault.IntegrationTests*'
