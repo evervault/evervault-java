@@ -17,12 +17,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public final class WhenUsingEncryptionServiceTests {
-    private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
     private  static final String SECP256K1_NAME = "secp256r1";
+    private static final String ALGORITHM_TO_MATCH = "ECDH";
     private final EncryptionService service;
     private final IProvideEncryptedFormat encryptFormatProvider;
 
-    private final String KeySample = "AiQ2UlDc/tH8lUJDJJbd0JDMLww+R3/pamRIGGLtd4T/";
+    private final String KeySample = "jgatC55ow8RD4yt9KgjSu3q1TwLK6syLOY+uDinbFLQ=";
 
     public WhenUsingEncryptionServiceTests() {
         encryptFormatProvider = mock(IProvideEncryptedFormat.class);
@@ -36,8 +36,10 @@ public final class WhenUsingEncryptionServiceTests {
 
     @Test
     void decodedPublicKeyMustMatchAlgorithm() throws NoSuchAlgorithmException, InvalidKeySpecException {
+
         var key = service.getEllipticCurvePublicKeyFrom(KeySample);
-        assert ELLIPTIC_CURVE_ALGORITHM.equals(key.getAlgorithm());
+        var algo = key.getAlgorithm();
+        assert ALGORITHM_TO_MATCH.equals(algo);
     }
 
     @Test
@@ -49,7 +51,7 @@ public final class WhenUsingEncryptionServiceTests {
     @Test
     void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
         var provider = new BouncyCastleProvider();
-        var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, provider);
+        var keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_TO_MATCH, provider);
         var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
         keyPairGenerator.initialize(genParameter, new SecureRandom());
         var keyPair = keyPairGenerator.generateKeyPair();

@@ -7,11 +7,12 @@ import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.custom.sec.SecP256R1Curve;
 
 import javax.crypto.KeyAgreement;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
@@ -26,13 +27,15 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
 
     @Override
     public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        var key = decodeBase64String(base64key);
-        var curve = new SecP256R1Curve();
-        var point = curve.decodePoint(key);
+        var privateKeyByteArray = decodeBase64String(base64key);
 
-        var parameterSpec = new ECParameterSpec(curve, point, curve.getOrder());
-        var spec = new ECPublicKeySpec(point, parameterSpec);
-        return KeyFactory.getInstance(ELLIPTIC_CURVE_ALGORITHM, getProvider()).generatePublic(spec);
+        var spec = ECNamedCurveTable.getParameterSpec(SECP256R1_NAME);
+        var pointQ = spec.getG().multiply(new BigInteger(1, privateKeyByteArray));
+
+        var kf = KeyFactory.getInstance(KEY_AGREEMENT_ALGORITHM, new BouncyCastleProvider());
+        var pubSpec = new ECPublicKeySpec(pointQ, spec);
+
+        return kf.generatePublic(pubSpec);
     }
 
     @Override
