@@ -14,3 +14,7 @@ jobs:
         run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
       - name: build project
         run: gradle build
+      - name: unit tests
+        run: gradle test --tests 'EverVault.UnitTests*'
+      - name: integration tests
+        run: gradle test --tests 'EverVault.IntegrationTests'
