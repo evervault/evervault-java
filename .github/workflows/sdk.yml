@@ -1,0 +1,14 @@
+name: sdk
+
+on: [ push, pull_request ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lin-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install assimp
+        run: sudo bash ${GITHUB_WORKSPACE}/install_assimp.bash
