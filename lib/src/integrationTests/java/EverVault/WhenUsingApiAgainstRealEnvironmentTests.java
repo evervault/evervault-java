@@ -33,19 +33,19 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void doesThrowWhenUrlIsNotValid() {
-        assertThrows(IllegalArgumentException.class, () -> new EverVault(getEnvironmentApiKey(), "notanurl", "notanurl", false));
+        assertThrows(IllegalArgumentException.class, () -> new EverVault(getEnvironmentApiKey(), "notanurl", "notanurl"));
     }
 
     @Test
     void doesThrowWhenInvalidKey() {
-        assertThrows(HttpFailureException.class, () -> new EverVault("foo", API_ADDRESS, RUN_ADDRESS, false));
+        assertThrows(HttpFailureException.class, () -> new EverVault("foo", API_ADDRESS, RUN_ADDRESS));
     }
 
     @Test
     void encryptSomeDataCorrectly() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherException, MandatoryParameterException {
         final String someDataToEncrypt = "Foo";
 
-        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS, false);
+        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS);
 
         var result = (String) everVault.encrypt(someDataToEncrypt);
 
@@ -62,7 +62,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRun() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
-        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS, false);
+        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS);
 
         var foo = new Bar();
         foo.name = (String) everVault.encrypt("Foo");

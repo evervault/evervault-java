@@ -29,7 +29,7 @@ public final class EverVault extends EverVaultService {
         return everVaultRunUrl;
     }
 
-    public EverVault(String apiKey, String everVaultApiUrl, String everVaultRunUrl, boolean use256R1Curve) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+    public EverVault(String apiKey, String everVaultApiUrl, String everVaultRunUrl) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
         this.everVaultApiUrl = everVaultApiUrl;
         this.everVaultRunUrl = everVaultRunUrl;
 
@@ -48,6 +48,6 @@ public final class EverVault extends EverVaultService {
     }
 
     public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
-        this(apiKey, EVERVAULT_BASE_URL, EVERVAULT_RUN_URL, false);
+        this(apiKey, EVERVAULT_BASE_URL, EVERVAULT_RUN_URL);
     }
 }
