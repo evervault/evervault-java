@@ -10,10 +10,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class WhenUsingApiAgainstRealEnvironmentTests {
-    private static final String API_ADDRESS = "api.evervault.io";
-    private static final String RUN_ADDRESS = "run.evervault.io";
+    private static final String API_ADDRESS = "https://api.evervault.io";
+    private static final String RUN_ADDRESS = "https://run.evervault.io";
     private static final String ENV_API_KEY = "ENVIRONMENT_APIKEY";
+    private static final String CAGE_NAME = "javasdktest";
 
     private String getEnvironmentApiKey() {
         return "MjI4:5aIoNC2qILbZpEhlr2PSwXNOtipP3hfuJhDgIBWirY8XT4Xnj7jqAfX3jKCPjagRr"; //System.getenv(ENV_API_KEY);
@@ -28,8 +31,13 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     @Test
-    void doesNotThrowWhenCreatingNewInstanceWithValidKey() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
-        new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS);
+    void doesThrowWhenUrlIsNotValid() {
+        assertThrows(IllegalArgumentException.class, () -> new EverVault(getEnvironmentApiKey(), "notanurl", "notanurl"));
+    }
+
+    @Test
+    void doesThrowWhenInvalidKey() {
+        assertThrows(HttpFailureException.class, () -> new EverVault("Foo", API_ADDRESS, RUN_ADDRESS));
     }
 
     @Test
@@ -42,5 +50,21 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
         assert !result.isEmpty();
         assert !result.isBlank();
+    }
+
+    private static class Bar {
+        public String name;
+    }
+
+    @Test
+    void encryptAndRun() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS);
+
+        var foo = new Bar();
+        foo.name = (String)everVault.encrypt("Foo");
+
+        var cageResult = everVault.run(CAGE_NAME, foo, false, null);
+
+        assert !cageResult.runId.isEmpty();
     }
 }
