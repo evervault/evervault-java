@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class WhenUsingApiAgainstRealEnvironmentTests {
@@ -50,6 +51,9 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
         assert !result.isEmpty();
         assert !result.isBlank();
+
+        var split = result.split(":");
+        assertEquals(6, split.length);
     }
 
     private static class Bar {
