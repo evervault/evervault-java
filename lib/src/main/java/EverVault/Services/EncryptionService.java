@@ -25,11 +25,18 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
         this.encryptFormatProvider = encryptFormatProvider;
     }
 
+    protected static final String CURVE_NAME_256K1 = "secp256r1";
+
+    @Override
+    protected String getCurveName() {
+        return CURVE_NAME_256K1;
+    }
+
     @Override
     public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         var privateKeyByteArray = decodeBase64String(base64key);
 
-        var spec = ECNamedCurveTable.getParameterSpec(SECP256R1_NAME);
+        var spec = ECNamedCurveTable.getParameterSpec(getCurveName());
         var pointQ = spec.getG().multiply(new BigInteger(1, privateKeyByteArray));
 
         var kf = KeyFactory.getInstance(KEY_AGREEMENT_ALGORITHM, provider);

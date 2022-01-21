@@ -33,21 +33,21 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void doesThrowWhenUrlIsNotValid() {
-        assertThrows(IllegalArgumentException.class, () -> new EverVault(getEnvironmentApiKey(), "notanurl", "notanurl"));
+        assertThrows(IllegalArgumentException.class, () -> new EverVault(getEnvironmentApiKey(), "notanurl", "notanurl", false));
     }
 
     @Test
     void doesThrowWhenInvalidKey() {
-        assertThrows(HttpFailureException.class, () -> new EverVault("foo", API_ADDRESS, RUN_ADDRESS));
+        assertThrows(HttpFailureException.class, () -> new EverVault("foo", API_ADDRESS, RUN_ADDRESS, false));
     }
 
     @Test
     void encryptSomeDataCorrectly() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherException, MandatoryParameterException {
         final String someDataToEncrypt = "Foo";
 
-        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS);
+        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS, false);
 
-        var result = (String)everVault.encrypt(someDataToEncrypt);
+        var result = (String) everVault.encrypt(someDataToEncrypt);
 
         assert !result.isEmpty();
         assert !result.isBlank();
@@ -62,10 +62,10 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRun() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
-        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS);
+        var everVault = new EverVault(getEnvironmentApiKey(), API_ADDRESS, RUN_ADDRESS, false);
 
         var foo = new Bar();
-        foo.name = (String)everVault.encrypt("Foo");
+        foo.name = (String) everVault.encrypt("Foo");
 
         var cageResult = everVault.run(CAGE_NAME, foo, false, null);
 

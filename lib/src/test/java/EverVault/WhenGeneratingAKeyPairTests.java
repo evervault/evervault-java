@@ -12,6 +12,13 @@ public class WhenGeneratingAKeyPairTests {
         public KeyPair newKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
             return this.generateNewKeyPair();
         }
+
+        protected static final String CURVE_NAME_256K1 = "secp256r1";
+
+        @Override
+        protected String getCurveName() {
+            return CURVE_NAME_256K1;
+        }
     }
 
     private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";

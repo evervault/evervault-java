@@ -7,7 +7,12 @@ import java.security.spec.ECGenParameterSpec;
 
 public abstract class EncryptionServiceCommon extends Base64Handler {
     protected static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
-    protected  static final String SECP256R1_NAME = "secp256r1";
+
+    // Virtual method
+    protected String getCurveName() {
+        return "";
+    }
+
     protected final BouncyCastleProvider provider;
 
     public EncryptionServiceCommon() {
@@ -17,7 +22,7 @@ public abstract class EncryptionServiceCommon extends Base64Handler {
     protected KeyPair generateNewKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         var provider = new BouncyCastleProvider();
         var keyPairGenerator = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM, provider);
-        var genParameter = new ECGenParameterSpec(SECP256R1_NAME);
+        var genParameter = new ECGenParameterSpec(getCurveName());
         keyPairGenerator.initialize(genParameter, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }

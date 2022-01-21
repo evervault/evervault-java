@@ -1,5 +1,8 @@
 package EverVault;
 
+import EverVault.Contracts.IProvideECPublicKey;
+import EverVault.Contracts.IProvideEncryption;
+import EverVault.Contracts.IProvideSharedKey;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
@@ -26,12 +29,12 @@ public final class EverVault extends EverVaultService {
         return everVaultRunUrl;
     }
 
-    public EverVault(String apiKey, String everVaultApiUrl, String everVaultRunUrl) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+    public EverVault(String apiKey, String everVaultApiUrl, String everVaultRunUrl, boolean use256R1Curve) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
         this.everVaultApiUrl = everVaultApiUrl;
         this.everVaultRunUrl = everVaultRunUrl;
 
         var httpHandler = new HttpHandler(apiKey);
-        var encryptService = new EncryptionService(new StdEncryptionOutputFormat());
+        var encryptService = GetEncryptionService(use256R1Curve);
         var circuitBreaker = new CircuitBreaker();
 
         this.setupCircuitBreaker(circuitBreaker);
@@ -44,7 +47,19 @@ public final class EverVault extends EverVaultService {
         this.setupEncryption(encryptForObject);
     }
 
+    private interface IProvideEncryptionRole extends IProvideECPublicKey, IProvideSharedKey, IProvideEncryption { }
+
+    private IProvideEncryptionRole GetEncryptionService(boolean use256R1Curve) {
+        var outputFormat = new StdEncryptionOutputFormat();
+
+        if ( use256R1Curve) {
+            return (IProvideEncryptionRole)new EncryptionServiceBasedOnCurve256R1(outputFormat);
+        }
+
+        return (IProvideEncryptionRole)new EncryptionService(outputFormat);
+    }
+
     public EverVault(String apiKey) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
-        this(apiKey, EVERVAULT_BASE_URL, EVERVAULT_RUN_URL);
+        this(apiKey, EVERVAULT_BASE_URL, EVERVAULT_RUN_URL, false);
     }
 }
