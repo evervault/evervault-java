@@ -19,7 +19,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String CAGE_NAME = "javasdktest";
 
     private String getEnvironmentApiKey() {
-        return "MjI4:5aIoNC2qILbZpEhlr2PSwXNOtipP3hfuJhDgIBWirY8XT4Xnj7jqAfX3jKCPjagRr"; //System.getenv(ENV_API_KEY);
+        return System.getenv(ENV_API_KEY);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void doesThrowWhenInvalidKey() {
-        assertThrows(HttpFailureException.class, () -> new EverVault("Foo", API_ADDRESS, RUN_ADDRESS));
+        assertThrows(HttpFailureException.class, () -> new EverVault("MjI4:5aIoNC2qILbZpEhlr2PSwXNOtipP3hfuJhDgIBWirY8XT4Xnj7jqAfX3jKCPjagRr", API_ADDRESS, RUN_ADDRESS));
     }
 
     @Test
