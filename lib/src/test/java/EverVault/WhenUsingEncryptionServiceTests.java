@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public final class WhenUsingEncryptionServiceTests {
-    private  static final String SECP256K1_NAME = "secp256r1";
+    private  static final String SECP256K1_NAME = "secp256k1";
     private static final String ALGORITHM_TO_MATCH = "ECDH";
     private final EncryptionService service;
     private final IProvideEncryptedFormat encryptFormatProvider;

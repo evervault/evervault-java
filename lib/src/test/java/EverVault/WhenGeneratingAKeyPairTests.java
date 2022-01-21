@@ -13,7 +13,7 @@ public class WhenGeneratingAKeyPairTests {
             return this.generateNewKeyPair();
         }
 
-        protected static final String CURVE_NAME_256K1 = "secp256r1";
+        protected static final String CURVE_NAME_256K1 = "secp256k1";
 
         @Override
         protected String getCurveName() {
