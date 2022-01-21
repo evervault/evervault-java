@@ -68,7 +68,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var result = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (result.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(result.statusCode());
+            throw new HttpFailureException(result.statusCode(), result.body());
         }
 
         return new Gson().fromJson(result.body(), CagePublicKey.class);
@@ -81,6 +81,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/" + cageName))
                 .setHeader("Api-Key", apiKey)
+                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+                .setHeader("Accept", CONTENT_TYPE)
+                .setHeader("Content-Type", CONTENT_TYPE)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -97,7 +100,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(response.statusCode());
+            throw new HttpFailureException(response.statusCode(), response.body());
         }
 
         return new Gson().fromJson(response.body(), CageRunResult.class);

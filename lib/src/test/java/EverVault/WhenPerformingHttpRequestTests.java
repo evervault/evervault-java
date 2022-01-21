@@ -37,6 +37,20 @@ public class WhenPerformingHttpRequestTests {
         verify(pattern);
     }
 
+    private void assertHeadersForCageRun(String endpoint, String apiKey, HashMap<String, String> headerMap) {
+        var pattern = postRequestedFor(urlEqualTo(endpoint))
+                .withHeader("User-Agent", equalTo(USER_AGENT_HEADER))
+                .withHeader("Accept", equalTo(CONTENT_TYPE))
+                .withHeader("Content-Type", equalTo(CONTENT_TYPE))
+                .withHeader("Api-Key", equalTo(apiKey));
+
+        for (HashMap.Entry<String, String> item : headerMap.entrySet()) {
+            pattern = pattern.withHeader(item.getKey(), equalTo(item.getValue()));
+        }
+
+        verify(pattern);
+    }
+
     @Test
     public void httpHeadersAreIncludedForGets(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException, HttpFailureException {
         final String endpoint = "/cages/key";
@@ -100,6 +114,24 @@ public class WhenPerformingHttpRequestTests {
 
     private static class SomeData implements Serializable {
         public String name;
+    }
+
+    @Test
+    void hittingCageRunEndpointValidatesBasicHeaders(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String cageNameEndpoint = "/test-cage";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, true, "1.0.0");
+
+        assertHeadersForCageRun(cageNameEndpoint, API_KEY, new HashMap<>());
     }
 
     @Test
