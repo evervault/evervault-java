@@ -38,7 +38,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void doesThrowWhenInvalidKey() {
-        assertThrows(HttpFailureException.class, () -> new EverVault("MjI4:5aIoNC2qILbZpEhlr2PSwXNOtipP3hfuJhDgIBWirY8XT4Xnj7jqAfX3jKCPjagRr", API_ADDRESS, RUN_ADDRESS));
+        assertThrows(HttpFailureException.class, () -> new EverVault("foo", API_ADDRESS, RUN_ADDRESS));
     }
 
     @Test
