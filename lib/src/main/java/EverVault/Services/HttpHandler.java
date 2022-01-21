@@ -25,6 +25,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     private final static String HEADER_FOR_ASYNC_FIELD = "x-async";
     private final static String HEADER_FOR_VERSION_FIELD = "x-version-id";
     private final static long TIMEOUT_SECONDS_DEFAULT = 30;
+    private final static String CAGES_KEY_SUFFIX = "/cages/key";
     private final String apiKey;
     private final Duration httpTimeout;
 
@@ -44,7 +45,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(url))
+                .uri(URI.create(url + CAGES_KEY_SUFFIX))
                 .timeout(httpTimeout)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("AcceptEncoding", "gzip, deflate")

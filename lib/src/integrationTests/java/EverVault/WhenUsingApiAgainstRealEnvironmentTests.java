@@ -16,7 +16,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String ENV_API_KEY = "ENVIRONMENT_APIKEY";
 
     private String getEnvironmentApiKey() {
-        return System.getenv(ENV_API_KEY);
+        return "MjI4:5aIoNC2qILbZpEhlr2PSwXNOtipP3hfuJhDgIBWirY8XT4Xnj7jqAfX3jKCPjagRr"; //System.getenv(ENV_API_KEY);
     }
 
     @Test
