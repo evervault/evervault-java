@@ -20,7 +20,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String CAGE_NAME = "javasdktest";
 
     private String getEnvironmentApiKey() {
-        return "MjY1:2c85nja8lkJHZybURFkP7sJf7FrlFmYHBLP5J2tBG7mx64POYnFSAJsfLEW3LkvNp"; //System.getenv(ENV_API_KEY);
+        return System.getenv(ENV_API_KEY);
     }
 
     @Test
