@@ -3,6 +3,7 @@ package EverVault;
 import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.Services.EverVaultEncryptionService;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -46,7 +47,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesStringCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesStringCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         var someString = "Foo";
@@ -65,7 +66,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesDictionaryCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesDictionaryCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         var map = new HashMap<String, String>();
@@ -82,7 +83,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesBooleanCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, IOException {
+    void handlesBooleanCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[]{1}), any())).thenReturn("true");
@@ -93,7 +94,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesIntegerCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesIntegerCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         int someInt = 132;
@@ -106,7 +107,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesByteCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesByteCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         final byte someByte = 1;
@@ -120,7 +121,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesShortCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesShortCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         final short someShort = 1;
@@ -133,7 +134,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesLongCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesLongCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         final long someLong = 1;
@@ -146,7 +147,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesFloatCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesFloatCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         final float someFloat = 1;
@@ -159,7 +160,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesDoubleCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesDoubleCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         final double someDouble = 1;
@@ -172,7 +173,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesCharCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesCharCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         final char someChar = 'a';
@@ -187,7 +188,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesVectorCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    void handlesVectorCorrectly() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         var list = new Vector<Integer>();
@@ -220,7 +221,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesCustomClass() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException, IOException, InvalidCipherTextException, NotPossibleToHandleDataTypeException {
+    void handlesCustomClass() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException, NotPossibleToHandleDataTypeException, InvalidCipherException {
         var testSetup = getService();
 
         var someInstance = new SomeClass();
@@ -239,7 +240,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     @Test
-    void handlesArrayCorrectly() throws NotPossibleToHandleDataTypeException, InvalidCipherTextException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException {
+    void handlesArrayCorrectly() throws NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException, InvalidCipherException {
         var testSetup = getService();
 
         var sampleArray = new String[]{

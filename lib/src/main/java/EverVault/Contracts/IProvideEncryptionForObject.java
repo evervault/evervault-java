@@ -1,10 +1,10 @@
 package EverVault.Contracts;
 
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import java.io.IOException;
 
 public interface IProvideEncryptionForObject {
-    Object encrypt(Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException;
+    Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException;
 }

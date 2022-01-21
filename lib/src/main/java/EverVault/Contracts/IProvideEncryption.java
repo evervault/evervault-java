@@ -1,7 +1,7 @@
 package EverVault.Contracts;
 
-import org.bouncycastle.crypto.InvalidCipherTextException;
+import EverVault.Exceptions.InvalidCipherException;
 
 public interface IProvideEncryption {
-    String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException;
+    String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherException;
 }

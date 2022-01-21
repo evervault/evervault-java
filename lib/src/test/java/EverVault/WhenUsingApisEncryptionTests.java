@@ -49,9 +49,9 @@ class WhenUsingApisEncryptionTests {
         }
     }
 
-    private class CircuitBreakerInternal implements IProvideCircuitBreaker {
+    private static class CircuitBreakerInternal implements IProvideCircuitBreaker {
         @Override
-        public <TReturn> TReturn execute(int methodIdentifier, IExecute<TReturn> executable) throws MaxRetryReachedException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, IOException, InterruptedException {
+        public <TReturn> TReturn execute(int methodIdentifier, IExecute<TReturn> executable) throws NotPossibleToHandleDataTypeException, HttpFailureException, IOException, InterruptedException {
             return executable.execute();
         }
     }

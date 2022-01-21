@@ -2,8 +2,8 @@ package EverVault.DataHandlers;
 
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -15,7 +15,7 @@ public class MapHandler implements IDataHandler {
     }
 
     @Override
-    public Object encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var map = (Map)data;
 
         for (var item :

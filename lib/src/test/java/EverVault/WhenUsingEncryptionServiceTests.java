@@ -2,6 +2,7 @@ package EverVault;
 
 import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IProvideEncryptedFormat;
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Services.EncryptionService;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -61,7 +62,7 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void encryptStringReturnsOutputOfFormat() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherTextException {
+    void encryptStringReturnsOutputOfFormat() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherTextException, InvalidCipherException {
         var setup = new EncryptSetup();
         final String result = "Foo";
 
@@ -71,7 +72,7 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void encryptStringProvidesCorrectContent() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException {
+    void encryptStringProvidesCorrectContent() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, InvalidCipherException {
         final String result = "Foo";
 
         var setup = new EncryptSetup();

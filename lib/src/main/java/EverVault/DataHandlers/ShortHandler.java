@@ -4,9 +4,8 @@ import EverVault.Contracts.DataHeader;
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryption;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-
 import java.nio.ByteBuffer;
 
 public class ShortHandler implements IDataHandler {
@@ -28,7 +27,7 @@ public class ShortHandler implements IDataHandler {
     }
 
     @Override
-    public Object encrypt(IProvideEncryptionForObject context, Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException {
+    public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException {
         var bytes = ByteBuffer.allocate(BUFFER_SIZE).putShort((short) data).array();
 
         return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey);

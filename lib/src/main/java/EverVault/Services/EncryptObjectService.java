@@ -2,9 +2,8 @@ package EverVault.Services;
 
 import EverVault.Contracts.IDataHandler;
 import EverVault.Contracts.IProvideEncryptionForObject;
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-
 import java.io.IOException;
 
 public class EncryptObjectService implements IProvideEncryptionForObject {
@@ -15,7 +14,7 @@ public class EncryptObjectService implements IProvideEncryptionForObject {
     }
 
     @Override
-    public Object encrypt(Object data) throws InvalidCipherTextException, NotPossibleToHandleDataTypeException, IOException {
+    public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         for (var handler: dataHandlers) {
             if (handler.canEncrypt(data)){
                 return handler.encrypt(this, data);

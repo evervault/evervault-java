@@ -1,6 +1,7 @@
 package EverVault.Services;
 
 import EverVault.Contracts.*;
+import EverVault.Exceptions.InvalidCipherException;
 import EverVault.ReadModels.GeneratedSharedKey;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -8,7 +9,6 @@ import org.bouncycastle.crypto.modes.GCMBlockCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 
 import javax.crypto.KeyAgreement;
@@ -32,7 +32,7 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
         var spec = ECNamedCurveTable.getParameterSpec(SECP256R1_NAME);
         var pointQ = spec.getG().multiply(new BigInteger(1, privateKeyByteArray));
 
-        var kf = KeyFactory.getInstance(KEY_AGREEMENT_ALGORITHM, new BouncyCastleProvider());
+        var kf = KeyFactory.getInstance(KEY_AGREEMENT_ALGORITHM, provider);
         var pubSpec = new ECPublicKeySpec(pointQ, spec);
 
         return kf.generatePublic(pubSpec);
@@ -42,7 +42,7 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
     public GeneratedSharedKey generateSharedKeyBasedOn(PublicKey teamCagePublicKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
         var keyPair = generateNewKeyPair();
 
-        var agreement = KeyAgreement.getInstance(KEY_AGREEMENT_ALGORITHM, getProvider());
+        var agreement = KeyAgreement.getInstance(KEY_AGREEMENT_ALGORITHM, provider);
         agreement.init(keyPair.getPrivate());
         agreement.doPhase(teamCagePublicKey, true);
 
@@ -54,7 +54,7 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
     }
 
     @Override
-    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherTextException {
+    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey) throws InvalidCipherException {
         var random = new SecureRandom();
         var iv = new byte[12];
         random.nextBytes(iv);
@@ -65,7 +65,13 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
 
         var cipherText = new byte[cipher.getOutputSize(data.length)];
         var len = cipher.processBytes(data, 0, data.length, cipherText, 0);
-        cipher.doFinal(cipherText, len);
+
+        try {
+            cipher.doFinal(cipherText, len);
+        } catch (InvalidCipherTextException e) {
+            // We don't want to expose Bouncy Castle to the user.
+            throw new InvalidCipherException(e);
+        }
 
         return encryptFormatProvider.format(header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
     }
