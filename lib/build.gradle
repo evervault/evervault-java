@@ -20,22 +20,15 @@ dependencies {
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
 }
 
-//test {
-//    testLogging {
-//        events "passed", "skipped", "failed"
-//    }
-//    useJUnitPlatform()
-//}
-
-//testing {
-//    suites {
-//        test {
-//            useJUnitJupiter()
-//        }
-//        integrationTests(JvmTestSuite) {
-//            dependencies {
-//                implementation project
-//            }
-//        }
-//    }
-//}
+testing {
+    suites {
+        test {
+            useJUnitJupiter()
+        }
+        integrationTests(JvmTestSuite) {
+            dependencies {
+                implementation project
+            }
+        }
+    }
+}
