@@ -17,6 +17,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String RUN_ADDRESS = "run.evervault.io";
 
     @Test
-    void doesNotThrowWhenCreatingNewInstanceWithValidKey() {
+    void doesNotThrowWhenCreatingNewInstanceWithValidKey() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+        //new EverVault("SomeKey", API_ADDRESS, RUN_ADDRESS);
     }
 }
