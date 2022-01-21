@@ -13,7 +13,7 @@ jobs:
       - name: install dependencies
         run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
       - name: build project
-        run: gradle build
+        run: gradle clean build
       - name: unit tests
         run: ./gradlew test
       - name: integration tests
