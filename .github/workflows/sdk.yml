@@ -8,6 +8,8 @@ env:
 jobs:
   lin-build:
     runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT_APIKEY: ${{ secrets.ENVIRONMENT_APIKEY }}
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies
