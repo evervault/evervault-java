@@ -22,13 +22,13 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: failed_unit_tests.html
-          path: /home/runner/work/evervault-java/evervault-java/lib/build/reports/tests/integrationTests/index.html
+          name: failed_unit_tests.zip
+          path: /home/runner/work/evervault-java/evervault-java/lib/build/reports/tests/test
       - name: integration tests
         run: ./gradlew integrationTests
       - name: Upload integration test report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: failed_integration_tests.html
-          path: /home/runner/work/evervault-java/evervault-java/lib/build/reports/tests/integrationTests/index.html
+          name: failed_integration_tests.zip
+          path: /home/runner/work/evervault-java/evervault-java/lib/build/reports/tests/integrationTests
