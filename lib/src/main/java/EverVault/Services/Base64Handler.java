@@ -17,7 +17,7 @@ public abstract class Base64Handler {
     }
 
     protected String encodeBase64(byte[] byteArray) {
-        return new String(encoder.encode(byteArray), StandardCharsets.US_ASCII);
+        return new String(encoder.encode(byteArray), StandardCharsets.UTF_8);
     }
 
     /// Should this be here? Python's SDK has it names as __base_64_remove_padding

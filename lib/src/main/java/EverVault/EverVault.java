@@ -1,8 +1,5 @@
 package EverVault;
 
-import EverVault.Contracts.IProvideECPublicKey;
-import EverVault.Contracts.IProvideEncryption;
-import EverVault.Contracts.IProvideSharedKey;
 import EverVault.Exceptions.HttpFailureException;
 import EverVault.Exceptions.MaxRetryReachedException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
@@ -36,11 +33,12 @@ public final class EverVault extends EverVaultService {
         var httpHandler = new HttpHandler(apiKey);
         var encryptService = new EncryptionService(new StdEncryptionOutputFormat());
         var circuitBreaker = new CircuitBreaker();
+        var timeService = new TimeService();
 
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
 
-        this.setupKeyProviders(httpHandler, encryptService, encryptService);
+        this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService);
 
         var encryptForObject = new EverVaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey);
 

@@ -33,11 +33,12 @@ public final class EverVaultWith256R1 extends EverVaultService {
         var httpHandler = new HttpHandler(apiKey);
         var encryptService = new EncryptionServiceBasedOnCurve256R1(new StdEncryptionOutputFormat());
         var circuitBreaker = new CircuitBreaker();
+        var timeService = new TimeService();
 
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
 
-        this.setupKeyProviders(httpHandler, encryptService, encryptService);
+        this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService);
 
         var encryptForObject = new EverVaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey);
 

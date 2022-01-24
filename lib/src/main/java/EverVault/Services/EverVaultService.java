@@ -8,11 +8,10 @@ import EverVault.Exceptions.*;
 import EverVault.ReadModels.CageRunResult;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
+import java.time.Instant;
 
 public abstract class EverVaultService {
     protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
@@ -22,11 +21,14 @@ public abstract class EverVaultService {
     protected IProvideCageExecution cageExecutionProvider;
     protected IProvideCircuitBreaker circuitBreakerProvider;
 
+    protected final static int NEW_KEY_TIMESTAMP = 15;
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
-
+    protected Instant currentSharedKeyTimestamp;
     protected byte[] generatedEcdhKey;
     protected byte[] sharedKey;
+    protected IProvideTime timeProvider;
+    protected PublicKey teamKey;
 
     // Virtual method
     protected String getEverVaultBaseUrl() {
@@ -56,7 +58,8 @@ public abstract class EverVaultService {
 
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
-                                     IProvideSharedKey sharedKeyProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
+                                     IProvideSharedKey sharedKeyProvider,
+                                     IProvideTime timeProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
         if (cagePublicKeyFromEndpointProvider == null) {
             throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
         }
@@ -69,6 +72,11 @@ public abstract class EverVaultService {
             throw new NullPointerException(IProvideSharedKey.class.getName());
         }
 
+        if (timeProvider == null) {
+            throw new NullPointerException(IProvideTime.class.getName());
+        }
+
+        this.timeProvider = timeProvider;
         this.cagePublicKeyFromEndpointProvider = cagePublicKeyFromEndpointProvider;
         this.ecPublicKeyProvider = ecPublicKeyProvider;
         this.sharedKeyProvider = sharedKeyProvider;
@@ -87,17 +95,26 @@ public abstract class EverVaultService {
     private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
         var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEverVaultBaseUrl()));
 
-        var teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
+        teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
 
+        generateSharedKey();
+    }
+
+    private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
+        currentSharedKeyTimestamp = timeProvider.GetNow();
         var generated = sharedKeyProvider.generateSharedKeyBasedOn(teamKey);
 
         this.sharedKey = generated.SharedKey;
         this.generatedEcdhKey = generated.GeneratedEcdhKey;
     }
 
-    public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, IOException, MandatoryParameterException, InvalidCipherException {
+    public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, IOException, MandatoryParameterException, InvalidCipherException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
         if (data == null) {
             throw new MandatoryParameterException("data");
+        }
+
+        if (Duration.between(currentSharedKeyTimestamp, timeProvider.GetNow()).toMinutes() >= NEW_KEY_TIMESTAMP) {
+            generateSharedKey();
         }
 
         return this.encryptionProvider.encrypt(data);

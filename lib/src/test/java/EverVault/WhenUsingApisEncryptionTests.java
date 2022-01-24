@@ -4,27 +4,29 @@
 package EverVault;
 
 import EverVault.Contracts.*;
-import EverVault.Exceptions.HttpFailureException;
-import EverVault.Exceptions.MandatoryParameterException;
-import EverVault.Exceptions.MaxRetryReachedException;
-import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
+import EverVault.Exceptions.*;
 import EverVault.ReadModels.CagePublicKey;
 import EverVault.ReadModels.GeneratedSharedKey;
 import EverVault.Services.EverVaultService;
+import EverVault.Services.TimeService;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.net.http.HttpTimeoutException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class WhenUsingApisEncryptionTests {
     private final IProvideCagePublicKeyFromHttpApi cagePublicKeyProvider;
@@ -34,6 +36,7 @@ class WhenUsingApisEncryptionTests {
     private final IProvideCageExecution cageExecutionProvider;
     private final EverVault everVaultService;
     private final CircuitBreakerInternal circuitBreakerProvider;
+    private final IProvideTime timeProvider;
 
     private class EverVault extends EverVaultService {
         public void setupWrapper(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
@@ -41,10 +44,11 @@ class WhenUsingApisEncryptionTests {
                                  IProvideSharedKey sharedKeyProvider,
                                  IProvideEncryptionForObject encryptionProvider,
                                  IProvideCageExecution cageExecutionProvider,
-                                 IProvideCircuitBreaker circuitBreakerProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException {
+                                 IProvideCircuitBreaker circuitBreakerProvider,
+                                 IProvideTime timeProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException {
             this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
-            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider);
+            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider);
             this.setupEncryption(encryptionProvider);
         }
     }
@@ -64,6 +68,7 @@ class WhenUsingApisEncryptionTests {
         cageExecutionProvider = mock(IProvideCageExecution.class);
         circuitBreakerProvider = new CircuitBreakerInternal();
         everVaultService = new EverVault();
+        timeProvider = mock(IProvideTime.class);
     }
 
     @Test
@@ -77,10 +82,45 @@ class WhenUsingApisEncryptionTests {
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
+        when(timeProvider.GetNow()).thenReturn(Instant.now());
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+    }
+
+    @Test
+    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, InvalidKeySpecException, NoSuchProviderException, InvalidCipherException, MandatoryParameterException {
+        var cagePublicKey = new CagePublicKey();
+        cagePublicKey.ecdhKey = "teamEcdhKey";
+        cagePublicKey.key = "key";
+        cagePublicKey.teamUuid = "teamUuid";
+
+        var generated = new GeneratedSharedKey();
+        generated.SharedKey = new byte[]{};
+        generated.SharedKey = new byte[]{};
+
+        when(timeProvider.GetNow()).thenAnswer(new Answer<Instant>() {
+            private int nCall = 0;
+
+            @Override
+            public Instant answer(InvocationOnMock invocation) throws Throwable {
+                if (nCall == 0) {
+                    nCall++;
+                    return Instant.ofEpochSecond(0);
+                }
+
+                return Instant.ofEpochSecond(1000);
+            }
+        });
+        when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
+        when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+
+        everVaultService.encrypt("Foo");
+
+        verify(timeProvider, times(3)).GetNow();
+        verify(sharedKeyProvider, times(2)).generateSharedKeyBasedOn(any());
     }
 
     @Test
@@ -94,21 +134,23 @@ class WhenUsingApisEncryptionTests {
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
+        when(timeProvider.GetNow()).thenReturn(Instant.now());
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
         assertThrows(MandatoryParameterException.class, () -> everVaultService.encrypt(null));
     }
 
     @Test
     void newInstanceThrowsSpecificExceptionForLackingParameter() {
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, null));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, null, timeProvider));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, null));
         assertThrows(NullPointerException.class, () -> {
-            everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null, cageExecutionProvider, circuitBreakerProvider);
+            everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null, cageExecutionProvider, circuitBreakerProvider, timeProvider);
             everVaultService.encrypt("Foo");
         });
     }
@@ -127,11 +169,12 @@ class WhenUsingApisEncryptionTests {
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
+        when(timeProvider.GetNow()).thenReturn(Instant.now());
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
         when(encryptionForObjects.encrypt(any())).thenReturn(encryptedString);
 
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
 
         var result = (String) everVaultService.encrypt(someString);
 
