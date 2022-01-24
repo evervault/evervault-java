@@ -17,7 +17,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String API_ADDRESS = "https://api.evervault.io";
     private static final String RUN_ADDRESS = "https://run.evervault.io";
     private static final String ENV_API_KEY = "ENVIRONMENT_APIKEY";
-    private static final String CAGE_NAME = "javasdktest";
+    private static final String CAGE_NAME = "integrationtests";
 
     private String getEnvironmentApiKey() {
         return System.getenv(ENV_API_KEY);

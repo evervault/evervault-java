@@ -6,7 +6,6 @@ import EverVault.Contracts.IProvideEncryptionForObject;
 import EverVault.Exceptions.InvalidCipherException;
 import EverVault.Exceptions.NotPossibleToHandleDataTypeException;
 import EverVault.Services.EverVaultEncryptionService;
-import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
