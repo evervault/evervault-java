@@ -10,6 +10,7 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
 
 import javax.crypto.KeyAgreement;
 import java.math.BigInteger;
@@ -54,7 +55,7 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
         agreement.doPhase(teamCagePublicKey, true);
 
         var result = new GeneratedSharedKey();
-        result.GeneratedEcdhKey = keyPair.getPublic().getEncoded();
+        result.GeneratedEcdhKey = ((ECPublicKey) keyPair.getPublic()).getQ().getEncoded(true);
         result.SharedKey = agreement.generateSecret();
 
         return result;
