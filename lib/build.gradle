@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'jvm-test-suite'
+    id 'maven-publish'
 }
 
 group 'com.evervault'
@@ -29,6 +30,21 @@ testing {
             dependencies {
                 implementation project
             }
+        }
+    }
+}
+
+publishing {
+    publications {
+        evervault(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'myRepo'
+            url = layout.buildDirectory.dir("repo")
         }
     }
 }
