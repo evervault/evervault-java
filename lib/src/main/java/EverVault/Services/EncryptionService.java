@@ -80,6 +80,6 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
             throw new InvalidCipherException(e);
         }
 
-        return encryptFormatProvider.format(header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(data));
+        return encryptFormatProvider.format(header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(cipherText));
     }
 }
