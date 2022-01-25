@@ -12,12 +12,23 @@ public abstract class Base64Handler {
         encoder = Base64.getEncoder();
     }
 
+//    pythons definition seems to deal the string as if it was ASCII
+//    decoded_team_cage_key = base64.b64decode(resp["ecdhKey"])
+//
+//    ---------------------------------------------------------------------
+//
+//    def b64decode(s, altchars=None, validate=False):
+//            """Decode the Base64 encoded bytes-like object or ASCII string s.
+//
+//    Optional altchars must be a bytes-like object or ASCII string of length 2
+//    which specifies the alternative alphabet used instead of the '+' and '/'
+//    characters.
     protected byte[] decodeBase64String(String contentToDecode) {
-        return decoder.decode(contentToDecode.getBytes(StandardCharsets.UTF_8));
+        return decoder.decode(contentToDecode.getBytes(StandardCharsets.US_ASCII));
     }
 
     protected String encodeBase64(byte[] byteArray) {
-        return new String(encoder.encode(byteArray), StandardCharsets.UTF_8);
+        return encoder.encodeToString(byteArray);
     }
 
     /// Should this be here? Python's SDK has it names as __base_64_remove_padding
