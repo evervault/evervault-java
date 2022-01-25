@@ -62,7 +62,7 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void encryptStringReturnsOutputOfFormat() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherTextException, InvalidCipherException {
+    void encryptStringReturnsOutputOfFormat() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherException {
         var setup = new EncryptSetup();
         final String result = "Foo";
 
@@ -72,7 +72,7 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void encryptStringProvidesCorrectContent() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherTextException, InvalidCipherException {
+    void encryptStringProvidesCorrectContent() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherException {
         final String result = "Foo";
 
         var setup = new EncryptSetup();

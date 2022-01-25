@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 public class WhenHandlingWithCircuitBreakerTests {
     @Test
-    void triesToExecuteThePassedMethod() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+    void triesToExecuteThePassedMethod() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
         var execution = mock(IExecute.class);
 
         var circuitBreaker = new CircuitBreaker();
@@ -29,7 +29,7 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void throwsMaxRetriesReachedWhenReachesLimitOfTimeouts() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+    void throwsMaxRetriesReachedWhenReachesLimitOfTimeouts() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
         var execution = mock(IExecute.class);
 
         when(execution.execute()).thenThrow(new HttpTimeoutException("foo"));
@@ -40,7 +40,7 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void handlesDifferentMethodsOnDifferentResources() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+    void handlesDifferentMethodsOnDifferentResources() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
         var executionOne = mock(IExecute.class);
         var executionTwo = mock(IExecute.class);
 
@@ -57,7 +57,7 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void retriesIfItFails() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+    void retriesIfItFails() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
         var execution = mock(IExecute.class);
 
         when(execution.execute()).thenThrow(new HttpTimeoutException("foo"));
@@ -70,7 +70,7 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void returnTheContentFromExecuteBack() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+    void returnTheContentFromExecuteBack() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
         final var returnContent = "Foo";
         var execution = mock(IExecute.class);
 
@@ -83,7 +83,7 @@ public class WhenHandlingWithCircuitBreakerTests {
     }
 
     @Test
-    void workingCorrectlyResetsCounter() throws IOException, MaxRetryReachedException, NotPossibleToHandleDataTypeException, HttpFailureException, InvalidCipherTextException, InterruptedException {
+    void workingCorrectlyResetsCounter() throws IOException, MaxRetryReachedException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
         var execution = mock(IExecute.class);
         var sameExecId = mock(IExecute.class);
 
