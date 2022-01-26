@@ -118,15 +118,15 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
         var parameters = new AEADParameters(new KeyParameter(key), 128, iv);
         var cipher = new GCMBlockCipher(new AESEngine());
-        cipher.init(true, parameters);
+        cipher.init(false, parameters);
 
-        var output = new byte[35];
+        var output = new byte[3];
 
         var len = cipher.processBytes(encryptedData, 0, encryptedData.length, output, 0);
 
         cipher.doFinal(output, len);
 
-        var result = new String(output, StandardCharsets.UTF_8);
+        var result = new String(output, StandardCharsets.US_ASCII);
         assert result.equals(Bar.NAME_CONTENT);
     }
 }

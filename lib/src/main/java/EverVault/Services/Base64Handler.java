@@ -24,7 +24,7 @@ public abstract class Base64Handler {
 //    which specifies the alternative alphabet used instead of the '+' and '/'
 //    characters.
     protected byte[] decodeBase64String(String contentToDecode) {
-        return decoder.decode(contentToDecode.getBytes(StandardCharsets.US_ASCII));
+        return decoder.decode(contentToDecode.getBytes(StandardCharsets.UTF_8));
     }
 
     protected String encodeBase64(byte[] byteArray) {
