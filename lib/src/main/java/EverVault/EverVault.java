@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
 
-public final class EverVault extends EverVaultService {
+public class EverVault extends EverVaultService {
     private static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
     private static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
     private final String everVaultApiUrl;

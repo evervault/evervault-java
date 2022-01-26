@@ -29,6 +29,7 @@ testing {
         integrationTests(JvmTestSuite) {
             dependencies {
                 implementation project
+                implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
             }
         }
     }
