@@ -37,7 +37,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     public String getEnvironmentApiKey() {
-        return System.getEnv(ENV_API_KEY);
+        return System.getenv(ENV_API_KEY);
     }
 
     @Test
