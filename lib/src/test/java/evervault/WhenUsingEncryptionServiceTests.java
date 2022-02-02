@@ -1,9 +1,9 @@
 package evervault;
 
-import evervault.Contracts.DataHeader;
-import evervault.Contracts.IProvideEncryptedFormat;
-import evervault.Exceptions.InvalidCipherException;
-import evervault.Services.EncryptionService;
+import evervault.contracts.DataHeader;
+import evervault.contracts.IProvideEncryptedFormat;
+import evervault.exceptions.InvalidCipherException;
+import evervault.services.EncryptionService;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

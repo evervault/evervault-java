@@ -1,9 +1,9 @@
 package evervault;
 
-import evervault.Exceptions.HttpFailureException;
-import evervault.Exceptions.MaxRetryReachedException;
-import evervault.Exceptions.NotPossibleToHandleDataTypeException;
-import evervault.Services.*;
+import evervault.exceptions.HttpFailureException;
+import evervault.exceptions.MaxRetryReachedException;
+import evervault.exceptions.NotPossibleToHandleDataTypeException;
+import evervault.services.*;
 import evervault.utils.EcdhCurve;
 
 import java.io.IOException;

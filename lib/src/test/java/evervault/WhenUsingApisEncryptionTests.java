@@ -3,11 +3,11 @@
  */
 package evervault;
 
-import evervault.Contracts.*;
-import evervault.Exceptions.*;
-import evervault.ReadModels.CagePublicKey;
-import evervault.ReadModels.GeneratedSharedKey;
-import evervault.Services.EvervaultService;
+import evervault.contracts.*;
+import evervault.exceptions.*;
+import evervault.models.CagePublicKey;
+import evervault.models.GeneratedSharedKey;
+import evervault.services.EvervaultService;
 import evervault.utils.EcdhCurve;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;

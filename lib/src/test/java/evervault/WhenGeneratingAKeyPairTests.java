@@ -1,6 +1,6 @@
 package evervault;
 
-import evervault.Services.EncryptionServiceCommon;
+import evervault.services.EncryptionServiceCommon;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidAlgorithmParameterException;

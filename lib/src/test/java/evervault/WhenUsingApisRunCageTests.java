@@ -1,14 +1,14 @@
 package evervault;
 
-import evervault.Contracts.*;
-import evervault.Exceptions.HttpFailureException;
-import evervault.Exceptions.MandatoryParameterException;
-import evervault.Exceptions.MaxRetryReachedException;
-import evervault.Exceptions.NotPossibleToHandleDataTypeException;
-import evervault.ReadModels.CagePublicKey;
-import evervault.ReadModels.CageRunResult;
-import evervault.ReadModels.GeneratedSharedKey;
-import evervault.Services.EvervaultService;
+import evervault.contracts.*;
+import evervault.exceptions.HttpFailureException;
+import evervault.exceptions.MandatoryParameterException;
+import evervault.exceptions.MaxRetryReachedException;
+import evervault.exceptions.NotPossibleToHandleDataTypeException;
+import evervault.models.CagePublicKey;
+import evervault.models.CageRunResult;
+import evervault.models.GeneratedSharedKey;
+import evervault.services.EvervaultService;
 import evervault.utils.EcdhCurve;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;

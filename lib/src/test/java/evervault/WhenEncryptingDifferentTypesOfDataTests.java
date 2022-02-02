@@ -1,11 +1,11 @@
 package evervault;
 
-import evervault.Contracts.DataHeader;
-import evervault.Contracts.IProvideEncryption;
-import evervault.Contracts.IProvideEncryptionForObject;
-import evervault.Exceptions.InvalidCipherException;
-import evervault.Exceptions.NotPossibleToHandleDataTypeException;
-import evervault.Services.EvervaultEncryptionService;
+import evervault.contracts.DataHeader;
+import evervault.contracts.IProvideEncryption;
+import evervault.contracts.IProvideEncryptionForObject;
+import evervault.exceptions.InvalidCipherException;
+import evervault.exceptions.NotPossibleToHandleDataTypeException;
+import evervault.services.EvervaultEncryptionService;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;

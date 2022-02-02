@@ -1,6 +1,6 @@
 package evervault;
 
-import evervault.Exceptions.*;
+import evervault.exceptions.*;
 import evervault.utils.EcdhCurve;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;

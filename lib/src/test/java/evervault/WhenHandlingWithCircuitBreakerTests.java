@@ -1,10 +1,10 @@
 package evervault;
 
-import evervault.Contracts.IExecute;
-import evervault.Exceptions.HttpFailureException;
-import evervault.Exceptions.MaxRetryReachedException;
-import evervault.Exceptions.NotPossibleToHandleDataTypeException;
-import evervault.Services.CircuitBreaker;
+import evervault.contracts.IExecute;
+import evervault.exceptions.HttpFailureException;
+import evervault.exceptions.MaxRetryReachedException;
+import evervault.exceptions.NotPossibleToHandleDataTypeException;
+import evervault.services.CircuitBreaker;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

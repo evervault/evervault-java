@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
+      EV_API_URL: https://api.evervault.io
+      EV_CAGE_RUN_URL: https://run.evervault.io
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies

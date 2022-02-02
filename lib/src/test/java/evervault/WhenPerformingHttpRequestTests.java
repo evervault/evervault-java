@@ -1,7 +1,7 @@
 package evervault;
 
-import evervault.Exceptions.HttpFailureException;
-import evervault.Services.HttpHandler;
+import evervault.exceptions.HttpFailureException;
+import evervault.services.HttpHandler;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.gson.internal.LinkedTreeMap;
