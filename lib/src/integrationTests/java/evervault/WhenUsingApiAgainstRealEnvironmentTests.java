@@ -24,10 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String ENV_API_KEY = "ENVIRONMENT_API_KEY";
-    private static final String CAGE_NAME = Objects.requireNonNull(System.getenv("EV_CAGE_NAME"), "java-sdk-integration-tests");
+    private static final String DEFAULT_CAGE_NAME = "java-sdk-integration-tests";
+    private String cageName;
 
-    private String getEnvironmentApiKey() {
-        return System.getenv(ENV_API_KEY);
+    public WhenUsingApiAgainstRealEnvironmentTests() {
+        cageName = System.getenv("EV_CAGE_NAME");
+
+        if ( cageName == null) {
+            cageName  = DEFAULT_CAGE_NAME;
+        }
     }
 
     @Test
@@ -75,7 +80,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     void encryptAndRun() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
         var evervault = new Evervault(getEnvironmentApiKey());
 
-        var cageResult = evervault.run(CAGE_NAME, Bar.createFooStructure(evervault), false, null);
+        var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
 
         assert !cageResult.runId.isEmpty();
     }
@@ -84,7 +89,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     void encryptAndRunR1Curve() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
         var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
 
-        var cageResult = evervault.run(CAGE_NAME, Bar.createFooStructure(evervault), false, null);
+        var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
 
         assert !cageResult.runId.isEmpty();
     }
