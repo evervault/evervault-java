@@ -27,6 +27,10 @@ jobs:
           name: failed_unit_tests
           path: /home/runner/work/evervault-java/evervault-java/lib/build/reports/tests/test
       - name: integration tests
+        env:
+          ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
+          EV_API_URL: https://api.evervault.io
+          EV_CAGE_RUN_URL: https://run.evervault.io
         run: ./gradlew integrationTests
       - name: Upload integration test report on failure
         if: ${{ failure() }}
