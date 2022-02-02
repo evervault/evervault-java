@@ -2,16 +2,17 @@ package evervault.services;
 
 import evervault.contracts.DataHeader;
 import evervault.contracts.IProvideEncryptedFormat;
+import evervault.utils.Base64Handler;
 
 import java.nio.charset.StandardCharsets;
 
-public class R1StdEncryptionOutputFormat extends Base64Handler implements IProvideEncryptedFormat {
+public class R1StdEncryptionOutputFormat implements IProvideEncryptedFormat {
     private static final String EVERVAULT_VERSION = "ORK";
     private static final String ENCRYPTED_FIELD_FORMAT = "ev:%s%s:%s:%s:%s:$";
     private final String evervaultVersionToUse;
 
     public R1StdEncryptionOutputFormat() {
-        evervaultVersionToUse = encodeBase64(EVERVAULT_VERSION.getBytes(StandardCharsets.UTF_8));
+        evervaultVersionToUse = Base64Handler.encodeBase64(EVERVAULT_VERSION.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -21,7 +22,7 @@ public class R1StdEncryptionOutputFormat extends Base64Handler implements IProvi
             prefix = String.format(":%s", header.toString());
         }
 
-        return String.format(ENCRYPTED_FIELD_FORMAT, evervaultVersionToUse, prefix, removePadding(iv), removePadding(publicKey), removePadding(encryptedPayload));
+        return String.format(ENCRYPTED_FIELD_FORMAT, evervaultVersionToUse, prefix, Base64Handler.removePadding(iv), Base64Handler.removePadding(publicKey), Base64Handler.removePadding(encryptedPayload));
     }
 }
 

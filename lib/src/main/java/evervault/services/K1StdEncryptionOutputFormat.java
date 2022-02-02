@@ -2,16 +2,17 @@ package evervault.services;
 
 import evervault.contracts.DataHeader;
 import evervault.contracts.IProvideEncryptedFormat;
+import evervault.utils.Base64Handler;
 
 import java.nio.charset.StandardCharsets;
 
-public class K1StdEncryptionOutputFormat extends Base64Handler implements IProvideEncryptedFormat {
+public class K1StdEncryptionOutputFormat implements IProvideEncryptedFormat {
     private static final String EVERVAULT_VERSION = "DUB";
     private static final String ENCRYPTED_FIELD_FORMAT = "ev:%s%s:%s:%s:%s:$";
     private final String everVaultVersionToUse;
 
     public K1StdEncryptionOutputFormat() {
-        everVaultVersionToUse = encodeBase64(EVERVAULT_VERSION.getBytes(StandardCharsets.UTF_8));
+        everVaultVersionToUse = Base64Handler.encodeBase64(EVERVAULT_VERSION.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -21,6 +22,6 @@ public class K1StdEncryptionOutputFormat extends Base64Handler implements IProvi
             prefix = String.format(":%s", header.toString());
         }
 
-        return String.format(ENCRYPTED_FIELD_FORMAT, everVaultVersionToUse, prefix, removePadding(iv), removePadding(publicKey), removePadding(encryptedPayload));
+        return String.format(ENCRYPTED_FIELD_FORMAT, everVaultVersionToUse, prefix, Base64Handler.removePadding(iv), Base64Handler.removePadding(publicKey), Base64Handler.removePadding(encryptedPayload));
     }
 }

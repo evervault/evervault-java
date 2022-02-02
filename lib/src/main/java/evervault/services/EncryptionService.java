@@ -3,6 +3,7 @@ package evervault.services;
 import evervault.contracts.*;
 import evervault.exceptions.InvalidCipherException;
 import evervault.models.GeneratedSharedKey;
+import evervault.utils.Base64Handler;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
@@ -34,7 +35,7 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
 
     @Override
     public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        var publicKeyByteArray = decodeBase64String(base64key);
+        var publicKeyByteArray = Base64Handler.decodeBase64String(base64key);
 
         var spec = ECNamedCurveTable.getParameterSpec(getCurveName());
         var publicKey = new ECPublicKeySpec(spec.getCurve().decodePoint(publicKeyByteArray), spec);
@@ -79,6 +80,6 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
             throw new InvalidCipherException(e);
         }
 
-        return encryptFormatProvider.format(header, encodeBase64(iv), encodeBase64(generatedEcdhKey), encodeBase64(cipherText));
+        return encryptFormatProvider.format(header, Base64Handler.encodeBase64(iv), Base64Handler.encodeBase64(generatedEcdhKey), Base64Handler.encodeBase64(cipherText));
     }
 }

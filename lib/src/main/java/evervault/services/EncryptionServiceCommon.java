@@ -5,7 +5,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 
-public abstract class EncryptionServiceCommon extends Base64Handler {
+public abstract class EncryptionServiceCommon {
     protected static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
 
     // Virtual method
