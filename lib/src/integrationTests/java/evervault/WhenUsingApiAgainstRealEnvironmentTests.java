@@ -25,14 +25,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String ENV_API_KEY = "ENVIRONMENT_API_KEY";
     private static final String DEFAULT_CAGE_NAME = "java-sdk-integration-tests";
+    private static final String EV_CAGE_ENV_NAME = "EV_CAGE_NAME";
     private String cageName;
 
     public WhenUsingApiAgainstRealEnvironmentTests() {
-        cageName = System.getenv("EV_CAGE_NAME");
+        cageName = System.getenv(EV_CAGE_ENV_NAME);
 
         if ( cageName == null) {
             cageName  = DEFAULT_CAGE_NAME;
         }
+    }
+
+    public String getEnvironmentApiKey() {
+        return System.getEnv(ENV_API_KEY)
     }
 
     @Test
