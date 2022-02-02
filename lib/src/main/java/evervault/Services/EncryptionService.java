@@ -57,8 +57,6 @@ public class EncryptionService extends EncryptionServiceCommon implements IProvi
         result.GeneratedEcdhKey = ((BCECPublicKey) keyPair.getPublic()).getQ().getEncoded(true);
         result.SharedKey = agreement.generateSecret();
 
-        System.out.println(Base64.getEncoder().encodeToString(result.SharedKey));
-
         return result;
     }
 

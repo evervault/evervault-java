@@ -9,6 +9,7 @@ import evervault.ReadModels.CagePublicKey;
 import evervault.ReadModels.CageRunResult;
 import evervault.ReadModels.GeneratedSharedKey;
 import evervault.Services.EvervaultService;
+import evervault.utils.EcdhCurve;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 
@@ -42,10 +43,11 @@ public class WhenUsingApisRunCageTests {
                                  IProvideEncryptionForObject encryptionProvider,
                                  IProvideCageExecution cageExecutionProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider,
-                                 IProvideTime timeProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException {
+                                 IProvideTime timeProvider,
+                                 EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException {
             this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
-            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider);
+            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider, ecdhCurve);
             this.setupEncryption(encryptionProvider);
         }
     }
@@ -89,7 +91,7 @@ public class WhenUsingApisRunCageTests {
         cageRunResult.runId = "bar";
         when(cageExecutionProvider.runCage(anyString(), anyString(), any(), anyBoolean(), anyString())).thenReturn(cageRunResult);
 
-        evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+        evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
         var result = evervaultService.run("somecage", "somedata", true, "1");
 
@@ -116,7 +118,7 @@ public class WhenUsingApisRunCageTests {
         cageRunResult.runId = "bar";
         when(cageExecutionProvider.runCage(anyString(), anyString(), any(), anyBoolean(), anyString())).thenReturn(cageRunResult);
 
-        evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+        evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
         assertThrows(MandatoryParameterException.class, () -> evervaultService.run(null, "somedata", true, "1"));
         assertThrows(MandatoryParameterException.class, () -> evervaultService.run("", "somedata", true, "1"));
@@ -138,6 +140,6 @@ public class WhenUsingApisRunCageTests {
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
         when(timeProvider.GetNow()).thenReturn(Instant.now());
 
-        assertThrows(NullPointerException.class, () -> evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, null, circuitBreakerProvider, timeProvider));
+        assertThrows(NullPointerException.class, () -> evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, null, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1));
     }
 }

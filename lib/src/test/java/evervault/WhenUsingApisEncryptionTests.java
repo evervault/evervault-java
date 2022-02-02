@@ -8,6 +8,7 @@ import evervault.Exceptions.*;
 import evervault.ReadModels.CagePublicKey;
 import evervault.ReadModels.GeneratedSharedKey;
 import evervault.Services.EvervaultService;
+import evervault.utils.EcdhCurve;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -42,10 +43,11 @@ class WhenUsingApisEncryptionTests {
                                  IProvideEncryptionForObject encryptionProvider,
                                  IProvideCageExecution cageExecutionProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider,
-                                 IProvideTime timeProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
+                                 IProvideTime timeProvider,
+                                 EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
             this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
-            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider);
+            this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider, ecdhCurve);
             this.setupEncryption(encryptionProvider);
         }
     }
@@ -83,7 +85,7 @@ class WhenUsingApisEncryptionTests {
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
     }
 
     @Test
@@ -112,7 +114,7 @@ class WhenUsingApisEncryptionTests {
         });
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
         everVaultService.encrypt("Foo");
 
@@ -135,19 +137,19 @@ class WhenUsingApisEncryptionTests {
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
         assertThrows(MandatoryParameterException.class, () -> everVaultService.encrypt(null));
     }
 
     @Test
     void newInstanceThrowsSpecificExceptionForLackingParameter() {
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, null, timeProvider));
-        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, null));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(null, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, null, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, null, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, null, timeProvider, EcdhCurve.SECP256K1));
+        assertThrows(NullPointerException.class, () -> everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, null, EcdhCurve.SECP256K1));
         assertThrows(NullPointerException.class, () -> {
-            everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+            everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, null, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
             everVaultService.encrypt("Foo");
         });
     }
@@ -171,7 +173,7 @@ class WhenUsingApisEncryptionTests {
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
         when(encryptionForObjects.encrypt(any())).thenReturn(encryptedString);
 
-        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider);
+        everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
         var result = (String) everVaultService.encrypt(someString);
 

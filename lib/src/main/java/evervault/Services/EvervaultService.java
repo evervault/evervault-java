@@ -6,6 +6,7 @@ package evervault.Services;
 import evervault.Contracts.*;
 import evervault.Exceptions.*;
 import evervault.ReadModels.CageRunResult;
+import evervault.utils.EcdhCurve;
 
 import java.io.IOException;
 import java.security.*;
@@ -59,7 +60,8 @@ public abstract class EvervaultService {
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
                                      IProvideSharedKey sharedKeyProvider,
-                                     IProvideTime timeProvider) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
+                                     IProvideTime timeProvider,
+                                     EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
         if (cagePublicKeyFromEndpointProvider == null) {
             throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
         }
@@ -81,7 +83,7 @@ public abstract class EvervaultService {
         this.ecPublicKeyProvider = ecPublicKeyProvider;
         this.sharedKeyProvider = sharedKeyProvider;
 
-        setupKeys();
+        setupKeys(ecdhCurve);
     }
 
     protected void setupEncryption(IProvideEncryptionForObject encryptionProvider) {
@@ -92,10 +94,13 @@ public abstract class EvervaultService {
         this.encryptionProvider = encryptionProvider;
     }
 
-    private void setupKeys() throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
+    private void setupKeys(EcdhCurve ecdhCurve) throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
         var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultBaseUrl()));
-
-        teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
+        if (ecdhCurve.equals(EcdhCurve.SECP256R1)) {
+            teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhP256Key);
+        } else {
+            teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhKey);
+        }
 
         generateSharedKey();
     }

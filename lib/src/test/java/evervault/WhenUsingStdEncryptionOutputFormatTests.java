@@ -1,7 +1,7 @@
 package evervault;
 
 import evervault.Contracts.DataHeader;
-import evervault.Services.StdEncryptionOutputFormat;
+import evervault.Services.K1StdEncryptionOutputFormat;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,11 +11,11 @@ import java.util.Base64;
 import java.util.stream.Stream;
 
 public class WhenUsingStdEncryptionOutputFormatTests {
-    private final StdEncryptionOutputFormat std;
+    private final K1StdEncryptionOutputFormat std;
     private final static String everVaultVersionToUse = new String(Base64.getEncoder().encode("DUB".getBytes(StandardCharsets.UTF_8)), StandardCharsets.US_ASCII);
 
     public WhenUsingStdEncryptionOutputFormatTests() {
-        std = new StdEncryptionOutputFormat();
+        std = new K1StdEncryptionOutputFormat();
     }
 
     @ParameterizedTest
