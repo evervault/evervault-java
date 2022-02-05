@@ -37,15 +37,33 @@ testing {
 
 publishing {
     publications {
-        evervault(MavenPublication) {
+        mavenPublication(MavenPublication) {
             from components.java
+            artifactId 'Evervault'
+            pom {
+                name = 'Evervault'
+                description = 'Java SDK to integrate applications with Evervault services'
+                url = 'https://github.com/evervault/evervault-java'
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://mit-license.org/'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'engineering'
+                        name = 'Engineering'
+                        email = 'engineering@evervault.com'
+                    }
+                }
+            }
         }
     }
 
     repositories {
         maven {
-            name = 'myRepo'
-            url = layout.buildDirectory.dir("repo")
+            url = layout.buildDirectory.dir("https://github.com/evervault/evervault.java")
         }
     }
 }

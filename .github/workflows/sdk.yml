@@ -6,7 +6,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lin-build:
+  ci:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
@@ -38,3 +38,13 @@ jobs:
         with:
           name: failed_integration_tests
           path: /home/runner/work/evervault-java/evervault-java/lib/build/reports/tests/integrationTests
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [ ci ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
+      - name: build project
+        run: gradle clean build
