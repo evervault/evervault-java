@@ -1,7 +1,7 @@
 package evervault;
 
 import evervault.contracts.DataHeader;
-import evervault.services.K1StdEncryptionOutputFormat;
+import evervault.services.R1StdEncryptionOutputFormat;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,10 +11,10 @@ import java.util.Base64;
 import java.util.stream.Stream;
 
 public class WhenUsingR1EncryptionOutputFormatTests {
-    private final K1StdEncryptionOutputFormat std;
+    private final R1StdEncryptionOutputFormat std;
     private final static String everVaultVersionToUse = new String(Base64.getEncoder().encode("ORK".getBytes(StandardCharsets.UTF_8)), StandardCharsets.US_ASCII);
 
-    public WhenUsingStdEncryptionOutputFormatTests() {
+    public WhenUsingR1EncryptionOutputFormatTests() {
         std = new R1StdEncryptionOutputFormat();
     }
 

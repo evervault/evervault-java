@@ -1,5 +1,6 @@
 package evervault;
 
+import evervault.exceptions.NotImplementedException;
 import evervault.services.EncryptionServiceCommon;
 import org.junit.jupiter.api.Test;
 
@@ -9,22 +10,28 @@ import java.security.NoSuchAlgorithmException;
 
 public class WhenGeneratingAKeyPairTests {
     private static class SomeNewService extends EncryptionServiceCommon {
-        public KeyPair newKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+        public KeyPair newKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NotImplementedException {
             return this.generateNewKeyPair();
         }
 
         protected static final String CURVE_NAME_256K1 = "secp256k1";
+        protected static final String KEY_GENERATOR_ALGORITHM = "EC";
 
         @Override
         protected String getCurveName() {
             return CURVE_NAME_256K1;
+        }
+
+        @Override
+        protected String getKeyGeneratorAlgorithm() throws NotImplementedException {
+            return KEY_GENERATOR_ALGORITHM;
         }
     }
 
     private static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
 
     @Test
-    void keyPairAlgorithmMustMatch() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    void keyPairAlgorithmMustMatch() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NotImplementedException {
         var service = new SomeNewService();
 
         var keypair = service.newKeyPair();

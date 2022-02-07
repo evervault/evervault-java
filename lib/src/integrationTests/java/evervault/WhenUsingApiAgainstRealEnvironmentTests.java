@@ -54,7 +54,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     @Test
-    void encryptSomeDataCorrectly() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherException, MandatoryParameterException {
+    void encryptSomeDataCorrectly() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherException, MandatoryParameterException, NotImplementedException {
         final String someDataToEncrypt = "Foo";
 
         var evervault = new Evervault(getEnvironmentApiKey());
@@ -73,7 +73,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
         public static final String NAME_CONTENT = "Foo";
 
-        public static Bar createFooStructure(Evervault evervault) throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, MandatoryParameterException, InvalidKeyException {
+        public static Bar createFooStructure(Evervault evervault) throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, MandatoryParameterException, InvalidKeyException, NotImplementedException {
             var bar = new Bar();
             bar.name = (String) evervault.encrypt(NAME_CONTENT);
 
@@ -82,7 +82,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     @Test
-    void encryptAndRun() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+    void encryptAndRun() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, NotImplementedException {
         var evervault = new Evervault(getEnvironmentApiKey());
 
         var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
@@ -91,7 +91,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     @Test
-    void encryptAndRunR1Curve() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+    void encryptAndRunR1Curve() throws NotPossibleToHandleDataTypeException, InvalidCipherException, IOException, MandatoryParameterException, HttpFailureException, InvalidAlgorithmParameterException, MaxRetryReachedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, NotImplementedException {
         var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
 
         var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
@@ -100,7 +100,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     private static class OwnEvervault extends Evervault {
-        public OwnEvervault(String apiKey) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException {
+        public OwnEvervault(String apiKey) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, NotImplementedException {
             super(apiKey);
         }
 
@@ -113,7 +113,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final int IV_POS = 2;
 
     @Test
-    void decryptDataWorksAsExpected() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherException, MandatoryParameterException, InvalidCipherTextException {
+    void decryptDataWorksAsExpected() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherException, MandatoryParameterException, InvalidCipherTextException, NotImplementedException {
         var evervault = new OwnEvervault(getEnvironmentApiKey());
 
         var bar = Bar.createFooStructure(evervault);

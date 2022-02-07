@@ -44,7 +44,7 @@ class WhenUsingApisEncryptionTests {
                                  IProvideCageExecution cageExecutionProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider,
                                  IProvideTime timeProvider,
-                                 EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException {
+                                 EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
             this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
             this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider, ecdhCurve);
@@ -71,7 +71,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException {
+    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -89,7 +89,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, InvalidKeySpecException, NoSuchProviderException, InvalidCipherException, MandatoryParameterException {
+    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, InvalidKeySpecException, NoSuchProviderException, InvalidCipherException, MandatoryParameterException, NotImplementedException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -123,7 +123,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException {
+    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";

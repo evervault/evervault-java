@@ -1,6 +1,7 @@
 package evervault.services;
 
 import evervault.contracts.IProvideEncryptedFormat;
+import evervault.exceptions.NotImplementedException;
 
 public class EncryptionServiceBasedOnCurve256K1 extends EncryptionService {
     public EncryptionServiceBasedOnCurve256K1(IProvideEncryptedFormat encryptFormatProvider) {
@@ -12,5 +13,15 @@ public class EncryptionServiceBasedOnCurve256K1 extends EncryptionService {
     @Override
     protected String getCurveName() {
         return CURVE_NAME_256K1;
+    }
+
+    @Override
+    protected String getKeyAgreementAlgorithm() throws NotImplementedException {
+        return KEY_AGREEMENT_ALGORITHM;
+    }
+
+    @Override
+    protected String getKeyGeneratorAlgorithm() throws NotImplementedException {
+        return ELLIPTIC_CURVE_ALGORITHM;
     }
 }

@@ -2,6 +2,7 @@ package evervault.services;
 
 import evervault.contracts.*;
 import evervault.exceptions.InvalidCipherException;
+import evervault.exceptions.NotImplementedException;
 import evervault.models.GeneratedSharedKey;
 import evervault.utils.Base64Handler;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -17,39 +18,36 @@ import javax.crypto.KeyAgreement;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
-public class EncryptionService extends EncryptionServiceCommon implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption {
-    private static final int DEFAULT_MAC_BIT_SIZE = 128;
-    private static final String KEY_AGREEMENT_ALGORITHM = "ECDH";
-    private final IProvideEncryptedFormat encryptFormatProvider;
+public abstract class EncryptionService extends EncryptionServiceCommon implements IProvideECPublicKey, IProvideSharedKey, IProvideEncryption {
+    protected static final int DEFAULT_MAC_BIT_SIZE = 128;
+    protected static final String KEY_AGREEMENT_ALGORITHM = "ECDH";
+    protected final IProvideEncryptedFormat encryptFormatProvider;
 
     public EncryptionService(IProvideEncryptedFormat encryptFormatProvider) {
         this.encryptFormatProvider = encryptFormatProvider;
     }
 
-    protected static final String CURVE_NAME_256K1 = "secp256k1";
-
-    @Override
-    protected String getCurveName() {
-        return CURVE_NAME_256K1;
+    protected String getKeyAgreementAlgorithm() throws NotImplementedException {
+        throw new NotImplementedException("getKeyAgreementAlgorithm");
     }
 
     @Override
-    public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public PublicKey getEllipticCurvePublicKeyFrom(String base64key) throws NoSuchAlgorithmException, InvalidKeySpecException, NotImplementedException {
         var publicKeyByteArray = Base64Handler.decodeBase64String(base64key);
 
         var spec = ECNamedCurveTable.getParameterSpec(getCurveName());
         var publicKey = new ECPublicKeySpec(spec.getCurve().decodePoint(publicKeyByteArray), spec);
 
-        var kf = KeyFactory.getInstance(KEY_AGREEMENT_ALGORITHM, provider);
+        var kf = KeyFactory.getInstance(getKeyAgreementAlgorithm(), provider);
 
         return kf.generatePublic(publicKey);
     }
 
     @Override
-    public GeneratedSharedKey generateSharedKeyBasedOn(PublicKey teamCagePublicKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public GeneratedSharedKey generateSharedKeyBasedOn(PublicKey teamCagePublicKey) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, NotImplementedException {
         var keyPair = generateNewKeyPair();
 
-        var agreement = KeyAgreement.getInstance(KEY_AGREEMENT_ALGORITHM, provider);
+        var agreement = KeyAgreement.getInstance(getKeyAgreementAlgorithm(), provider);
         agreement.init(keyPair.getPrivate());
         agreement.doPhase(teamCagePublicKey, true);
 

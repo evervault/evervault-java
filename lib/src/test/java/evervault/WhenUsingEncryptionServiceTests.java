@@ -3,7 +3,9 @@ package evervault;
 import evervault.contracts.DataHeader;
 import evervault.contracts.IProvideEncryptedFormat;
 import evervault.exceptions.InvalidCipherException;
+import evervault.exceptions.NotImplementedException;
 import evervault.services.EncryptionService;
+import evervault.services.EncryptionServiceBasedOnCurve256K1;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -13,6 +15,7 @@ import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -26,16 +29,50 @@ public final class WhenUsingEncryptionServiceTests {
 
     public WhenUsingEncryptionServiceTests() {
         encryptFormatProvider = mock(IProvideEncryptedFormat.class);
-        service = new EncryptionService(encryptFormatProvider);
+        service = new EncryptionServiceBasedOnCurve256K1(encryptFormatProvider);
+    }
+
+    private static class WithoutAlgorithm extends EncryptionService {
+        public WithoutAlgorithm(IProvideEncryptedFormat encryptFormatProvider) {
+            super(encryptFormatProvider);
+        }
+
+        @Override
+        protected String getCurveName() {
+            return "secp256k1";
+        }
+    }
+
+    private static class WithoutCurve extends EncryptionService {
+        public WithoutCurve(IProvideEncryptedFormat encryptFormatProvider) {
+            super(encryptFormatProvider);
+        }
+
+        @Override
+        protected String getKeyGeneratorAlgorithm() throws NotImplementedException {
+            return "ECDH";
+        }
     }
 
     @Test
-    void decodingStringIntoPublicKeyDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    void notDefiningCurveThrows() {
+        var es = new WithoutCurve(encryptFormatProvider);
+        assertThrows(NotImplementedException.class, () -> es.getEllipticCurvePublicKeyFrom(KeySample));
+    }
+
+    @Test
+    void notDefiningAlgorithmThrows() {
+        var es = new WithoutAlgorithm(encryptFormatProvider);
+        assertThrows(NotImplementedException.class, () -> es.getEllipticCurvePublicKeyFrom(KeySample));
+    }
+
+    @Test
+    void decodingStringIntoPublicKeyDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException, NotImplementedException {
         service.getEllipticCurvePublicKeyFrom(KeySample);
     }
 
     @Test
-    void decodedPublicKeyMustMatchAlgorithm() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    void decodedPublicKeyMustMatchAlgorithm() throws NoSuchAlgorithmException, InvalidKeySpecException, NotImplementedException {
 
         var key = service.getEllipticCurvePublicKeyFrom(KeySample);
         var algo = key.getAlgorithm();
@@ -43,13 +80,13 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void generateSharedKeyWithDecodedStringDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
+    void generateSharedKeyWithDecodedStringDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotImplementedException {
         var publicKey = service.getEllipticCurvePublicKeyFrom(KeySample);
         service.generateSharedKeyBasedOn(publicKey);
     }
 
     @Test
-    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException {
+    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
         var provider = new BouncyCastleProvider();
         var keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_TO_MATCH, provider);
         var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
