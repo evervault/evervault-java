@@ -11,12 +11,8 @@ import java.util.Base64;
 import java.util.stream.Stream;
 
 public class WhenUsingR1EncryptionOutputFormatTests {
-    private final R1StdEncryptionOutputFormat std;
+    private final static R1StdEncryptionOutputFormat std = new R1StdEncryptionOutputFormat();
     private final static String everVaultVersionToUse = new String(Base64.getEncoder().encode("ORK".getBytes(StandardCharsets.UTF_8)), StandardCharsets.US_ASCII);
-
-    public WhenUsingR1EncryptionOutputFormatTests() {
-        std = new R1StdEncryptionOutputFormat();
-    }
 
     @ParameterizedTest
     @MethodSource("formattingParameters")
