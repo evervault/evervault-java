@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'jvm-test-suite'
-    id 'maven-publish',
+    id 'maven-publish'
     id 'signing'
 }
 
