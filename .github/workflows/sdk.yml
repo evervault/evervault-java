@@ -57,4 +57,4 @@ jobs:
       - name: build project
         run: gradle clean build
       - name: publish
-        run: gradle uploadArchives
+        run: gradle publish
