@@ -1,11 +1,12 @@
 plugins {
     id 'java-library'
     id 'jvm-test-suite'
-    id 'maven-publish'
+    id 'maven-publish',
+    id 'signing'
 }
 
 group 'com.evervault'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 repositories {
     mavenCentral()
@@ -16,9 +17,28 @@ dependencies {
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
     testImplementation "org.mockito:mockito-core:3.+"
 
-
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+signing {
+    sign configurations.archives
+}
+
+artifacts {
+    archives jar
+    archives groovydocJar
+    archives sourcesJar
 }
 
 testing {
@@ -35,35 +55,50 @@ testing {
     }
 }
 
-publishing {
-    publications {
-        mavenPublication(MavenPublication) {
-            from components.java
-            artifactId 'Evervault'
-            pom {
-                name = 'Evervault'
-                description = 'Java SDK to integrate applications with Evervault services'
-                url = 'https://github.com/evervault/evervault-java'
-                licenses {
-                    license {
-                        name = 'MIT'
-                        url = 'https://mit-license.org/'
-                    }
+uploadArchives {
+    repositories {
+        if (isDevBuild) {
+            mavenLocal()
+        } else {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
                 }
-                developers {
-                    developer {
-                        id = 'engineering'
-                        name = 'Engineering'
-                        email = 'engineering@evervault.com'
+
+                snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    name 'Evervault'
+                    packaging 'jar'
+                    description 'Evervault SDK to integrate with cages service and enabling the developer to encrypt his data'
+                    url 'http://www.evervault.com/'
+
+                    scm {
+                        connection 'scm:git@github.com:evervault/evervault-java.git'
+                        developerConnection 'scm:git@github.com:evervault/evervault-java.git'
+                        url 'scm:git@github.com:evervault/evervault-java.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The MIT License (MIT)'
+                            url 'https://mit-license.org/'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'engineering'
+                            name 'engineering'
+                            email 'engineering@evervault.com'
+                        }
                     }
                 }
             }
-        }
-    }
-
-    repositories {
-        maven {
-            url = layout.buildDirectory.dir("https://github.com/evervault/evervault.java")
         }
     }
 }

@@ -42,9 +42,16 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: [ ci ]
     runs-on: ubuntu-latest
+    env:
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
+      - name: gradle.properties
+        run: bash ${GITHUB_WORKSPACE}/generate_gradle_properties.bash
       - name: build project
         run: gradle clean build
+      - name: publish
+        run: gradle uploadArchives
