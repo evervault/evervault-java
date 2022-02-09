@@ -6,10 +6,18 @@ plugins {
 }
 
 group 'com.evervault'
-version '1.0'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+}
+
+def getRepositoryUsername() {
+    return hasProperty("ossrhUsername") ? ossrhUsername : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty("ossrhPassword") ? ossrhPassword : ""
 }
 
 dependencies {
@@ -29,10 +37,6 @@ task javadocJar(type: Jar) {
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
-}
-
-signing {
-    sign configurations.archives
 }
 
 artifacts {
@@ -55,46 +59,56 @@ testing {
     }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+publishing {
+    publications {
+        mavenjava(MavenPublication) { publication ->
+            from components.java
 
-            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+            artifact javadocJar
+            artifact sourcesJar
 
-            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'Evervault'
-                packaging 'jar'
-                description 'Evervault SDK to integrate with cages service and enabling the developer to encrypt his data'
-                url 'http://www.evervault.com/'
-
+            pom {
+                name = 'Evervault'
+                description = 'Evervault SDK enabling developers to integrate their applications with Evervault services'
+                url = 'https://github.com/evervault/evervault-java'
                 scm {
-                    connection 'scm:git@github.com:evervault/evervault-java.git'
-                    developerConnection 'scm:git@github.com:evervault/evervault-java.git'
-                    url 'scm:git@github.com:evervault/evervault-java.git'
+                    url = 'https://github.com/evervault/evervault-java'
+                    connection = 'scm:git:ssh://git@github.com:evervault/evervault-java.git'
                 }
-
                 licenses {
                     license {
-                        name 'The MIT License (MIT)'
-                        url 'https://mit-license.org/'
+                        name = 'The MIT License (MIT)'
+                        url = 'https://mit-license.org/'
                     }
                 }
-
                 developers {
                     developer {
-                        id 'engineering'
-                        name 'engineering'
-                        email 'engineering@evervault.com'
+                        name = 'engineering'
+                        organization = 'Evervault'
+                        email = 'engineering@evervault.com'
                     }
+                }
+                organization {
+                    name = 'Evervault'
+                    url = 'https://www.evervault.com/'
                 }
             }
         }
     }
+    repositories {
+        maven {
+            name = 'sonatype'
+            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username getRepositoryUsername()
+                password getRepositoryPassword()
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
 }
