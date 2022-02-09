@@ -8,10 +8,6 @@ plugins {
 group 'com.evervault'
 version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
 def getRepositoryUsername() {
     return hasProperty("ossrhUsername") ? ossrhUsername : ""
 }
@@ -29,26 +25,9 @@ dependencies {
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
 }
 
-javadoc {
-    source = sourceSets.main.allJava
-    options.memberLevel = JavadocMemberLevel.PUBLIC
-    options.addStringOption('Xdoclint:none', '-quiet')
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from 'build/docs/javadoc'
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    archiveClassifier.set('sources')
-}
-
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 testing {
@@ -116,5 +95,11 @@ publishing {
 }
 
 signing {
-    sign publishing.publications
+    sign publishing.publications.mavenjava
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
 }
