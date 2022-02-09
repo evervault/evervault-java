@@ -57,45 +57,41 @@ testing {
 
 uploadArchives {
     repositories {
-        if (isDevBuild) {
-            mavenLocal()
-        } else {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-                repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Evervault'
+                packaging 'jar'
+                description 'Evervault SDK to integrate with cages service and enabling the developer to encrypt his data'
+                url 'http://www.evervault.com/'
+
+                scm {
+                    connection 'scm:git@github.com:evervault/evervault-java.git'
+                    developerConnection 'scm:git@github.com:evervault/evervault-java.git'
+                    url 'scm:git@github.com:evervault/evervault-java.git'
                 }
 
-                snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                licenses {
+                    license {
+                        name 'The MIT License (MIT)'
+                        url 'https://mit-license.org/'
+                    }
                 }
 
-                pom.project {
-                    name 'Evervault'
-                    packaging 'jar'
-                    description 'Evervault SDK to integrate with cages service and enabling the developer to encrypt his data'
-                    url 'http://www.evervault.com/'
-
-                    scm {
-                        connection 'scm:git@github.com:evervault/evervault-java.git'
-                        developerConnection 'scm:git@github.com:evervault/evervault-java.git'
-                        url 'scm:git@github.com:evervault/evervault-java.git'
-                    }
-
-                    licenses {
-                        license {
-                            name 'The MIT License (MIT)'
-                            url 'https://mit-license.org/'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id 'engineering'
-                            name 'engineering'
-                            email 'engineering@evervault.com'
-                        }
+                developers {
+                    developer {
+                        id 'engineering'
+                        name 'engineering'
+                        email 'engineering@evervault.com'
                     }
                 }
             }
