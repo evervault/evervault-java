@@ -1,0 +1,60 @@
+name: sdk
+
+on: [ push, pull_request ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
+      EV_API_URL: https://api.evervault.io
+      EV_CAGE_RUN_URL: https://run.evervault.io
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
+      - name: build project
+        run: gradle clean build
+      - name: unit tests
+        run: ./gradlew test
+      - name: Upload unit test report on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: failed_unit_tests
+          path: ${GITHUB_WORKSPACE}/lib/build/reports/tests/test
+      - name: integration tests
+        env:
+          ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
+          EV_API_URL: https://api.evervault.io
+          EV_CAGE_RUN_URL: https://run.evervault.io
+        run: ./gradlew integrationTests
+      - name: Upload integration test report on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: failed_integration_tests
+          path: ${GITHUB_WORKSPACE}/lib/build/reports/tests/integrationTests
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [ ci ]
+    runs-on: ubuntu-latest
+    env:
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      GPG_KEY_FILE: ${{ secrets.GPG_KEY_FILE }}
+      GPG_KEY_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
+      GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: sudo bash ${GITHUB_WORKSPACE}/install_dependencies.bash
+      - name: gradle.properties
+        run: bash ${GITHUB_WORKSPACE}/generate_gradle_properties.bash
+      - name: build project
+        run: gradle clean build
+      - name: publish
+        run: gradle publish
