@@ -5,6 +5,10 @@
 # create gpg key file
 echo ${GPG_KEY_FILE} | base64 -d > ${HOME}/gpg_key_file.gpg
 
+if [ ! -d ${HOME}/.gradle ]; then
+  mkdir -p ${HOME}/.gradle
+fi
+
 echo "signing.keyId=${GPG_KEY_ID}" >> ${HOME}/.gradle/gradle.properties
 echo "signing.password=${GPG_KEY_PASSWORD}" >> ${HOME}/.gradle/gradle.properties
 echo "signing.secretKeyRingFile=${HOME}/gpg_key_file.gpg" >> ${HOME}/.gradle/gradle.properties
