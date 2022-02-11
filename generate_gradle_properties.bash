@@ -2,8 +2,12 @@
 
 # https://central.sonatype.org/publish/publish-gradle/#metadata-definition-and-upload
 
+set -e
+
 # create gpg key file
 echo ${GPG_KEY_FILE} > ${HOME}/gpg_key_file.key
+
+md5sum ${HOME}/gpg_key_file.key
 
 # importing key back gpg, so we can export it back to the expected format
 gpg --import ${HOME}/gpg_key_file.key
