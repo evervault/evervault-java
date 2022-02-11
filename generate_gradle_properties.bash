@@ -10,7 +10,7 @@ echo ${GPG_KEY_FILE} > ${HOME}/gpg_key_file.key
 md5sum ${HOME}/gpg_key_file.key
 
 # importing key back gpg, so we can export it back to the expected format
-gpg --import ${HOME}/gpg_key_file.key
+gpg --batch --import ${HOME}/gpg_key_file.key
 
 echo "PGP file imported"
 
