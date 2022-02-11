@@ -4,6 +4,8 @@
 
 set -e
 
+gpg --version
+
 # create gpg key file
 echo ${GPG_KEY_FILE} > ${HOME}/gpg_key_file.key
 
