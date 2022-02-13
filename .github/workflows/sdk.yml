@@ -55,4 +55,4 @@ jobs:
       - name: install dependencies
         run: sudo ${GITHUB_WORKSPACE}/install_dependencies.bash
       - name: publish
-        run: ./gradlew publishMavenjavaPublicationToSonatypeRepository --debug --stacktrace
+        run: ./gradlew publishMavenjavaPublicationToSonatypeRepository
