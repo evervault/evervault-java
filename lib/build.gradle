@@ -20,11 +20,11 @@ def getRepositoryPassword() {
     return hasProperty("ossrhPassword") ? ossrhPassword : ""
 }
 
-def getSigningKey() {
-    return hasProperty("signinKey") ? signinKey : ""
+def getKeyFile() {
+    return hasProperty("signingKey") ? signingKey : ""
 }
 
-def getSigningPassword() {
+def getKeyPassword() {
     return hasProperty("signingPassword") ? signingPassword : ""
 }
 
@@ -107,7 +107,7 @@ publishing {
 }
 
 signing {
-    useInMemoryPgpKeys(getSigningKey(), getSigningPassword())
+    useInMemoryPgpKeys(getKeyFile(), getKeyPassword())
     sign publishing.publications.mavenjava
 }
 
