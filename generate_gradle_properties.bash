@@ -8,7 +8,7 @@ if [ ! -d ${HOME}/.gradle ]; then
   mkdir -p ${HOME}/.gradle
 fi
 
-echo "signingKey=${GPG_KEY_FILE}" >> ${GITHUB_WORKSPACE}/gradle.properties
-echo "signingPassword=${GPG_KEY_PASSWORD}" >> ${GITHUB_WORKSPACE}/gradle.properties
-echo "ossrhUsername=${SONATYPE_USERNAME}" >> ${GITHUB_WORKSPACE}/gradle.properties
-echo "ossrhPassword=${SONATYPE_PASSWORD}" >> ${GITHUB_WORKSPACE}/gradle.properties
+echo "signingKey=${GPG_KEY_FILE}" >> ${1}/gradle.properties
+echo "signingPassword=${GPG_KEY_PASSWORD}" >> ${1}/gradle.properties
+echo "ossrhUsername=${SONATYPE_USERNAME}" >> ${1}/gradle.properties
+echo "ossrhPassword=${SONATYPE_PASSWORD}" >> ${1}/gradle.properties
