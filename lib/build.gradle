@@ -58,10 +58,11 @@ testing {
 
 publishing {
     publications {
-        mavenjava(MavenPublication) { publication ->
+        mavenJava(MavenPublication) {
             from components.java
 
             artifact sourcesJar
+            artifact javadocJar
 
             pom {
                 name = 'Evervault'
@@ -107,7 +108,7 @@ publishing {
 
 signing {
     useInMemoryPgpKeys(getKeyFile(), getKeyPassword())
-    sign publishing.publications.mavenjava
+    sign publishing.publications.mavenJava
 }
 
 javadoc {
