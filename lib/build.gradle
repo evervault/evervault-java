@@ -61,7 +61,6 @@ publishing {
         mavenjava(MavenPublication) { publication ->
             from components.java
 
-            artifact javadocJar
             artifact sourcesJar
 
             pom {
