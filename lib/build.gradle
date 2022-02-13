@@ -61,8 +61,6 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
 
-            artifactId project.name
-
             pom {
                 name = 'Evervault'
                 description = 'Evervault SDK enabling developers to integrate their applications with Evervault services'
@@ -88,11 +86,6 @@ publishing {
                     name = 'Evervault'
                     url = 'https://www.evervault.com/'
                 }
-            }
-
-            java {
-                withJavadocJar()
-                withSourcesJar()
             }
         }
     }
