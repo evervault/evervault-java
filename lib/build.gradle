@@ -12,14 +12,6 @@ repositories {
     mavenCentral()
 }
 
-def getRepositoryUsername() {
-    return hasProperty("ossrhUsername") ? ossrhUsername : ""
-}
-
-def getRepositoryPassword() {
-    return hasProperty("ossrhPassword") ? ossrhPassword : ""
-}
-
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
@@ -91,14 +83,15 @@ publishing {
             def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials {
-                username getRepositoryUsername()
-                password getRepositoryPassword()
+                username ossrhUsername
+                password ossrhPassword
             }
         }
     }
 }
 
 signing {
+    useInMemoryPgpKeys(signinKey, signingPassword)
     sign publishing.publications.mavenjava
 }
 
