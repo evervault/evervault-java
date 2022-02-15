@@ -50,7 +50,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void doesThrowWhenInvalidKey() {
-        assertThrows(HttpFailureException.class, () -> new Evervault("foo"));
+        assertThrows(EvervaultException.class, () -> new Evervault("foo"));
     }
 
     @Test
