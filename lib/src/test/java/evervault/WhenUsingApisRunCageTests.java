@@ -41,7 +41,7 @@ public class WhenUsingApisRunCageTests {
                                  IProvideCageExecution cageExecutionProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider,
                                  IProvideTime timeProvider,
-                                 EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+                                 EcdhCurve ecdhCurve) throws EvervaultException {
             this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
             this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider, ecdhCurve);
@@ -69,7 +69,7 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void callingToRunCageReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, MandatoryParameterException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+    void callingToRunCageReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -96,7 +96,7 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+    void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -117,9 +117,9 @@ public class WhenUsingApisRunCageTests {
 
         evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
-        assertThrows(MandatoryParameterException.class, () -> evervaultService.run(null, "somedata", true, "1"));
-        assertThrows(MandatoryParameterException.class, () -> evervaultService.run("", "somedata", true, "1"));
-        assertThrows(MandatoryParameterException.class, () -> evervaultService.run("somecage", null, true, "1"));
+        assertThrows(EvervaultException.class, () -> evervaultService.run(null, "somedata", true, "1"));
+        assertThrows(EvervaultException.class, () -> evervaultService.run("", "somedata", true, "1"));
+        assertThrows(EvervaultException.class, () -> evervaultService.run("somecage", null, true, "1"));
     }
 
     @Test

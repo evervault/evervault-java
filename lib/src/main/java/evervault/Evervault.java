@@ -1,18 +1,9 @@
 package evervault;
 
-import evervault.exceptions.HttpFailureException;
-import evervault.exceptions.MaxRetryReachedException;
-import evervault.exceptions.NotImplementedException;
-import evervault.exceptions.NotPossibleToHandleDataTypeException;
+import evervault.exceptions.EvervaultException;
 import evervault.services.*;
 import evervault.utils.EcdhCurve;
 
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
@@ -39,11 +30,11 @@ public class Evervault extends EvervaultService {
         this.evervaultRunUrl = Objects.requireNonNullElse(envRunUrl, EVERVAULT_RUN_URL);
     }
 
-    public Evervault(String apiKey) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, NotImplementedException {
+    public Evervault(String apiKey) throws EvervaultException {
         this(apiKey, EcdhCurve.SECP256K1);
     }
 
-    public Evervault(String apiKey, EcdhCurve ecdhCurve) throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, NotImplementedException {
+    public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
         setEvervaultBaseUrl();
         setEvervaultRunUrl();
 
