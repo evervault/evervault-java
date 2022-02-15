@@ -2,7 +2,7 @@ package evervault.exceptions;
 
 // latest layer of exception before leaving Evervault domain
 public class EvervaultException extends Exception {
-    private Exception nestedException;
+    private final Exception nestedException;
 
     public EvervaultException(Exception e) {
         nestedException = e;

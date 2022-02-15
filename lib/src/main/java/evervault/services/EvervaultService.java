@@ -122,7 +122,7 @@ public abstract class EvervaultService {
             throw new EvervaultException(new MandatoryParameterException("data"));
         }
 
-        UpdateKeysIfTimeIsDue();
+        updateKeysIfTimeIsDue();
 
         try {
             return this.encryptionProvider.encrypt(data);
@@ -131,7 +131,7 @@ public abstract class EvervaultService {
         }
     }
 
-    protected void UpdateKeysIfTimeIsDue() throws EvervaultException {
+    protected void updateKeysIfTimeIsDue() throws EvervaultException {
         if (Duration.between(currentSharedKeyTimestamp, timeProvider.GetNow()).toMinutes() >= NEW_KEY_TIMESTAMP) {
             try {
                 generateSharedKey();
