@@ -44,7 +44,7 @@ class WhenUsingApisEncryptionTests {
                                  IProvideCageExecution cageExecutionProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider,
                                  IProvideTime timeProvider,
-                                 EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+                                 EcdhCurve ecdhCurve) throws EvervaultException {
             this.setupCircuitBreaker(circuitBreakerProvider);
             this.setupCageExecutionProvider(cageExecutionProvider);
             this.setupKeyProviders(cagePublicKeyFromEndpointProvider, ecPublicKeyProvider, sharedKeyProvider, timeProvider, ecdhCurve);
@@ -71,7 +71,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -89,7 +89,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, InvalidKeySpecException, NoSuchProviderException, InvalidCipherException, MandatoryParameterException, NotImplementedException {
+    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -123,7 +123,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -138,7 +138,7 @@ class WhenUsingApisEncryptionTests {
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
         everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
-        assertThrows(MandatoryParameterException.class, () -> everVaultService.encrypt(null));
+        assertThrows(EvervaultException.class, () -> everVaultService.encrypt(null));
     }
 
     @Test

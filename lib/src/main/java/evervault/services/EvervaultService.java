@@ -61,7 +61,7 @@ public abstract class EvervaultService {
                                      IProvideECPublicKey ecPublicKeyProvider,
                                      IProvideSharedKey sharedKeyProvider,
                                      IProvideTime timeProvider,
-                                     EcdhCurve ecdhCurve) throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InterruptedException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+                                     EcdhCurve ecdhCurve) throws EvervaultException {
         if (cagePublicKeyFromEndpointProvider == null) {
             throw new NullPointerException(IProvideCagePublicKeyFromHttpApi.class.getName());
         }
@@ -83,7 +83,11 @@ public abstract class EvervaultService {
         this.ecPublicKeyProvider = ecPublicKeyProvider;
         this.sharedKeyProvider = sharedKeyProvider;
 
-        setupKeys(ecdhCurve);
+        try {
+            setupKeys(ecdhCurve);
+        } catch (HttpFailureException | InterruptedException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | InvalidKeyException | NotPossibleToHandleDataTypeException | MaxRetryReachedException | NoSuchProviderException | NotImplementedException | IOException e) {
+            throw new EvervaultException(e);
+        }
     }
 
     protected void setupEncryption(IProvideEncryptionForObject encryptionProvider) {
@@ -113,27 +117,43 @@ public abstract class EvervaultService {
         this.generatedEcdhKey = generated.GeneratedEcdhKey;
     }
 
-    public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, IOException, MandatoryParameterException, InvalidCipherException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
+    public Object encrypt(Object data) throws EvervaultException {
         if (data == null) {
-            throw new MandatoryParameterException("data");
+            throw new EvervaultException(new MandatoryParameterException("data"));
         }
 
-        if (Duration.between(currentSharedKeyTimestamp, timeProvider.GetNow()).toMinutes() >= NEW_KEY_TIMESTAMP) {
-            generateSharedKey();
-        }
+        updateKeysIfTimeIsDue();
 
-        return this.encryptionProvider.encrypt(data);
+        try {
+            return this.encryptionProvider.encrypt(data);
+        } catch (NotPossibleToHandleDataTypeException | IOException | InvalidCipherException e) {
+            throw new EvervaultException(e);
+        }
     }
 
-    public CageRunResult run(String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException, MandatoryParameterException, NotPossibleToHandleDataTypeException, MaxRetryReachedException {
+    protected void updateKeysIfTimeIsDue() throws EvervaultException {
+        if (Duration.between(currentSharedKeyTimestamp, timeProvider.GetNow()).toMinutes() >= NEW_KEY_TIMESTAMP) {
+            try {
+                generateSharedKey();
+            } catch (InvalidAlgorithmParameterException | InvalidKeyException | NoSuchAlgorithmException | NotImplementedException e) {
+                throw new EvervaultException(e);
+            }
+        }
+    }
+
+    public CageRunResult run(String cageName, Object data, boolean async, String version) throws EvervaultException {
         if (cageName == null || cageName.isEmpty()) {
-            throw new MandatoryParameterException("cageName");
+            throw new EvervaultException(new MandatoryParameterException("cageName"));
         }
 
         if (data == null) {
-            throw new MandatoryParameterException("data");
+            throw new EvervaultException(new MandatoryParameterException("data"));
         }
 
-        return circuitBreakerProvider.execute(runCageHash, () -> cageExecutionProvider.runCage(getEvervaultRunUrl(), cageName, data, async, version));
+        try {
+            return circuitBreakerProvider.execute(runCageHash, () -> cageExecutionProvider.runCage(getEvervaultRunUrl(), cageName, data, async, version));
+        } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
+            throw new EvervaultException(e);
+        }
     }
 }
