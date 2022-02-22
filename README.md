@@ -36,6 +36,8 @@ implementation 'com.evervault:lib:1.0.1'
 
 You have access to two main methods.
 
+Warning: this SDK does not support the outbound proxy.
+
 ### encrypt
 
 **encrypt** will encrypt your data and return an object which is a String in case you passed a literal type like bool, string, int, float, char, byte. 
