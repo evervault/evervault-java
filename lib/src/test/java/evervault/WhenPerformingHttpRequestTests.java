@@ -52,6 +52,36 @@ public class WhenPerformingHttpRequestTests {
     }
 
     @Test
+    public void getCageUrlEndingWithSlashDoesNotThrow(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String endpoint = "/cages/key";
+
+        stubFor(get(urlEqualTo(endpoint))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
+
+        var client = new HttpHandler(API_KEY);
+
+        client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + "/");
+    }
+
+    @Test
+    public void runCageUrlEndingWithSlashDoesNotThrow(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String cageNameEndpoint = "/test-cage";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        client.runCage(wireMockRuntimeInfo.getHttpBaseUrl() + "/", "test-cage", data, true, "1.0.0");
+    }
+
+    @Test
     public void httpHeadersAreIncludedForGets(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException, HttpFailureException {
         final String endpoint = "/cages/key";
 
