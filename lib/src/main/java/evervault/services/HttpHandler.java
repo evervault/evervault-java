@@ -44,10 +44,11 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
-        final var finalAddress = url + CAGES_KEY_SUFFIX;
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve(CAGES_KEY_SUFFIX);
 
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(finalAddress))
+                .uri(finalAddress)
                 .timeout(httpTimeout)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("AcceptEncoding", "gzip, deflate")
@@ -78,8 +79,11 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     public CageRunResult runCage(String url, String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
         var serializedData = new Gson().toJson(data);
 
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/" + cageName);
+
         var requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/" + cageName))
+                .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", CONTENT_TYPE)
