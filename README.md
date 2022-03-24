@@ -74,3 +74,9 @@ void encryptAndRun() throws EvervaultException {
     var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
 }
 ```
+
+### Changelog
+
+#### 1.0.2
+
+* Evervault urls ending with slash now fixed.
