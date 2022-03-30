@@ -7,10 +7,16 @@ import evervault.utils.EcdhCurve;
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
-    private static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
-    private static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
+    private static final String EVERVAULT_BASE_URL = "https://api.evervault.io/";
+    private static final String EVERVAULT_RUN_URL = "https://run.evervault.io/";
+    private static final String EVERVAULT_BASE_HOST = "api.evervault.io";
+    private static final String EVERVAULT_RUN_HOST = "run.evervault.io";
+    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.io";
+
     private String evervaultApiUrl;
     private String evervaultRunUrl;
+    private String evervaultRelayUrl;
+    private String[] evervaultIgnoreDomains;
 
     public String getEvervaultBaseUrl() {
         return evervaultApiUrl;
@@ -18,6 +24,14 @@ public class Evervault extends EvervaultService {
 
     public String getEvervaultRunUrl() {
         return evervaultRunUrl;
+    }
+
+    public String getEvervaultRelayUrl() {
+        return evervaultRelayUrl;
+    }
+
+    public String[] getEvervaultIgnoreDomains() {
+        return evervaultIgnoreDomains;
     }
 
     private void setEvervaultBaseUrl() {
@@ -30,13 +44,62 @@ public class Evervault extends EvervaultService {
         this.evervaultRunUrl = Objects.requireNonNullElse(envRunUrl, EVERVAULT_RUN_URL);
     }
 
+    private void setEvervaultRelayUrl() {
+        var envRelayUrl = System.getenv("EV_RELAY_HOST");
+        this.evervaultRelayUrl = Objects.requireNonNullElse(envRelayUrl, EVERVAULT_RELAY_HOST);
+    }
+
+    private void setEvervaultIgnoreDomains(String[] ignoreDomains) {
+        String[] defaultDomains = {EVERVAULT_BASE_HOST, EVERVAULT_RUN_HOST};
+        if (ignoreDomains == null) {
+            this.evervaultIgnoreDomains = defaultDomains;
+        } else {
+            this.evervaultIgnoreDomains = mergeIgnoreDomains(defaultDomains, ignoreDomains);
+        }
+    }
+
+    private String[] mergeIgnoreDomains(String[] defaultDomains, String[] ignoreDomains) {
+        var defaultLength = defaultDomains.length;
+        var ignoreDomainsLength = ignoreDomains.length;
+
+        var mergedLength = defaultLength + ignoreDomainsLength;
+        String[] mergedDomains = new String[mergedLength];
+
+        System.arraycopy(defaultDomains, 0, mergedDomains, 0, defaultLength);
+        System.arraycopy(ignoreDomains, 0, mergedDomains, defaultLength, ignoreDomainsLength);
+
+        return mergedDomains;
+    }
+
     public Evervault(String apiKey) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1);
+        this(apiKey, EcdhCurve.SECP256K1, true, null);
+    }
+
+    public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
+        this(apiKey, EcdhCurve.SECP256K1, intercept, null);
+    }
+
+    public Evervault(String apiKey, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
+        this(apiKey, EcdhCurve.SECP256K1, intercept, ignoreDomains);
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
+        this(apiKey, ecdhCurve, true, null);
+    }
+
+    public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept) throws EvervaultException {
+        this(apiKey, ecdhCurve, intercept, null);
+    }
+
+    public Evervault(String apiKey, EcdhCurve ecdhCurve, String[] ignoreDomains) throws EvervaultException {
+        this(apiKey, ecdhCurve, true, ignoreDomains);
+    }
+
+    public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
         setEvervaultBaseUrl();
         setEvervaultRunUrl();
+        setEvervaultRelayUrl();
+        setEvervaultIgnoreDomains(ignoreDomains);
 
         var httpHandler = new HttpHandler(apiKey);
         var encryptService = EncryptionServiceFactory.build(ecdhCurve);
@@ -51,5 +114,6 @@ public class Evervault extends EvervaultService {
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey);
 
         this.setupEncryption(encryptForObject);
+        if (intercept) this.setupIntercept(apiKey);
     }
 }
