@@ -57,7 +57,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     void encryptSomeDataCorrectly() throws EvervaultException {
         final String someDataToEncrypt = "Foo";
 
-        var evervault = new Evervault(getEnvironmentApiKey());
+        var evervault = new Evervault(getEnvironmentApiKey(), false);
 
         var result = (String) evervault.encrypt(someDataToEncrypt);
 
@@ -83,7 +83,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRun() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey());
+        var evervault = new Evervault(getEnvironmentApiKey(), false);
 
         var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
 
@@ -92,7 +92,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRunR1Curve() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
+        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1, false);
 
         var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
 
