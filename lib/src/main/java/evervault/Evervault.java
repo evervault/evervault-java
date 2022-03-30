@@ -7,11 +7,11 @@ import evervault.utils.EcdhCurve;
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
-    private static final String EVERVAULT_BASE_URL = "https://api.evervault.io/";
-    private static final String EVERVAULT_RUN_URL = "https://run.evervault.io/";
-    private static final String EVERVAULT_BASE_HOST = "api.evervault.io";
-    private static final String EVERVAULT_RUN_HOST = "run.evervault.io";
-    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.io";
+    private static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
+    private static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
+    private static final String EVERVAULT_BASE_HOST = "api.evervault.com";
+    private static final String EVERVAULT_RUN_HOST = "run.evervault.com";
+    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.com";
 
     private String evervaultApiUrl;
     private String evervaultRunUrl;
