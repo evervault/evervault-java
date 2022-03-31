@@ -19,7 +19,7 @@ jobs:
       - name: build project
         run: gradle clean build
       - name: unit tests
-        run: ./gradlew test
+        run: ./gradlew test --info
       - name: Upload unit test report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
