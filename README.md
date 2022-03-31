@@ -26,7 +26,7 @@ See the Evervault [Java SDK documentation](https://docs.evervault.com/reference/
 
 ## Installation
 
-Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.evervault/lib), and can be installed using your preferred built tool.
+Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.evervault/lib), and can be installed using your preferred build tool.
 
 ### Gradle
 ```sh
