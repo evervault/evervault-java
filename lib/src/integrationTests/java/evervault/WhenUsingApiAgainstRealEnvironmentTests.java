@@ -101,7 +101,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     private static class OwnEvervault extends Evervault {
         public OwnEvervault(String apiKey) throws EvervaultException {
-            super(apiKey);
+            super(apiKey, false);
         }
 
         public byte[] getSharedKey() {
