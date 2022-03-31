@@ -8,6 +8,7 @@ import evervault.models.CageRunResult;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.net.Authenticator;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;

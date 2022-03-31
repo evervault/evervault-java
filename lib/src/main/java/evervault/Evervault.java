@@ -7,50 +7,48 @@ import evervault.utils.EcdhCurve;
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
-    private static final String EVERVAULT_BASE_URL = "https://api.evervault.com/";
-    private static final String EVERVAULT_RUN_URL = "https://run.evervault.com/";
-    private static final String EVERVAULT_BASE_HOST = "api.evervault.com";
+    private static final String EVERVAULT_API_HOST = "api.evervault.com";
     private static final String EVERVAULT_RUN_HOST = "run.evervault.com";
     private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.com";
 
-    private String evervaultApiUrl;
-    private String evervaultRunUrl;
-    private String evervaultRelayUrl;
+    private String evervaultApiHost;
+    private String evervaultRunHost;
+    private String evervaultRelayHost;
     private String[] evervaultIgnoreDomains;
 
-    public String getEvervaultBaseUrl() {
-        return evervaultApiUrl;
-    }
+    public String getEvervaultApiHost() { return evervaultApiHost; }
 
-    public String getEvervaultRunUrl() {
-        return evervaultRunUrl;
-    }
+    public String getEvervaultApiUrl() { return "https://" + evervaultApiHost + "/"; }
 
-    public String getEvervaultRelayUrl() {
-        return evervaultRelayUrl;
+    public String getEvervaultRunHost() { return evervaultRunHost; };
+
+    public String getEvervaultRunUrl() { return "https://" + evervaultRunHost + "/"; }
+
+    public String getEvervaultRelayHost() {
+        return evervaultRelayHost;
     }
 
     public String[] getEvervaultIgnoreDomains() {
         return evervaultIgnoreDomains;
     }
 
-    private void setEvervaultBaseUrl() {
-        var envApiUrl = System.getenv("EV_API_URL");
-        this.evervaultApiUrl = Objects.requireNonNullElse(envApiUrl, EVERVAULT_BASE_URL);
+    private void setEvervaultApiHost() {
+        var envApiHost = System.getenv("EV_API_HOST");
+        this.evervaultApiHost = Objects.requireNonNullElse(envApiHost, EVERVAULT_API_HOST);
     }
 
-    private void setEvervaultRunUrl() {
-        var envRunUrl = System.getenv("EV_CAGE_RUN_URL");
-        this.evervaultRunUrl = Objects.requireNonNullElse(envRunUrl, EVERVAULT_RUN_URL);
+    private void setEvervaultRunHost() {
+        var envRunHost = System.getenv("EV_CAGE_RUN_HOST");
+        this.evervaultRunHost = Objects.requireNonNullElse(envRunHost, EVERVAULT_RUN_HOST);
     }
 
     private void setEvervaultRelayUrl() {
-        var envRelayUrl = System.getenv("EV_RELAY_HOST");
-        this.evervaultRelayUrl = Objects.requireNonNullElse(envRelayUrl, EVERVAULT_RELAY_HOST);
+        var envRelayHost = System.getenv("EV_RELAY_HOST");
+        this.evervaultRelayHost = Objects.requireNonNullElse(envRelayHost, EVERVAULT_RELAY_HOST);
     }
 
     private void setEvervaultIgnoreDomains(String[] ignoreDomains) {
-        String[] defaultDomains = {EVERVAULT_BASE_HOST, EVERVAULT_RUN_HOST};
+        String[] defaultDomains = {getEvervaultApiHost(), getEvervaultRunHost()};
         if (ignoreDomains == null) {
             this.evervaultIgnoreDomains = defaultDomains;
         } else {
@@ -96,8 +94,8 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
-        setEvervaultBaseUrl();
-        setEvervaultRunUrl();
+        setEvervaultApiHost();
+        setEvervaultRunHost();
         setEvervaultRelayUrl();
         setEvervaultIgnoreDomains(ignoreDomains);
 
@@ -115,11 +113,6 @@ public class Evervault extends EvervaultService {
 
         this.setupEncryption(encryptForObject);
 
-
-        if (intercept) {
-            System.out.println("SETTING UP INTERCEPT");
-            this.setupIntercept(apiKey);
-
-        }
+        if (intercept) { this.setupIntercept(apiKey); }
     }
 }

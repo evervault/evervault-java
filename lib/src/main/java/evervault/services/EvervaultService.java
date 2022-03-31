@@ -36,7 +36,13 @@ public abstract class EvervaultService {
     protected Boolean intercept = true;
 
     // Virtual method
-    protected String getEvervaultBaseUrl() {
+    protected String getEvervaultApiHost() { return ""; }
+
+    // Virtual method
+    protected String getEvervaultApiUrl() { return ""; }
+
+    // Virtual method
+    protected String getEvervaultRunHost() {
         return "";
     }
 
@@ -46,9 +52,7 @@ public abstract class EvervaultService {
     }
 
     // Virtual method
-    protected String getEvervaultRelayUrl() {
-        return "";
-    }
+    protected String getEvervaultRelayHost() { return ""; }
 
     // Virtual method
     protected String[] getEvervaultIgnoreDomains() { return new String[0]; }
@@ -111,7 +115,7 @@ public abstract class EvervaultService {
     }
 
     private void setupKeys(EcdhCurve ecdhCurve) throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
-        var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultBaseUrl()));
+        var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultApiUrl()));
 
         teamUuid = teamEcdhKey.teamUuid;
 
@@ -128,7 +132,7 @@ public abstract class EvervaultService {
 
         String user = teamUuid;
         String password = apiKey;
-        String proxyHost = getEvervaultRelayUrl();
+        String proxyHost = getEvervaultRelayHost();
         String proxyPort = RELAY_PORT;
         String ignoreDomains = String.join("|", getEvervaultIgnoreDomains());
 
