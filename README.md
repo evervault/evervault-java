@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.2'
+implementation 'com.evervault:lib:2.0.3'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.2'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.2</version>
+  <version>2.0.3</version>
 </dependency>
 ```
 
@@ -178,3 +178,7 @@ void encryptAndRun() throws EvervaultException {
 #### 2.0.2
 
 * Update README with CA instructions
+
+### 2.0.3
+
+* Move to new package name structure
