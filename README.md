@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.1'
+implementation 'com.evervault:lib:2.0.2'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.1'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
 </dependency>
 ```
 
@@ -61,7 +61,7 @@ To allow outbound interception with Relay the Evervault Root Ca certificate must
 curl https://ca.evervault.com --output evervault-ca.cert
 ```
 ```
-sudo keytool -import -alias evervault-ca -file evervault-ca.cer -keystore <path/to/jdk/cacerts>
+sudo keytool -import -alias evervault-ca -file evervault-ca.cert -keystore <path/to/jdk/cacerts>
 ```
 
 #### Apache HTTP Client
