@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.1'
+implementation 'com.evervault:lib:2.0.2'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.1'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
 </dependency>
 ```
 
@@ -174,3 +174,7 @@ void encryptAndRun() throws EvervaultException {
 #### 2.0.1
 
 * Evervault Java SDK now supports intercepting requests for decryption.
+
+#### 2.0.2
+
+* Update README with CA instructions
