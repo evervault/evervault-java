@@ -10,8 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
-      EV_API_URL: https://api.evervault.io
-      EV_CAGE_RUN_URL: https://run.evervault.io
+      EV_API_HOST: api.evervault.io
+      EV_CAGE_RUN_HOST: run.evervault.io
+      EV_RELAY_HOST: strict.relay.evervault.io
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies
@@ -19,7 +20,7 @@ jobs:
       - name: build project
         run: gradle clean build
       - name: unit tests
-        run: ./gradlew test
+        run: ./gradlew test --info
       - name: Upload unit test report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
@@ -31,7 +32,7 @@ jobs:
           ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
           EV_API_URL: https://api.evervault.io
           EV_CAGE_RUN_URL: https://run.evervault.io
-        run: ./gradlew integrationTests
+        run: ./gradlew integrationTests --info
       - name: Upload integration test report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2

@@ -13,6 +13,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.time.Instant;
+import java.net.Authenticator;
 
 public abstract class EvervaultService {
     protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
@@ -23,6 +24,7 @@ public abstract class EvervaultService {
     protected IProvideCircuitBreaker circuitBreakerProvider;
 
     protected final static int NEW_KEY_TIMESTAMP = 15;
+    protected final static String RELAY_PORT = "8443";
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
     protected Instant currentSharedKeyTimestamp;
@@ -30,9 +32,17 @@ public abstract class EvervaultService {
     protected byte[] sharedKey;
     protected IProvideTime timeProvider;
     protected PublicKey teamKey;
+    protected String teamUuid;
+    protected Boolean intercept = true;
 
     // Virtual method
-    protected String getEvervaultBaseUrl() {
+    protected String getEvervaultApiHost() { return ""; }
+
+    // Virtual method
+    protected String getEvervaultApiUrl() { return ""; }
+
+    // Virtual method
+    protected String getEvervaultRunHost() {
         return "";
     }
 
@@ -40,6 +50,12 @@ public abstract class EvervaultService {
     protected String getEvervaultRunUrl() {
         return "";
     }
+
+    // Virtual method
+    protected String getEvervaultRelayHost() { return ""; }
+
+    // Virtual method
+    protected String[] getEvervaultIgnoreDomains() { return new String[0]; }
 
     protected void setupCircuitBreaker(IProvideCircuitBreaker provideCircuitBreaker) {
         if (provideCircuitBreaker == null) {
@@ -99,7 +115,10 @@ public abstract class EvervaultService {
     }
 
     private void setupKeys(EcdhCurve ecdhCurve) throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
-        var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultBaseUrl()));
+        var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultApiUrl()));
+
+        teamUuid = teamEcdhKey.teamUuid;
+
         if (ecdhCurve.equals(EcdhCurve.SECP256R1)) {
             teamKey = ecPublicKeyProvider.getEllipticCurvePublicKeyFrom(teamEcdhKey.ecdhP256Key);
         } else {
@@ -107,6 +126,32 @@ public abstract class EvervaultService {
         }
 
         generateSharedKey();
+    }
+
+    protected void setupIntercept(String apiKey) {
+
+        String user = teamUuid;
+        String password = apiKey;
+        String proxyHost = getEvervaultRelayHost();
+        String proxyPort = RELAY_PORT;
+        String ignoreDomains = String.join("|", getEvervaultIgnoreDomains());
+
+        Authenticator authenticator = new ProxyAuthenticator(user, password);
+        Authenticator.setDefault(authenticator);
+
+        System.setProperty("https.proxyHost", proxyHost);
+        System.setProperty("https.proxyPort", proxyPort);
+        System.setProperty("https.proxyUser", user);
+        System.setProperty("https.proxyPassword", password);
+        System.setProperty("https.nonProxyHosts", ignoreDomains);
+        System.setProperty("jdk.https.auth.tunneling.disabledSchemes", "");
+
+        System.setProperty("http.proxyHost", proxyHost);
+        System.setProperty("http.proxyPort", proxyPort);
+        System.setProperty("http.proxyUser", user);
+        System.setProperty("http.proxyPassword", password);
+        System.setProperty("http.nonProxyHosts", ignoreDomains);
+        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
     }
 
     private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
