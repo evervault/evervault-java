@@ -174,3 +174,7 @@ void encryptAndRun() throws EvervaultException {
 #### 2.0.1
 
 * Evervault Java SDK now supports intercepting requests for decryption.
+
+#### 2.0.2
+
+* Update README with CA instructions
