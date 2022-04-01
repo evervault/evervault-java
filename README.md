@@ -55,6 +55,15 @@ The Evervault Java SDK can automatically route all outbound HTTPS requests throu
 
 To disable this behaviour, set `intercept` to `false` in the initialization options. For the most common Java HTTP Clients, here is how intercept can be set up:
 
+### Evervault CA
+To allow outbound interception with Relay the Evervault Root Ca certificate must be added to the JVM keystore.
+```
+curl https://ca.evervault.com --output evervault-ca.cert
+```
+```
+sudo keytool -import -alias evervault-ca -file evervault-ca.cert -keystore <path/to/jdk/cacerts>
+```
+
 #### Apache HTTP Client
 
 Apache HTTP Client uses two extra JVM settings to authenticate with the proxy. When the Evervault Java SDK is initialised with intercept enabled, it sets these settings.
