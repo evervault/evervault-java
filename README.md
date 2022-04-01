@@ -61,7 +61,7 @@ To allow outbound interception with Relay the Evervault Root Ca certificate must
 curl https://ca.evervault.com --output evervault-ca.cert
 ```
 ```
-sudo keytool -import -alias evervault-ca -file evervault-ca.cer -keystore <path/to/jdk/cacerts>
+sudo keytool -import -alias evervault-ca -file evervault-ca.cert -keystore <path/to/jdk/cacerts>
 ```
 
 #### Apache HTTP Client
