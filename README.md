@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.3'
+implementation 'com.evervault:lib:2.0.4'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.3'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.3</version>
+  <version>2.0.4</version>
 </dependency>
 ```
 
@@ -182,3 +182,7 @@ void encryptAndRun() throws EvervaultException {
 ### 2.0.3
 
 * Move to new package name structure
+
+### 2.0.4
+
+* Fix issue with Java 11 Http Client and proxy

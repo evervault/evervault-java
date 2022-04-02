@@ -135,6 +135,9 @@ public abstract class EvervaultService {
         String proxyPort = RELAY_PORT;
         String ignoreDomains = String.join("|", getEvervaultIgnoreDomains());
 
+        System.setProperty("jdk.https.auth.tunneling.disabledSchemes", "");
+        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
+
         Authenticator authenticator = new ProxyAuthenticator(user, password);
         Authenticator.setDefault(authenticator);
 
@@ -143,14 +146,12 @@ public abstract class EvervaultService {
         System.setProperty("https.proxyUser", user);
         System.setProperty("https.proxyPassword", password);
         System.setProperty("https.nonProxyHosts", ignoreDomains);
-        System.setProperty("jdk.https.auth.tunneling.disabledSchemes", "");
-
+        
         System.setProperty("http.proxyHost", proxyHost);
         System.setProperty("http.proxyPort", proxyPort);
         System.setProperty("http.proxyUser", user);
         System.setProperty("http.proxyPassword", password);
         System.setProperty("http.nonProxyHosts", ignoreDomains);
-        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
     }
 
     private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
