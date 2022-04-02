@@ -79,11 +79,18 @@ System.setProperty("http.proxyPassword", password);
 
 #### Java 11 Client
 
-When using the new Java 11 client, **you will have to update the client to use the default authenticator and proxy like so**:
+When using the new Java 11 client, you will have to: 
+
+* Add a system property before the SDK is initiased to enable BASIC auth with the proxy.
+* Update HTTP Client to use the default Authenticator (The default is set by the SDK).
 
 ```java
-// When the Evervault Java SDK is initialised with intercept enabled, it's set's the default authenticator and proxy.
-// You just need to inject the authenticator into your builder.
+
+import com.evervault.Evervault;
+import com.evervault.utils.ProxySystemSettings;
+
+System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
+var evervault = new Evervault(apiKey);
 
 HttpClient httpClient = HttpClient.newBuilder()
   .authenticator(Authenicator.getDefault())
