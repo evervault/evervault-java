@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.4'
+implementation 'com.evervault:lib:2.0.5'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.4'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.4</version>
+  <version>2.0.5</version>
 </dependency>
 ```
 
@@ -79,11 +79,18 @@ System.setProperty("http.proxyPassword", password);
 
 #### Java 11 Client
 
-When using the new Java 11 client, **you will have to update the client to use the default authenticator and proxy like so**:
+When using the new Java 11 client, you will have to: 
+
+* Add a system property before the SDK is initiased to enable BASIC auth with the proxy.
+* Update HTTP Client to use the default Authenticator (The default is set by the SDK).
 
 ```java
-// When the Evervault Java SDK is initialised with intercept enabled, it's set's the default authenticator and proxy.
-// You just need to inject the authenticator into your builder.
+
+import com.evervault.Evervault;
+import com.evervault.utils.ProxySystemSettings;
+
+System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
+var evervault = new Evervault(apiKey);
 
 HttpClient httpClient = HttpClient.newBuilder()
   .authenticator(Authenicator.getDefault())
@@ -186,3 +193,8 @@ void encryptAndRun() throws EvervaultException {
 ### 2.0.4
 
 * Fix issue with Java 11 Http Client and proxy
+
+
+### 2.0.5
+
+* Add Value for enabling BASIC auth with the proxy
