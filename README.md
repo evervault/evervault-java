@@ -124,7 +124,7 @@ If you use a different http client to the clients above, you can setup relay int
 
 ### encrypt
 
-**encrypt** will encrypt your data and return an object which is a String in case you passed a literal type like bool, string, int, float, char, byte. 
+**encrypt** will encrypt your data and return an object which is a String in case you passed a literal type like `bool`, `string`, `int`, `float`, `char`, `byte`. 
 
 In case you pass a map<literal, literal> then the key will be preserved and the value will be an encryped string. If value is another map for example, it will follow the sample principle recursively.
 
@@ -139,7 +139,7 @@ run will send the data to your cage to be processed.
 Evervault constructor expects your api key which you can retrieve from evervault website. There are also optional parameters.
 
 ```java
-var Evervault = new Evervault(API_KEY)
+var Evervault = new Evervault("<API_KEY>")
 ```
 
 | Parameter        | Type                         | Description                                                                                                                          |
