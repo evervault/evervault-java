@@ -9,9 +9,9 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
-    private static final String EVERVAULT_API_HOST = "api.evervault.io";
-    private static final String EVERVAULT_RUN_HOST = "run.evervault.io";
-    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.io";
+    private static final String EVERVAULT_API_HOST = "api.evervault.com";
+    private static final String EVERVAULT_RUN_HOST = "run.evervault.com";
+    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.com";
 
     private String evervaultApiHost;
     private String evervaultRunHost;
@@ -110,7 +110,8 @@ public class Evervault extends EvervaultService {
         this.setupCageExecutionProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
-        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, ((BCECPublicKey) this.teamKey).getQ().getEncoded(true));
+        var teamPublicKey = ((BCECPublicKey) this.teamKey).getQ().getEncoded(true);
+        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, teamPublicKey);
 
         this.setupEncryption(encryptForObject);
 
