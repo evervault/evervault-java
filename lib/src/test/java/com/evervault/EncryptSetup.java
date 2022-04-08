@@ -8,11 +8,12 @@ import java.security.spec.ECGenParameterSpec;
 
 public class EncryptSetup {
     private final String ALGORITHM = "EC";
-    private final String STDNAME = "secp256k1";
+    private final String STDNAME = "secp256r1";
     private final String KEYAGREEMENT_ALGORITHM = "ECDH";
 
     public KeyPair keyPair;
     public byte[] sharedKey;
+    public byte[] cageKey;
 
     public EncryptSetup() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
         var provider = new BouncyCastleProvider();

@@ -4,6 +4,7 @@
 package com.evervault;
 
 import com.evervault.contracts.*;
+import com.evervault.exceptions.Asn1EncodingException;
 import com.evervault.exceptions.EvervaultException;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.exceptions.NotImplementedException;
@@ -71,7 +72,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void creatingANewServiceDoesNotThrow() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
+    void creatingANewServiceDoesNotThrow() throws Asn1EncodingException, HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -89,7 +90,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
+    void newKeyMustBeGeneratedIf15MinutesHavePassed() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -123,7 +124,7 @@ class WhenUsingApisEncryptionTests {
     }
 
     @Test
-    void tryingToEncryptNullThrows() throws HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
+    void tryingToEncryptNullThrows() throws Asn1EncodingException, HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";

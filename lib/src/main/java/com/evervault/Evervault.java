@@ -4,12 +4,14 @@ import com.evervault.exceptions.EvervaultException;
 import com.evervault.services.*;
 import com.evervault.utils.EcdhCurve;
 
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
-    private static final String EVERVAULT_API_HOST = "api.evervault.com";
-    private static final String EVERVAULT_RUN_HOST = "run.evervault.com";
-    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.com";
+    private static final String EVERVAULT_API_HOST = "api.evervault.io";
+    private static final String EVERVAULT_RUN_HOST = "run.evervault.io";
+    private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.io";
 
     private String evervaultApiHost;
     private String evervaultRunHost;
@@ -108,8 +110,7 @@ public class Evervault extends EvervaultService {
         this.setupCageExecutionProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
-
-        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey);
+        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, ((BCECPublicKey) this.teamKey).getQ().getEncoded(true));
 
         this.setupEncryption(encryptForObject);
 

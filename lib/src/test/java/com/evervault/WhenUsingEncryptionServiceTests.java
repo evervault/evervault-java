@@ -2,6 +2,7 @@ package com.evervault;
 
 import com.evervault.contracts.DataHeader;
 import com.evervault.contracts.IProvideEncryptedFormat;
+import com.evervault.exceptions.Asn1EncodingException;
 import com.evervault.exceptions.InvalidCipherException;
 import com.evervault.exceptions.NotImplementedException;
 import com.evervault.services.EncryptionService;
@@ -80,13 +81,13 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void generateSharedKeyWithDecodedStringDoesNotThrow() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotImplementedException {
+    void generateSharedKeyWithDecodedStringDoesNotThrow() throws Asn1EncodingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotImplementedException {
         var publicKey = service.getEllipticCurvePublicKeyFrom(KeySample);
         service.generateSharedKeyBasedOn(publicKey);
     }
 
     @Test
-    void generateSharedKeyDoesNotThrow() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
+    void generateSharedKeyDoesNotThrow() throws Asn1EncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
         var provider = new BouncyCastleProvider();
         var keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_TO_MATCH, provider);
         var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
@@ -98,17 +99,17 @@ public final class WhenUsingEncryptionServiceTests {
     }
 
     @Test
-    void encryptStringReturnsOutputOfFormat() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherException {
+    void encryptStringReturnsOutputOfFormat() throws NotImplementedException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherException {
         var setup = new EncryptSetup();
         final String result = "Foo";
 
         when(encryptFormatProvider.format(any(), any(), any(), any())).thenReturn(result);
 
-        assert service.encryptData(DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey).equals(result);
+        assert service.encryptData(DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey, setup.cageKey).equals(result);
     }
 
     @Test
-    void encryptStringProvidesCorrectContent() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherException {
+    void encryptStringProvidesCorrectContent() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherException {
         final String result = "Foo";
 
         var setup = new EncryptSetup();
@@ -119,7 +120,7 @@ public final class WhenUsingEncryptionServiceTests {
 
         when(encryptFormatProvider.format(any(), any(), any(), any())).thenReturn(result);
 
-        service.encryptData(DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey);
+        service.encryptData(DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey, setup.cageKey);
 
         verify(encryptFormatProvider, times(1)).format(dataHeaderTypeCapture.capture(), ivCapture.capture(), publicKeyCapture.capture(), encryptedPayloadCapture.capture());
 

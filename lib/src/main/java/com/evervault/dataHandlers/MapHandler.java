@@ -3,6 +3,7 @@ package com.evervault.dataHandlers;
 import com.evervault.contracts.IProvideEncryptionForObject;
 import com.evervault.contracts.IDataHandler;
 import com.evervault.exceptions.InvalidCipherException;
+import com.evervault.exceptions.NotImplementedException;
 import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class MapHandler implements IDataHandler {
     }
 
     @Override
-    public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
+    public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException, NotImplementedException {
         var map = (Map)data;
 
         for (var item :

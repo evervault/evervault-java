@@ -10,4 +10,8 @@ public enum EcdhCurve {
         this.curveId = curveId;
     }
 
+    public boolean equalValue(String curveName) {
+        return this.curveId.equals(curveName);
+    }
+
 }
