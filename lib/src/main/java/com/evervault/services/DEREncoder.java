@@ -1,7 +1,5 @@
 package com.evervault.services;
 
-import java.util.HexFormat;
-
 import com.evervault.exceptions.Asn1EncodingException;
 import com.evervault.models.Secp256r1Constants;
 import com.evervault.utils.HexHandler;
@@ -46,6 +44,6 @@ public class DEREncoder {
             ),
             ASN1.BITSTR(HexHandler.encode(decompressedPublicKey))
         );
-        return HexFormat.of().parseHex(encoded);
+        return HexHandler.decode(encoded);
     }
 }
