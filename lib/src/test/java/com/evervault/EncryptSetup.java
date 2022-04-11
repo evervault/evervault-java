@@ -13,7 +13,7 @@ public class EncryptSetup {
 
     public KeyPair keyPair;
     public byte[] sharedKey;
-    public byte[] cageKey;
+    public PublicKey cageKey;
 
     public EncryptSetup() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
         var provider = new BouncyCastleProvider();
@@ -27,5 +27,6 @@ public class EncryptSetup {
         agreement.doPhase(keyPair.getPublic(), true);
 
         sharedKey = agreement.generateSecret();
+        cageKey = keyPair.getPublic();
     }
 }

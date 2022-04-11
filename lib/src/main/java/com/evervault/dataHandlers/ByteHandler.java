@@ -1,5 +1,7 @@
 package com.evervault.dataHandlers;
 
+import java.security.PublicKey;
+
 import com.evervault.contracts.DataHeader;
 import com.evervault.contracts.IProvideEncryptionForObject;
 import com.evervault.contracts.IDataHandler;
@@ -12,9 +14,9 @@ public class ByteHandler implements IDataHandler {
     private final IProvideEncryption encryptionProvider;
     private final byte[] generatedEcdhKey;
     private final byte[] sharedKey;
-    private byte[] teamPublicKey;
+    private PublicKey teamPublicKey;
  
-    public ByteHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, byte[] teamPublicKey) {
+    public ByteHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, PublicKey teamPublicKey) {
         this.encryptionProvider = encryptionProvider;
         this.generatedEcdhKey = generatedEcdhKey;
         this.sharedKey = sharedKey;

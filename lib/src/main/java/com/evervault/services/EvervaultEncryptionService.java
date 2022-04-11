@@ -1,11 +1,13 @@
 package com.evervault.services;
 
+import java.security.PublicKey;
+
 import com.evervault.contracts.IDataHandler;
 import com.evervault.contracts.IProvideEncryption;
 import com.evervault.dataHandlers.*;
 
 public class EvervaultEncryptionService extends EncryptObjectService {
-    public EvervaultEncryptionService(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, byte[] teamPublicKey) {
+    public EvervaultEncryptionService(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, PublicKey teamPublicKey) {
         super(new IDataHandler[] {
                 new StringDataHandler(encryptionProvider, generatedEcdhKey, sharedKey, teamPublicKey),
                 new FloatHandler(encryptionProvider, generatedEcdhKey, sharedKey, teamPublicKey),

@@ -9,6 +9,7 @@ import com.evervault.exceptions.NotImplementedException;
 import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 
 import java.nio.ByteBuffer;
+import java.security.PublicKey;
 
 public class FloatHandler implements IDataHandler {
     private static final int BUFFER_SIZE = 4;
@@ -16,9 +17,9 @@ public class FloatHandler implements IDataHandler {
     private final IProvideEncryption encryptionProvider;
     private final byte[] generatedEcdhKey;
     private final byte[] sharedKey;
-    private byte[] teamPublicKey;
+    private PublicKey teamPublicKey;
 
-    public FloatHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, byte[] teamPublicKey) {
+    public FloatHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, PublicKey teamPublicKey) {
         this.encryptionProvider = encryptionProvider;
         this.generatedEcdhKey = generatedEcdhKey;
         this.sharedKey = sharedKey;

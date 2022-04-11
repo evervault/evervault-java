@@ -4,8 +4,6 @@ import com.evervault.exceptions.EvervaultException;
 import com.evervault.services.*;
 import com.evervault.utils.EcdhCurve;
 
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-
 import java.util.Objects;
 
 public class Evervault extends EvervaultService {
@@ -110,8 +108,7 @@ public class Evervault extends EvervaultService {
         this.setupCageExecutionProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
-        var teamPublicKey = ((BCECPublicKey) this.teamKey).getQ().getEncoded(true);
-        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, teamPublicKey);
+        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);
 
         this.setupEncryption(encryptForObject);
 

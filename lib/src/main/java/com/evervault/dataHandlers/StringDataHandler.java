@@ -8,14 +8,15 @@ import com.evervault.exceptions.InvalidCipherException;
 import com.evervault.exceptions.NotImplementedException;
 
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 
 public class StringDataHandler implements IDataHandler {
     private final IProvideEncryption encryptionProvider;
     private final byte[] generatedEcdhKey;
     private final byte[] sharedKey;
-    private byte[] teamPublicKey;
+    private PublicKey teamPublicKey;
 
-    public StringDataHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, byte[] teamPublicKey)
+    public StringDataHandler(IProvideEncryption encryptionProvider, byte[] generatedEcdhKey, byte[] sharedKey, PublicKey teamPublicKey)
     {
         this.encryptionProvider = encryptionProvider;
         this.generatedEcdhKey = generatedEcdhKey;

@@ -98,8 +98,9 @@ public abstract class EncryptionService extends EncryptionServiceCommon implemen
     }
 
     @Override
-    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey, byte[] teamPublicKey) throws InvalidCipherException, NotImplementedException {
+    public String encryptData(DataHeader header, byte[] generatedEcdhKey, byte[] data, byte[] sharedKey, PublicKey teamPublicKey) throws InvalidCipherException, NotImplementedException {
         var isNistCurve = this.isNistCurve(getCurveName());
+        var compressedTeamPublicKey = ((BCECPublicKey) teamPublicKey).getQ().getEncoded(true);
         var random = new SecureRandom();
         var iv = new byte[12];
         random.nextBytes(iv);
@@ -109,7 +110,7 @@ public abstract class EncryptionService extends EncryptionServiceCommon implemen
         if (!isNistCurve) {
             parameters = new AEADParameters(new KeyParameter(sharedKey), DEFAULT_MAC_BIT_SIZE, iv);
         } else {
-            parameters = new AEADParameters(new KeyParameter(sharedKey), DEFAULT_MAC_BIT_SIZE, iv, teamPublicKey);
+            parameters = new AEADParameters(new KeyParameter(sharedKey), DEFAULT_MAC_BIT_SIZE, iv, compressedTeamPublicKey);
         }
         cipher.init(true, parameters);
 

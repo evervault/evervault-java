@@ -102,7 +102,7 @@ public final class WhenUsingEncryptionServiceTests {
     void encryptStringReturnsOutputOfFormat() throws NotImplementedException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherException {
         var setup = new EncryptSetup();
         final String result = "Foo";
-
+        System.out.println(setup.cageKey);
         when(encryptFormatProvider.format(any(), any(), any(), any())).thenReturn(result);
 
         assert service.encryptData(DataHeader.String, setup.keyPair.getPublic().getEncoded(), "SomeData".getBytes(StandardCharsets.UTF_8), setup.sharedKey, setup.cageKey).equals(result);
