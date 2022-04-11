@@ -7,7 +7,7 @@ import com.evervault.contracts.IProvideEncryptedFormat;
 import java.nio.charset.StandardCharsets;
 
 public class R1StdEncryptionOutputFormat implements IProvideEncryptedFormat {
-    private static final String EVERVAULT_VERSION = "ORK";
+    private static final String EVERVAULT_VERSION = "NOC";
     private static final String ENCRYPTED_FIELD_FORMAT = "ev:%s%s:%s:%s:%s:$";
     private final String evervaultVersionToUse;
 

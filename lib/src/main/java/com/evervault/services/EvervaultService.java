@@ -100,7 +100,7 @@ public abstract class EvervaultService {
 
         try {
             setupKeys(ecdhCurve);
-        } catch (HttpFailureException | InterruptedException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | InvalidKeyException | NotPossibleToHandleDataTypeException | MaxRetryReachedException | NoSuchProviderException | NotImplementedException | IOException e) {
+        } catch (HttpFailureException | InterruptedException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | InvalidKeyException | NotPossibleToHandleDataTypeException | MaxRetryReachedException | NoSuchProviderException | NotImplementedException | IOException | Asn1EncodingException e) {
             throw new EvervaultException(e);
         }
     }
@@ -113,7 +113,7 @@ public abstract class EvervaultService {
         this.encryptionProvider = encryptionProvider;
     }
 
-    private void setupKeys(EcdhCurve ecdhCurve) throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException {
+    private void setupKeys(EcdhCurve ecdhCurve) throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException, Asn1EncodingException {
         var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultApiUrl()));
 
         teamUuid = teamEcdhKey.teamUuid;
@@ -154,7 +154,7 @@ public abstract class EvervaultService {
         System.setProperty("http.nonProxyHosts", ignoreDomains);
     }
 
-    private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
+    private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, Asn1EncodingException {
         currentSharedKeyTimestamp = timeProvider.GetNow();
         var generated = sharedKeyProvider.generateSharedKeyBasedOn(teamKey);
 
@@ -171,7 +171,7 @@ public abstract class EvervaultService {
 
         try {
             return this.encryptionProvider.encrypt(data);
-        } catch (NotPossibleToHandleDataTypeException | IOException | InvalidCipherException e) {
+        } catch (NotPossibleToHandleDataTypeException | IOException | InvalidCipherException | NotImplementedException e) {
             throw new EvervaultException(e);
         }
     }
@@ -180,7 +180,7 @@ public abstract class EvervaultService {
         if (Duration.between(currentSharedKeyTimestamp, timeProvider.GetNow()).toMinutes() >= NEW_KEY_TIMESTAMP) {
             try {
                 generateSharedKey();
-            } catch (InvalidAlgorithmParameterException | InvalidKeyException | NoSuchAlgorithmException | NotImplementedException e) {
+            } catch (InvalidAlgorithmParameterException | InvalidKeyException | NoSuchAlgorithmException | NotImplementedException | Asn1EncodingException e) {
                 throw new EvervaultException(e);
             }
         }

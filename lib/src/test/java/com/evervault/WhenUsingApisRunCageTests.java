@@ -69,7 +69,7 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void callingToRunCageReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException, EvervaultException {
+    void callingToRunCageReturnsTheHttpContent() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -96,7 +96,7 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
+    void nullParameterThrows() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
@@ -123,7 +123,7 @@ public class WhenUsingApisRunCageTests {
     }
 
     @Test
-    void providerNotSetThrows() throws HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
+    void providerNotSetThrows() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
         var cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";

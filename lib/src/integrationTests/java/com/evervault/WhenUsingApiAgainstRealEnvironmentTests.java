@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String ENV_API_KEY = "ENVIRONMENT_API_KEY";
-    private static final String DEFAULT_CAGE_NAME = "java-sdk-integration-tests";
+    private static final String DEFAULT_CAGE_NAME = "java-integration-test-cage";
     private static final String EV_CAGE_ENV_KEY = "EV_CAGE_NAME";
     private String cageName;
 
@@ -83,8 +83,8 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     @Test
     void encryptAndRun() throws EvervaultException {
         var evervault = new Evervault(getEnvironmentApiKey());
-
-        var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
+        var data = Bar.createFooStructure(evervault);
+        var cageResult = evervault.run(cageName, data, false, null);
 
         assert !cageResult.runId.isEmpty();
     }
@@ -92,8 +92,8 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     @Test
     void encryptAndRunR1Curve() throws EvervaultException {
         var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
-
-        var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
+        var data = Bar.createFooStructure(evervault);
+        var cageResult = evervault.run(cageName, data, false, null);
 
         assert !cageResult.runId.isEmpty();
     }
