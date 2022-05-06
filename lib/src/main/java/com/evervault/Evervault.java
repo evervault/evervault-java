@@ -111,6 +111,7 @@ public class Evervault extends EvervaultService {
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);
 
         this.setupEncryption(encryptForObject);
+        this.setupCredentialsProvider(apiKey);
 
         if (intercept) { this.setupIntercept(apiKey); }
     }
