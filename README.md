@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.6'
+implementation 'com.evervault:lib:2.0.7'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.6'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.6</version>
+  <version>2.0.7</version>
 </dependency>
 ```
 
@@ -64,17 +64,23 @@ curl https://ca.evervault.com --output evervault-ca.cert
 sudo keytool -import -alias evervault-ca -file evervault-ca.cert -keystore <path/to/jdk/cacerts>
 ```
 
-#### Apache HTTP Client
+#### Apache Closeable HTTP Client
 
-Apache HTTP Client uses two extra JVM settings to authenticate with the proxy. When the Evervault Java SDK is initialised with intercept enabled, it sets these settings.
+The Apache Closeable HTTP Client requires the proxy and credentials to be explicitly set. When initialising your http client, you will need to get the CredentialsProvider from the Evervault SDK and the host from the Evervault ProxySystemSettings class.
 
 ```java
-// Note This is done automatically when you setup the Evervault SDK
+// Import ProxySettings for setting proxy host
+import com.evervault.utils.ProxySystemSettings;
 
-System.setProperty("https.proxyUser", user);
-System.setProperty("https.proxyPassword", password);
-System.setProperty("http.proxyUser", user);
-System.setProperty("http.proxyPassword", password);
+// Initialise Evervault SDK
+var evervault = new Evervault(getEnvironmentApiKey())
+        
+// Build httpClient with proxy
+CloseableHttpClient httpClient = HttpClientBuilder
+    .create()
+    .setProxy(ProxySystemSettings.PROXY_HOST)
+    .setDefaultCredentialsProvider(evervault.getEvervaultProxyCredentials())
+    .build();
 ```
 
 #### Java 11 Client
@@ -204,3 +210,7 @@ void encryptAndRun() throws EvervaultException {
 * Add KDF when deriving shared secret
 
 * Add AAD when encrypting with Secp256r1 curve
+
+### 2.0.7
+
+* Add helper methods for initialising Apache `CloseableHttpClient` with proxy.

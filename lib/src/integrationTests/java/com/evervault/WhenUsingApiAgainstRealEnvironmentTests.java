@@ -2,6 +2,17 @@ package com.evervault;
 
 import com.evervault.exceptions.*;
 import com.evervault.utils.EcdhCurve;
+import com.evervault.utils.ProxySystemSettings;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
@@ -9,12 +20,17 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.junit.jupiter.api.Test;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
@@ -34,6 +50,36 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
             cageName  = DEFAULT_CAGE_NAME;
         }
     }
+
+    public SSLContext getSSLContextTrustAny() throws KeyManagementException, NoSuchAlgorithmException {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new SecureRandom());
+        return sslContext;
+    };
+
+    public String getPayloadWithEncryptedString(Object encryptedString) {
+        String msg = "  \"payment\": {\n" +
+                "    \"type\": \"visa\",\n" +
+                "    \"cardholderName\": \"Claude Shannon\",\n" +
+                "    \"cardNumber\": \""+ encryptedString + "\",\n" +
+                "    \"expYear\": \"23\"\n" +
+                "  },";
+        return msg;
+    };
 
     public String getEnvironmentApiKey() {
         return System.getenv(ENV_API_KEY);
@@ -55,7 +101,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     @Test
     void encryptSomeDataCorrectly() throws EvervaultException {
         final String someDataToEncrypt = "Foo";
-
+        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
         var evervault = new Evervault(getEnvironmentApiKey());
 
         var result = (String) evervault.encrypt(someDataToEncrypt);
@@ -82,6 +128,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRun() throws EvervaultException {
+        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
         var evervault = new Evervault(getEnvironmentApiKey());
         var data = Bar.createFooStructure(evervault);
         var cageResult = evervault.run(cageName, data, false, null);
@@ -91,6 +138,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRunR1Curve() throws EvervaultException {
+        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
         var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
         var data = Bar.createFooStructure(evervault);
         var cageResult = evervault.run(cageName, data, false, null);
@@ -113,6 +161,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void decryptDataWorksAsExpected() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException {
+        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
         var evervault = new OwnEvervault(getEnvironmentApiKey());
 
         var bar = Bar.createFooStructure(evervault);
@@ -139,5 +188,71 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
         var result = new String(output, StandardCharsets.US_ASCII);
         assert result.equals(Bar.NAME_CONTENT);
+    }
+
+    @Test
+    void interceptWorksThroughJava11HttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
+
+        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
+        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
+
+        var encryptedString = evervault.encrypt("Secret info");
+
+        HttpClient httpClient = HttpClient.newBuilder()
+                .sslContext(getSSLContextTrustAny())
+                .authenticator(Authenticator.getDefault())
+                .build();
+
+        String uri = "https://enssc1aqsjv0g.x.pipedream.net/java-11";
+        String msg = getPayloadWithEncryptedString(encryptedString);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .POST(HttpRequest.BodyPublishers.ofString(msg))
+                .build();
+
+        HttpResponse<?> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+
+        System.out.println(response.headers());
+        assert response.headers().map().get("x-evervault-ctx") != null;
+        assert response.statusCode() == 200;
+    }
+
+    @Test
+    void interceptWorksThroughApacheHttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
+
+        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
+        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
+
+        var encryptedString = evervault.encrypt("Secret info");
+
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(60 * 1000)
+                .setConnectionRequestTimeout(60 * 1000)
+                .setSocketTimeout(60 * 1000).build();
+
+        CloseableHttpClient httpClient = HttpClientBuilder
+                .create()
+                .setSSLContext(getSSLContextTrustAny())
+                .setDefaultRequestConfig(config)
+                .setProxy(ProxySystemSettings.PROXY_HOST)
+                .setDefaultCredentialsProvider(evervault.getEvervaultProxyCredentials())
+                .build();
+
+        String uri = "https://enssc1aqsjv0g.x.pipedream.net/apache-client";
+        String msg = getPayloadWithEncryptedString(encryptedString);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .POST(HttpRequest.BodyPublishers.ofString(msg))
+                .build();
+
+        org.apache.http.client.methods.HttpPost httpPost = new HttpPost(uri);
+        httpPost.setEntity(new StringEntity(msg));
+        CloseableHttpResponse response = httpClient.execute(httpPost);
+
+        httpClient.close();
+        Header[] headers = response.getHeaders("x-evervault-ctx");
+        assert headers.length > 0;
     }
 }

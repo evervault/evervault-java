@@ -7,6 +7,9 @@ import com.evervault.contracts.*;
 import com.evervault.exceptions.*;
 import com.evervault.models.CageRunResult;
 import com.evervault.utils.EcdhCurve;
+import com.evervault.utils.ProxyCredentialsProvider;
+import org.apache.http.client.CredentialsProvider;
+
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -21,6 +24,7 @@ public abstract class EvervaultService {
     protected IProvideEncryptionForObject encryptionProvider;
     protected IProvideCageExecution cageExecutionProvider;
     protected IProvideCircuitBreaker circuitBreakerProvider;
+    protected CredentialsProvider credentialsProvider;
 
     protected final static int NEW_KEY_TIMESTAMP = 15;
     protected final static String RELAY_PORT = "8443";
@@ -152,6 +156,15 @@ public abstract class EvervaultService {
         System.setProperty("http.proxyUser", user);
         System.setProperty("http.proxyPassword", password);
         System.setProperty("http.nonProxyHosts", ignoreDomains);
+    }
+
+    protected void setupCredentialsProvider(String apiKey) {
+        this.credentialsProvider = ProxyCredentialsProvider
+                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), Integer.valueOf(RELAY_PORT), teamUuid, apiKey);
+    }
+
+    public CredentialsProvider getEvervaultProxyCredentials() {
+        return this.credentialsProvider;
     }
 
     private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, Asn1EncodingException {
