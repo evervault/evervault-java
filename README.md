@@ -73,7 +73,7 @@ The Apache Closeable HTTP Client requires the proxy and credentials to be explic
 import com.evervault.utils.ProxySystemSettings;
 
 // Initialise Evervault SDK
-var evervault = new Evervault(getEnvironmentApiKey()
+var evervault = new Evervault(getEnvironmentApiKey())
         
 // Build httpClient with proxy
 CloseableHttpClient httpClient = HttpClientBuilder
