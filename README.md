@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.6'
+implementation 'com.evervault:lib:2.0.7'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.6'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.6</version>
+  <version>2.0.7</version>
 </dependency>
 ```
 
