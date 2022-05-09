@@ -231,13 +231,11 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
                 .setConnectionRequestTimeout(60 * 1000)
                 .setSocketTimeout(60 * 1000).build();
 
-        HttpHost proxy = new HttpHost("strict.relay.evervault.io", 8443);
-
         CloseableHttpClient httpClient = HttpClientBuilder
                 .create()
                 .setSSLContext(getSSLContextTrustAny())
                 .setDefaultRequestConfig(config)
-                .setProxy(proxy)
+                .setProxy(ProxySystemSettings.PROXY_HOST)
                 .setDefaultCredentialsProvider(evervault.getEvervaultProxyCredentials())
                 .build();
 
@@ -253,6 +251,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
         httpPost.setEntity(new StringEntity(msg));
         CloseableHttpResponse response = httpClient.execute(httpPost);
 
+        httpClient.close();
         Header[] headers = response.getHeaders("x-evervault-ctx");
         assert headers.length > 0;
     }
