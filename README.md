@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.7'
+implementation 'com.evervault:lib:2.0.8'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.7'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.7</version>
+  <version>2.0.8</version>
 </dependency>
 ```
 
@@ -214,3 +214,7 @@ void encryptAndRun() throws EvervaultException {
 ### 2.0.7
 
 * Add helper methods for initialising Apache `CloseableHttpClient` with proxy.
+
+### 2.0.8
+
+* Bump Apache version to 4.5.13 to handle `CVE-2020-13956`
