@@ -9,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 
 public class ProxyCredentialsProvider {
 
-    public static CredentialsProvider getEvervaultCredentialsProvider(String proxyHost, Integer proxyPort, String teamUuid, String teamApiKey) {
-        AuthScope authScope= new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
+    public static CredentialsProvider getEvervaultCredentialsProvider(String proxyHost, String teamUuid, String teamApiKey) {
+        AuthScope authScope= new AuthScope(proxyHost, AuthScope.ANY_PORT);
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(teamUuid, teamApiKey);
 
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();

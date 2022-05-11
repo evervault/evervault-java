@@ -151,8 +151,6 @@ public abstract class EvervaultService {
         System.setProperty("https.proxyPassword", password);
         System.setProperty("https.nonProxyHosts", ignoreDomains);
         
-        System.setProperty("http.proxyHost", proxyHost);
-        System.setProperty("http.proxyPort", proxyPort);
         System.setProperty("http.proxyUser", user);
         System.setProperty("http.proxyPassword", password);
         System.setProperty("http.nonProxyHosts", ignoreDomains);
@@ -160,7 +158,7 @@ public abstract class EvervaultService {
 
     protected void setupCredentialsProvider(String apiKey) {
         this.credentialsProvider = ProxyCredentialsProvider
-                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), Integer.valueOf(RELAY_PORT), teamUuid, apiKey);
+                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), teamUuid, apiKey);
     }
 
     public CredentialsProvider getEvervaultProxyCredentials() {
