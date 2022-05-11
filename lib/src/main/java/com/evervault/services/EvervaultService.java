@@ -28,6 +28,7 @@ public abstract class EvervaultService {
 
     protected final static int NEW_KEY_TIMESTAMP = 15;
     protected final static String RELAY_PORT = "8443";
+    protected final static String APACHE_RELAY_PORT = "443";
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
     protected Instant currentSharedKeyTimestamp;
@@ -156,11 +157,14 @@ public abstract class EvervaultService {
         System.setProperty("http.nonProxyHosts", ignoreDomains);
     }
 
+    //Used for Apache Http Clients
     protected void setupCredentialsProvider(String apiKey) {
         this.credentialsProvider = ProxyCredentialsProvider
-                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), teamUuid, apiKey);
+                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), Integer.valueOf(APACHE_RELAY_PORT), teamUuid, apiKey);
     }
 
+    //Returns a CredentialsProvider to authenticate an
+    // Apache HttpClient with the Evervault Proxy.
     public CredentialsProvider getEvervaultProxyCredentials() {
         return this.credentialsProvider;
     }
