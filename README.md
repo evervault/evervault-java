@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.0.8'
+implementation 'com.evervault:lib:2.1.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.0.8'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.0.8</version>
+  <version>2.1.0</version>
 </dependency>
 ```
 
@@ -124,7 +124,7 @@ If you use a different http client to the clients above, you can setup relay int
 | Setting   | Value                                                                   |
 |-----------|-------------------------------------------------------------------------|
 | host      | strict.relay.evervault.com                                              |
-| port      | 8443                                                                    |
+| port      | 443                                                                     |
 | user      | Your Evervault Team's UUID (Can be found in the Evervault Dashboard)    |
 | password  | Your Evervault Team's API_KEY (Can be found in the Evervault Dashboard) |
 
@@ -218,3 +218,9 @@ void encryptAndRun() throws EvervaultException {
 ### 2.0.8
 
 * Bump Apache version to 4.5.13 to handle `CVE-2020-13956`
+
+### 2.1.0
+
+* Make Apache Clients use port 443 for Evervault Proxy.
+
+* Update Guava Version to latest to resolve `CVE-2018-10237`

@@ -17,5 +17,6 @@ public class ProxySystemSettings {
         return strictHost;
     };
 
-    public static HttpHost PROXY_HOST = new HttpHost(getStrictHost(), 8443);
+    //Apache Client supports HTTPS proxy so go through 443
+    public static HttpHost PROXY_HOST = new HttpHost(getStrictHost(), 443, "https");
 }
