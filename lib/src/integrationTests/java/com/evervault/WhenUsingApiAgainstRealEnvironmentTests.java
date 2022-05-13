@@ -253,7 +253,6 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
         httpPost.setEntity(new StringEntity(msg));
         CloseableHttpResponse response = httpClient.execute(httpPost);
 
-        System.out.println(response);
         Header[] headers = response.getHeaders("x-evervault-ctx");
         assert headers.length == 0;
 
@@ -261,7 +260,6 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
         httpPost2.setEntity(new StringEntity(msg));
         CloseableHttpResponse response2 = httpClient.execute(httpPost2);
 
-        System.out.println(response2);
         Header[] headers2 = response2.getHeaders("x-evervault-ctx");
         assert headers2.length > 0;
 
