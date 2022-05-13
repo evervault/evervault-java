@@ -119,11 +119,11 @@ var Evervault = new Evervault("<API_KEY>")
 ```
 
 | Parameter        | Type                         | Description                                                                                                                          |
-| ---------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| ---------------- | ---------------------------- |--------------------------------------------------------------------------------------------------------------------------------------|
 | `apiKey`         | `String`                     | The API key of your Evervault Team                                                                                                   |
 | `curve`          | `Evervault.EcdhCurve`        | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more. |
 | `intercept`      | `Boolean`                    | Route outbound requests through Evervault to automatically decrypt encrypted fields.                                                 |
-| `ignoreDomains`  | `String[]`                   | An array of hostnames which will not be routed through Evervault for encryption. eg [ "api.example.com", "support.example.com" ]        |
+| `ignoreDomains`  | `String[]`                   | An array of hostnames which will not be routed through Evervault for decryption. eg [ "api.example.com", "support.example.com" ]     |
 
 
 ### Example
