@@ -8,14 +8,15 @@ import com.evervault.exceptions.*;
 import com.evervault.models.CageRunResult;
 import com.evervault.utils.EcdhCurve;
 import com.evervault.utils.ProxyCredentialsProvider;
+import com.evervault.utils.ProxyRoutePlanner;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.time.Instant;
-import java.net.Authenticator;
 
 public abstract class EvervaultService {
     protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
@@ -26,9 +27,10 @@ public abstract class EvervaultService {
     protected IProvideCircuitBreaker circuitBreakerProvider;
     protected CredentialsProvider credentialsProvider;
 
+    protected HttpRoutePlanner httpRoutePlanner;
+
     protected final static int NEW_KEY_TIMESTAMP = 15;
-    protected final static String RELAY_PORT = "8443";
-    protected final static String APACHE_RELAY_PORT = "443";
+    protected final static String RELAY_PORT = "443";
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
     protected Instant currentSharedKeyTimestamp;
@@ -138,13 +140,13 @@ public abstract class EvervaultService {
         String password = apiKey;
         String proxyHost = getEvervaultRelayHost();
         String proxyPort = RELAY_PORT;
-        String ignoreDomains = String.join("|", getEvervaultIgnoreDomains());
+
+        String[] evervaultIgnoreDomains = getEvervaultIgnoreDomains();
+        this.setupHttpRoutePlanner(evervaultIgnoreDomains);
+        String ignoreDomains = String.join("|", evervaultIgnoreDomains);
 
         System.setProperty("jdk.https.auth.tunneling.disabledSchemes", "");
         System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
-
-        Authenticator authenticator = new ProxyAuthenticator(user, password);
-        Authenticator.setDefault(authenticator);
 
         System.setProperty("https.proxyHost", proxyHost);
         System.setProperty("https.proxyPort", proxyPort);
@@ -160,7 +162,7 @@ public abstract class EvervaultService {
     //Used for Apache Http Clients
     protected void setupCredentialsProvider(String apiKey) {
         this.credentialsProvider = ProxyCredentialsProvider
-                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), Integer.valueOf(APACHE_RELAY_PORT), teamUuid, apiKey);
+                .getEvervaultCredentialsProvider(getEvervaultRelayHost(), Integer.valueOf(RELAY_PORT), teamUuid, apiKey);
     }
 
     //Returns a CredentialsProvider to authenticate an
@@ -168,6 +170,13 @@ public abstract class EvervaultService {
     public CredentialsProvider getEvervaultProxyCredentials() {
         return this.credentialsProvider;
     }
+
+    protected void setupHttpRoutePlanner(String[] ignoreDomains) {
+        this.httpRoutePlanner = ProxyRoutePlanner
+                .getEvervaultRoutePlanner(ignoreDomains);
+    }
+
+    public HttpRoutePlanner getEvervaultHttpRoutePlanner() { return this.httpRoutePlanner; }
 
     private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, Asn1EncodingException {
         currentSharedKeyTimestamp = timeProvider.GetNow();
