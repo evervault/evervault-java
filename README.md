@@ -51,7 +51,7 @@ The Evervault Java SDK exposes a constructor and two functions:
 
 ### Relay Interception
 
-The Evervault Java SDK can automatically route all outbound HTTPS requests through Relay for decryption. This can be done by setting up a proxy to Evervault on your HTTP client.
+The Evervault Java SDK can be used to route all outbound HTTPS requests through Relay for decryption. This can be done by setting up a proxy to Evervault on your HTTP client.
 
 To disable this behaviour, set `intercept` to `false` in the initialization options. For the most common Java HTTP Clients, here is how intercept can be set up:
 
@@ -83,43 +83,11 @@ CloseableHttpClient httpClient = HttpClientBuilder
     .build();
 ```
 
-#### Java 11 Client
-
-When using the new Java 11 client, you will have to: 
-
-* Add a system property before the SDK is initiased to enable BASIC auth with the proxy.
-* Update HTTP Client to use the default Authenticator (The default is set by the SDK).
-
-```java
-
-import com.evervault.Evervault;
-import com.evervault.utils.ProxySystemSettings;
-
-System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
-var evervault = new Evervault(apiKey);
-
-HttpClient httpClient = HttpClient.newBuilder()
-  .authenticator(Authenicator.getDefault())
-  ...
-  .build();
-```
-
-#### HTTPUrlConnection API
-
-When using the original HTTPUrlConnection API, you can use intercept out of the box. When you initialize the evervault Java SDK with intercept enabled (enabled by default). It sets the JVM properties for sending a request through a proxy.
-
-```java
-// Note This is done automatically when you setup the Evervault SDK
-
-System.setProperty("http.proxyHost", proxyHost);
-System.setProperty("http.proxyPort", proxyPort);
-System.setProperty("https.proxyHost", proxyHost);
-System.setProperty("https.proxyPort", proxyPort);
-```
+*Note: We currently only support CONNECT-over-TLS in order to avoid transmitting credentials in plaintext. The Apache Http Client does support this. The core Java Http Clients do NOT currently support this.*
 
 ### Manual Proxy
 
-If you use a different http client to the clients above, you can setup relay interception by setting the http client to proxy requests through relay with these details:
+If you use a different http client to the Apache HTTPClient above, and it supports `CONNECT-over-TLS`, you can set up relay interception by setting the http client to proxy requests through relay with these details:
 
 | Setting   | Value                                                                   |
 |-----------|-------------------------------------------------------------------------|
@@ -132,7 +100,7 @@ If you use a different http client to the clients above, you can setup relay int
 
 **encrypt** will encrypt your data and return an object which is a String in case you passed a literal type like `bool`, `string`, `int`, `float`, `char`, `byte`. 
 
-In case you pass a map<literal, literal> then the key will be preserved and the value will be an encryped string. If value is another map for example, it will follow the sample principle recursively.
+In case you pass a map<literal, literal> then the key will be preserved and the value will be an encrypted string. If value is another map for example, it will follow the sample principle recursively.
 
 In case you pass a vector with literals the return will be vector with encrypted strings. 
 

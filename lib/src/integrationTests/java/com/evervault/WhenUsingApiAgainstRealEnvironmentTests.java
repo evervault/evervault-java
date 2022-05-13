@@ -191,34 +191,6 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     @Test
-    void interceptWorksThroughJava11HttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
-
-        System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
-        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
-
-        var encryptedString = evervault.encrypt("Secret info");
-
-        HttpClient httpClient = HttpClient.newBuilder()
-                .sslContext(getSSLContextTrustAny())
-                .authenticator(Authenticator.getDefault())
-                .build();
-
-        String uri = "https://enssc1aqsjv0g.x.pipedream.net/java-11";
-        String msg = getPayloadWithEncryptedString(encryptedString);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(uri))
-                .POST(HttpRequest.BodyPublishers.ofString(msg))
-                .build();
-
-        HttpResponse<?> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-
-        System.out.println(response.headers());
-        assert response.headers().map().get("x-evervault-ctx") != null;
-        assert response.statusCode() == 200;
-    }
-
-    @Test
     void interceptWorksThroughApacheHttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
 
         System.setProperty(ProxySystemSettings.PROXY_DISABLED_SCHEMES_KEY, ProxySystemSettings.PROXY_DISABLED_SCHEMES_VALUE);
