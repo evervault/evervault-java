@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.1.0'
+implementation 'com.evervault:lib:2.1.1'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.1.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
 </dependency>
 ```
 
@@ -66,7 +66,8 @@ sudo keytool -import -alias evervault-ca -file evervault-ca.cert -keystore <path
 
 #### Apache Closeable HTTP Client
 
-The Apache Closeable HTTP Client requires the proxy and credentials to be explicitly set. When initialising your http client, you will need to get the CredentialsProvider from the Evervault SDK and the host from the Evervault ProxySystemSettings class.
+The Apache Closeable HTTP Client requires the proxy and credentials to be explicitly set. When initialising your http client, you will need to get the CredentialsProvider from the Evervault SDK and the host from the Evervault ProxySystemSettings class. 
+If you set ignoreDomains when initialising the SDK, you will need to add the Evervault HttpRoutePlanner to the builder.
 
 ```java
 // Import ProxySettings for setting proxy host
@@ -80,6 +81,7 @@ CloseableHttpClient httpClient = HttpClientBuilder
     .create()
     .setProxy(ProxySystemSettings.PROXY_HOST)
     .setDefaultCredentialsProvider(evervault.getEvervaultProxyCredentials())
+    .setRoutePlanner(evervault.getEvervaultHttpRoutePlanner())  //This route planner has the ignoreDomains array loaded into it.        
     .build();
 ```
 
@@ -144,6 +146,7 @@ void encryptAndRun() throws EvervaultException {
 
     var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
 }
+
 ```
 
 ### Changelog
@@ -192,3 +195,9 @@ void encryptAndRun() throws EvervaultException {
 * Make Apache Clients use port 443 for Evervault Proxy.
 
 * Update Guava Version to latest to resolve `CVE-2018-10237`
+
+### 2.1.1
+
+* Remove Core Java Clients. 
+
+* Add Apache Route Planner for ignore domains.
