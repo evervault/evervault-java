@@ -15,6 +15,7 @@ public class Evervault extends EvervaultService {
     private String evervaultRunHost;
     private String evervaultRelayHost;
     private String[] evervaultIgnoreDomains;
+    private String[] evervaultDecryptionDomains;
 
     public String getEvervaultApiHost() { return evervaultApiHost; }
 
@@ -30,6 +31,9 @@ public class Evervault extends EvervaultService {
 
     public String[] getEvervaultIgnoreDomains() {
         return evervaultIgnoreDomains;
+    }
+    public String[] getEvervaultDecryptionDomains() {
+        return evervaultDecryptionDomains;
     }
 
     private void setEvervaultApiHost() {
@@ -70,11 +74,15 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String apiKey) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, true, null);
+        this(apiKey, null, EcdhCurve.SECP256K1);
     }
 
     public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
         this(apiKey, EcdhCurve.SECP256K1, intercept, null);
+    }
+
+    public Evervault(String apiKey, String[] decryptionDomains) throws EvervaultException {
+        this(apiKey, decryptionDomains, EcdhCurve.SECP256K1);
     }
 
     public Evervault(String apiKey, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
@@ -82,7 +90,7 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, ecdhCurve, true, null);
+        this(apiKey, null, ecdhCurve);
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept) throws EvervaultException {
@@ -94,10 +102,24 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
+        this(apiKey, ecdhCurve, intercept, ignoreDomains, null);
+        System.out.println(
+                "The `intercept` and `ignoreDomains` config options in Evervault Node.js SDK are deprecated and slated for removal." +
+                "\nPlease switch to the `decryptionDomains` config option." +
+                "\nMore details: https://docs.evervault.com/reference/nodejs-sdk#evervaultsdk"
+        );
+    }
+
+    public Evervault(String apiKey, String[] decryptionDomains, EcdhCurve ecdhCurve) throws EvervaultException {
+        this(apiKey, ecdhCurve, false, null, decryptionDomains);
+    }
+
+    private Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains, String[] decryptionDomains) throws EvervaultException {
         setEvervaultApiHost();
         setEvervaultRunHost();
         setEvervaultRelayUrl();
         setEvervaultIgnoreDomains(ignoreDomains);
+        this.evervaultDecryptionDomains = decryptionDomains;
 
         var httpHandler = new HttpHandler(apiKey);
         var encryptService = EncryptionServiceFactory.build(ecdhCurve);
@@ -114,5 +136,9 @@ public class Evervault extends EvervaultService {
         this.setupCredentialsProvider(apiKey);
 
         if (intercept) { this.setupIntercept(apiKey); }
+
+        if (decryptionDomains != null && decryptionDomains.length > 0) {
+            this.setupInterceptV2();
+        }
     }
 }

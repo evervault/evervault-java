@@ -63,6 +63,8 @@ public abstract class EvervaultService {
     // Virtual method
     protected String[] getEvervaultIgnoreDomains() { return new String[0]; }
 
+    protected String[] getEvervaultDecryptionDomains() { return new String[0]; }
+
     protected void setupCircuitBreaker(IProvideCircuitBreaker provideCircuitBreaker) {
         if (provideCircuitBreaker == null) {
             throw new NullPointerException(IProvideCircuitBreaker.class.getName());
@@ -159,6 +161,11 @@ public abstract class EvervaultService {
         System.setProperty("http.nonProxyHosts", ignoreDomains);
     }
 
+    protected void setupInterceptV2() {
+        String[] decryptionDomains = getEvervaultDecryptionDomains();
+        this.setupHttpRoutePlannerV2(decryptionDomains);
+    }
+
     //Used for Apache Http Clients
     protected void setupCredentialsProvider(String apiKey) {
         this.credentialsProvider = ProxyCredentialsProvider
@@ -174,6 +181,11 @@ public abstract class EvervaultService {
     protected void setupHttpRoutePlanner(String[] ignoreDomains) {
         this.httpRoutePlanner = ProxyRoutePlanner
                 .getEvervaultRoutePlanner(ignoreDomains);
+    }
+
+    protected void setupHttpRoutePlannerV2(String[] decryptionDomains) {
+        this.httpRoutePlanner = ProxyRoutePlanner
+                .getEvervaultRoutePlannerV2(decryptionDomains);
     }
 
     public HttpRoutePlanner getEvervaultHttpRoutePlanner() { return this.httpRoutePlanner; }

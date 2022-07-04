@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:2.1.1'
+implementation 'com.evervault:lib:3.0.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:2.1.1'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>2.1.1</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
@@ -55,6 +55,7 @@ The Evervault Java SDK can be used to route all outbound HTTPS requests through 
 
 To disable this behaviour, set `intercept` to `false` in the initialization options. For the most common Java HTTP Clients, here is how intercept can be set up:
 
+*Note: We currently only support CONNECT-over-TLS in order to avoid transmitting credentials in plaintext. The Apache Http Client does support this. The core Java Http Clients do NOT currently support this.*
 ### Evervault CA
 To allow outbound interception with Relay the Evervault Root Ca certificate must be added to the JVM keystore.
 ```
@@ -84,8 +85,6 @@ CloseableHttpClient httpClient = HttpClientBuilder
     .setRoutePlanner(evervault.getEvervaultHttpRoutePlanner())  //This route planner has the ignoreDomains array loaded into it.        
     .build();
 ```
-
-*Note: We currently only support CONNECT-over-TLS in order to avoid transmitting credentials in plaintext. The Apache Http Client does support this. The core Java Http Clients do NOT currently support this.*
 
 ### Manual Proxy
 
@@ -201,3 +200,9 @@ void encryptAndRun() throws EvervaultException {
 * Remove Core Java Clients. 
 
 * Add Apache Route Planner for ignore domains.
+
+### 3.0.0
+
+* Added decryptionDomains config option
+
+* Deprecated `ignoreDomains` and `intercept` config options
