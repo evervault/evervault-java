@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.0.0'
+implementation 'com.evervault:lib:3.1.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.0.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.0.0</version>
+  <version>3.1.0</version>
 </dependency>
 ```
 
@@ -51,9 +51,9 @@ The Evervault Java SDK exposes a constructor and two functions:
 
 ### Relay Interception
 
-The Evervault Java SDK can be used to route all outbound HTTPS requests through Relay for decryption. This can be done by setting up a proxy to Evervault on your HTTP client.
+The Evervault Java SDK can be used to route all outbound HTTPS requests through Relay for decryption. This can be done by setting up a proxy to Evervault on your HTTP client and specifying a list of domains to route through the proxy when initializing the SDK.
 
-To disable this behaviour, set `intercept` to `false` in the initialization options. For the most common Java HTTP Clients, here is how intercept can be set up:
+For the most common Java HTTP Clients, here is how intercept can be set up:
 
 *Note: We currently only support CONNECT-over-TLS in order to avoid transmitting credentials in plaintext. The Apache Http Client does support this. The core Java Http Clients do NOT currently support this.*
 ### Evervault CA
@@ -68,7 +68,6 @@ sudo keytool -import -alias evervault-ca -file evervault-ca.cert -keystore <path
 #### Apache Closeable HTTP Client
 
 The Apache Closeable HTTP Client requires the proxy and credentials to be explicitly set. When initialising your http client, you will need to get the CredentialsProvider from the Evervault SDK and the host from the Evervault ProxySystemSettings class. 
-If you set ignoreDomains when initialising the SDK, you will need to add the Evervault HttpRoutePlanner to the builder.
 
 ```java
 // Import ProxySettings for setting proxy host
@@ -117,12 +116,11 @@ Evervault constructor expects your api key which you can retrieve from evervault
 var Evervault = new Evervault("<API_KEY>")
 ```
 
-| Parameter        | Type                         | Description                                                                                                                          |
-| ---------------- | ---------------------------- |--------------------------------------------------------------------------------------------------------------------------------------|
-| `apiKey`         | `String`                     | The API key of your Evervault Team                                                                                                   |
-| `curve`          | `Evervault.EcdhCurve`        | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more. |
-| `intercept`      | `Boolean`                    | Route outbound requests through Evervault to automatically decrypt encrypted fields.                                                 |
-| `ignoreDomains`  | `String[]`                   | An array of hostnames which will not be routed through Evervault for decryption. eg [ "api.example.com", "support.example.com" ]     |
+| Parameter           | Type                         | Description                                                                                                                                                       |
+|---------------------| ---------------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `apiKey`            | `String`                     | The API key of your Evervault Team                                                                                                                                |
+| `curve`             | `Evervault.EcdhCurve`        | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more.                              |
+| `decryptionDomains` | `String[]`                   | An array of hostnames which will  be routed through Evervault for decryption, supports wildcards. eg [ "api.example.com", "support.example.com, "*.example.com" ] |
 
 
 ### Example

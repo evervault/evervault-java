@@ -22,11 +22,11 @@ public class ProxyRoutePlanner {
         });
     }
 
-    public static HttpRoutePlanner getEvervaultRoutePlannerV2(String[] decryptionDomains) {
+    public static HttpRoutePlanner getEvervaultRoutePlannerV2(String[] decryptionDomains, String[] alwaysIgnoreDomains) {
         return buildEvervaultRoutePlanner(new Predicate<String>() {
             @Override
             public boolean test(String hostname) {
-                return Arrays.asList(decryptionDomains).contains(hostname);
+                return Arrays.stream(decryptionDomains).anyMatch(domain -> domain.equals(hostname) || domain.charAt(0) == '*' && hostname.endsWith(domain.substring(1)));
             }
         });
     }
