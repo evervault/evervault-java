@@ -185,7 +185,7 @@ public abstract class EvervaultService {
 
     protected void setupHttpRoutePlannerV2(String[] decryptionDomains) {
         this.httpRoutePlanner = ProxyRoutePlanner
-                .getEvervaultRoutePlannerV2(decryptionDomains);
+                .getEvervaultRoutePlannerV2(decryptionDomains, getEvervaultIgnoreDomains());
     }
 
     public HttpRoutePlanner getEvervaultHttpRoutePlanner() { return this.httpRoutePlanner; }
