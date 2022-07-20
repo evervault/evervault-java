@@ -26,6 +26,8 @@ public class ProxyRoutePlanner {
         return buildEvervaultRoutePlanner(new Predicate<String>() {
             @Override
             public boolean test(String hostname) {
+                if (Arrays.asList(alwaysIgnoreDomains).contains(hostname))
+                    return false;
                 return Arrays.stream(decryptionDomains).anyMatch(domain -> domain.equals(hostname) || domain.charAt(0) == '*' && hostname.endsWith(domain.substring(1)));
             }
         });
