@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.1.0'
+implementation 'com.evervault:lib:3.2.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.1.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.1.0</version>
+  <version>3.2.0</version>
 </dependency>
 ```
 
@@ -48,6 +48,7 @@ The Evervault Java SDK exposes a constructor and two functions:
 
 * `evervault.encrypt()`
 * `evervault.run()`
+* `evervault.createRunToken()`
 
 ### Relay Interception
 
@@ -107,6 +108,10 @@ In case you pass a vector with literals the return will be vector with encrypted
 ### run
 
 run will send the data to your cage to be processed.
+
+### createRunToken
+
+createRunToken will create a single use, time bound token for invoking a cage.
 
 ### constructor
 
@@ -204,3 +209,7 @@ void encryptAndRun() throws EvervaultException {
 * Added decryptionDomains config option
 
 * Deprecated `ignoreDomains` and `intercept` config options
+
+### 3.2.0
+
+* Add createRunToken
