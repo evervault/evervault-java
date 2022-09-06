@@ -128,6 +128,7 @@ public class Evervault extends EvervaultService {
 
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
+        this.setupRunTokenProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);

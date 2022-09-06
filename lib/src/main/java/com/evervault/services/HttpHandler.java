@@ -2,6 +2,7 @@ package com.evervault.services;
 
 import com.evervault.contracts.IProvideCageExecution;
 import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
+import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.CagePublicKey;
 import com.evervault.models.CageRunResult;
@@ -16,7 +17,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -108,5 +109,32 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         }
 
         return new Gson().fromJson(response.body(), CageRunResult.class);
+    }
+
+    @Override
+    public String createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
+        var serializedData = new Gson().toJson(data);
+
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
+
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(finalAddress)
+                .setHeader("Api-Key", apiKey)
+                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+                .setHeader("Accept", CONTENT_TYPE)
+                .setHeader("Content-Type", CONTENT_TYPE)
+                .timeout(httpTimeout)
+                .POST(BodyPublishers.ofString(serializedData));
+
+        var request = requestBuilder.build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(response.statusCode(), response.body());
+        }
+
+        return response.body();
     }
 }
