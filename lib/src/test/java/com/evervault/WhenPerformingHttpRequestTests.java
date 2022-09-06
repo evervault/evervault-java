@@ -283,10 +283,10 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCreateRunTokenEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
-        final String cageName = "/test-cage";
+        final String createRunTokenEndpoint = "/v2/functions/test-cage/run-token";
         var client = new HttpHandler(API_KEY);
 
-        stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
+        stubFor(post(urlEqualTo(createRunTokenEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody("s0m3RunT0kenW1thNumb3rs")
                 .withStatus(200)));
