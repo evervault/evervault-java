@@ -6,6 +6,7 @@ package com.evervault.services;
 import com.evervault.contracts.*;
 import com.evervault.exceptions.*;
 import com.evervault.models.CageRunResult;
+import com.evervault.models.RunTokenResult;
 import com.evervault.utils.EcdhCurve;
 import com.evervault.utils.ProxyCredentialsProvider;
 import com.evervault.utils.ProxyRoutePlanner;
@@ -248,7 +249,7 @@ public abstract class EvervaultService {
         }
     }
 
-    public String createRunToken(String cageName, Object data) throws EvervaultException {
+    public RunTokenResult createRunToken(String cageName, Object data) throws EvervaultException {
         if (cageName == null || cageName.isEmpty()) {
             throw new EvervaultException(new MandatoryParameterException("cageName"));
         }

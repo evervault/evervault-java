@@ -148,8 +148,8 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
         var evervault = new Evervault(getEnvironmentApiKey());
         var data = Bar.createFooStructure(evervault);
         var runTokenResult = evervault.createRunToken(cageName, data);
-
-        assert !runTokenResult.isEmpty();
+        
+        assert !runTokenResult.token.isEmpty();
     }
 
     private static class OwnEvervault extends Evervault {

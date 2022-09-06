@@ -6,6 +6,7 @@ import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.CagePublicKey;
 import com.evervault.models.CageRunResult;
+import com.evervault.models.RunTokenResult;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -112,7 +113,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     @Override
-    public String createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
+    public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
         var serializedData = new Gson().toJson(data);
 
         var uri = URI.create(url);
@@ -135,6 +136,6 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             throw new HttpFailureException(response.statusCode(), response.body());
         }
 
-        return response.body();
+        return new Gson().fromJson(response.body(), RunTokenResult.class);
     }
 }

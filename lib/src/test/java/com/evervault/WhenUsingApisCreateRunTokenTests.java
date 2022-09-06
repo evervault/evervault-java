@@ -6,6 +6,7 @@ import com.evervault.services.EvervaultService;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import com.evervault.models.RunTokenResult;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -41,7 +42,8 @@ public class WhenUsingApisCreateRunTokenTests {
 
     @Test
     void callingToCreateRunTokenReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
-        var createRunTokenResult = "s0m3RunT0kenW1thNumb3rs";
+        var createRunTokenResult = new RunTokenResult();
+        createRunTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
         when(runTokenProvider.createRunToken(anyString(), anyString(), any())).thenReturn(createRunTokenResult);
 
         evervaultService.setupWrapper(runTokenProvider, circuitBreakerProvider);
@@ -53,7 +55,8 @@ public class WhenUsingApisCreateRunTokenTests {
 
     @Test
     void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException {
-        var createRunTokenResult = "s0m3RunT0kenW1thNumb3rs";
+        var createRunTokenResult = new RunTokenResult();
+        createRunTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
         when(runTokenProvider.createRunToken(anyString(), anyString(), any())).thenReturn(createRunTokenResult);
 
         evervaultService.setupWrapper(runTokenProvider, circuitBreakerProvider);

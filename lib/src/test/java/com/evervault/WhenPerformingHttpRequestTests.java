@@ -288,7 +288,7 @@ public class WhenPerformingHttpRequestTests {
 
         stubFor(post(urlEqualTo(createRunTokenEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody("s0m3RunT0kenW1thNumb3rs")
+                .withBody("{\"token\":\"s0m3RunT0kenW1thNumb3rs\"}")
                 .withStatus(200)));
 
         var data = new SomeData();
@@ -296,7 +296,7 @@ public class WhenPerformingHttpRequestTests {
 
         var result = client.createRunToken(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data);
 
-        Assertions.assertEquals("s0m3RunT0kenW1thNumb3rs", result);
+        Assertions.assertEquals("s0m3RunT0kenW1thNumb3rs", result.token);
     }
 
     @Test
