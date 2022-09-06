@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.1.0'
+implementation 'com.evervault:lib:3.2.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.1.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.1.0</version>
+  <version>3.2.0</version>
 </dependency>
 ```
 
@@ -210,6 +210,6 @@ void encryptAndRun() throws EvervaultException {
 
 * Deprecated `ignoreDomains` and `intercept` config options
 
-### 3.1.0
+### 3.2.0
 
 * Add createRunToken
