@@ -6,6 +6,7 @@ package com.evervault.services;
 import com.evervault.contracts.*;
 import com.evervault.exceptions.*;
 import com.evervault.models.CageRunResult;
+import com.evervault.models.OutboundRelayConfig;
 import com.evervault.utils.EcdhCurve;
 import com.evervault.utils.ProxyCredentialsProvider;
 import org.apache.http.client.CredentialsProvider;
@@ -19,6 +20,7 @@ import java.net.Authenticator;
 
 public abstract class EvervaultService {
     protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
+    protected IProvideRelayOutboundConfigFromHttpApi relayOutboundConfigFromHttpApi;
     protected IProvideECPublicKey ecPublicKeyProvider;
     protected IProvideSharedKey sharedKeyProvider;
     protected IProvideEncryptionForObject encryptionProvider;
@@ -155,6 +157,14 @@ public abstract class EvervaultService {
         System.setProperty("http.proxyUser", user);
         System.setProperty("http.proxyPassword", password);
         System.setProperty("http.nonProxyHosts", ignoreDomains);
+    }
+
+    protected void setupOutboundRelay(HttpHandler httpHandler) throws EvervaultException {
+        try {
+            OutboundRelayConfig outboundRelayConfig = httpHandler.getRelayOutboundConfig(getEvervaultApiUrl());
+        } catch (IOException | InterruptedException | HttpFailureException e) {
+            throw new EvervaultException(e);
+        }
     }
 
     //Used for Apache Http Clients

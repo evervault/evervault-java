@@ -2,9 +2,11 @@ package com.evervault.services;
 
 import com.evervault.contracts.IProvideCageExecution;
 import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
+import com.evervault.contracts.IProvideRelayOutboundConfigFromHttpApi;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.CagePublicKey;
 import com.evervault.models.CageRunResult;
+import com.evervault.models.OutboundRelayConfig;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -16,7 +18,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRelayOutboundConfigFromHttpApi {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -26,6 +28,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     private final static String HEADER_FOR_VERSION_FIELD = "x-version-id";
     private final static long TIMEOUT_SECONDS_DEFAULT = 30;
     private final static String CAGES_KEY_SUFFIX = "/cages/key";
+    private final static String RELAY_OUTBOUND_SUFFIX = "/v2/relay-outbound";
     private final String apiKey;
     private final Duration httpTimeout;
 
@@ -108,5 +111,31 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         }
 
         return new Gson().fromJson(response.body(), CageRunResult.class);
+    }
+
+    @Override
+    public OutboundRelayConfig getRelayOutboundConfig(String url) throws IOException, InterruptedException, HttpFailureException {
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve(RELAY_OUTBOUND_SUFFIX);
+
+        var requestBuilder = HttpRequest.newBuilder()
+            .uri(finalAddress)
+            .timeout(httpTimeout)
+            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+            .setHeader("AcceptEncoding", "gzip, deflate")
+            .setHeader("Accept", CONTENT_TYPE)
+            .setHeader("Content-Type", CONTENT_TYPE)
+            .setHeader("Api-Key", apiKey)
+            .GET();
+
+        var request = requestBuilder.build();
+
+        var result = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (result.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(result.statusCode(), result.body());
+        }
+
+        return new Gson().fromJson(result.body(), OutboundRelayConfig.class);
     }
 }

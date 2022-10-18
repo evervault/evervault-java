@@ -10,6 +10,7 @@ public class Evervault extends EvervaultService {
     private static final String EVERVAULT_API_HOST = "api.evervault.com";
     private static final String EVERVAULT_RUN_HOST = "run.evervault.com";
     private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.com";
+    private final String enableOutboundRelay;
 
     private String evervaultApiHost;
     private String evervaultRunHost;
@@ -70,30 +71,34 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String apiKey) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, true, null);
+        this(apiKey, EcdhCurve.SECP256K1, true, null, false);
     }
 
     public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, intercept, null);
+        this(apiKey, EcdhCurve.SECP256K1, intercept, null, false);
     }
 
     public Evervault(String apiKey, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, intercept, ignoreDomains);
+        this(apiKey, EcdhCurve.SECP256K1, intercept, ignoreDomains, false);
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, ecdhCurve, true, null);
+        this(apiKey, ecdhCurve, true, null, false);
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept) throws EvervaultException {
-        this(apiKey, ecdhCurve, intercept, null);
+        this(apiKey, ecdhCurve, intercept, null, false);
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve, String[] ignoreDomains) throws EvervaultException {
-        this(apiKey, ecdhCurve, true, ignoreDomains);
+        this(apiKey, ecdhCurve, true, ignoreDomains, false);
     }
 
-    public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
+    public Evervault(String apiKey, EcdhCurve ecdhCurve, boolean enableOutboundRelay) throws EvervaultException {
+        this(apiKey, ecdhCurve, true, null, enableOutboundRelay);
+    }
+
+    public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains, Boolean enableOutboundRelay) throws EvervaultException {
         setEvervaultApiHost();
         setEvervaultRunHost();
         setEvervaultRelayUrl();
@@ -112,6 +117,10 @@ public class Evervault extends EvervaultService {
 
         this.setupEncryption(encryptForObject);
         this.setupCredentialsProvider(apiKey);
+
+        if (enableOutboundRelay) {
+            this.setupOutboundRelay(httpHandler);
+        }
 
         if (intercept) { this.setupIntercept(apiKey); }
     }
