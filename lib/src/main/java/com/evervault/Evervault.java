@@ -103,7 +103,7 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
-        this(apiKey, ecdhCurve, intercept, ignoreDomains, null, null);
+        this(apiKey, ecdhCurve, intercept, ignoreDomains, null, false);
         System.out.println(
                 "The `intercept` and `ignoreDomains` config options in Evervault Node.js SDK are deprecated and slated for removal." +
                 "\nPlease switch to the `decryptionDomains` config option." +
@@ -138,7 +138,7 @@ public class Evervault extends EvervaultService {
         this.setupCredentialsProvider(apiKey);
 
         if (enableOutboundRelay) {
-            this.setupOutboundRelay(httpHandler);
+            this.setupOutboundRelay();
         }
 
         if (intercept) { this.setupIntercept(apiKey); }

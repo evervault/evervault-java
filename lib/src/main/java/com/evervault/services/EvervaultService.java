@@ -179,6 +179,11 @@ public abstract class EvervaultService {
         this.setupHttpRoutePlannerV2(decryptionDomains);
     }
 
+    protected void setupOutboundRelay() {
+        String[] decryptionDomains = getEvervaultDecryptionDomains();
+        this.setupHttpRoutePlannerV2(decryptionDomains);
+    }
+
     //Used for Apache Http Clients
     protected void setupCredentialsProvider(String apiKey) {
         this.credentialsProvider = ProxyCredentialsProvider
