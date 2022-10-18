@@ -262,4 +262,50 @@ public class WhenPerformingHttpRequestTests {
 
         verify(pattern);
     }
+
+    @Test
+    void hittingCreateRunTokenEndpointValidatesBasicHeaders(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String createRunTokenEndpoint = "/v2/functions/test-cage/run-token";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(post(urlEqualTo(createRunTokenEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"result\":{\"message\":\"someMessage\",\"name\":\"someEncryptedData\"},\"runId\":\"s0m3Str1ngW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        client.createRunToken(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data);
+
+        assertHeadersForCageRun(createRunTokenEndpoint, API_KEY, new HashMap<>());
+    }
+
+    @Test
+    void hittingCreateRunTokenEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String createRunTokenEndpoint = "/v2/functions/test-cage/run-token";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(post(urlEqualTo(createRunTokenEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"token\":\"s0m3RunT0kenW1thNumb3rs\"}")
+                .withStatus(200)));
+
+        var data = new SomeData();
+        data.name = "test";
+
+        var result = client.createRunToken(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data);
+
+        Assertions.assertEquals("s0m3RunT0kenW1thNumb3rs", result.token);
+    }
+
+    @Test
+    void hittingRunTokenEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        var client = new HttpHandler(API_KEY);
+
+        var data = new SomeData();
+        data.name = "test";
+
+        assertThrows(HttpFailureException.class, () -> client.createRunToken(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data));
+    }
 }

@@ -1,11 +1,11 @@
 package com.evervault.models;
 
 public class OutboundRelayConfig {
-    public String appUuid;
+  public String appUuid;
 
-    public String teamUuid;
+  public String teamUuid;
 
-    public String strictMode;
+  public boolean strictMode;
 
-    public Object outboundDestinations;
+  public Object outboundDestinations;
 }
