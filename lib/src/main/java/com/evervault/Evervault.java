@@ -10,13 +10,14 @@ public class Evervault extends EvervaultService {
     private static final String EVERVAULT_API_HOST = "api.evervault.com";
     private static final String EVERVAULT_RUN_HOST = "run.evervault.com";
     private static final String EVERVAULT_RELAY_HOST = "strict.relay.evervault.com";
-    private final String enableOutboundRelay;
 
     private String evervaultApiHost;
     private String evervaultRunHost;
     private String evervaultRelayHost;
     private String[] evervaultIgnoreDomains;
     private String[] evervaultDecryptionDomains;
+
+    private boolean enableOutboundRelay;
 
     public String getEvervaultApiHost() { return evervaultApiHost; }
 
@@ -35,6 +36,10 @@ public class Evervault extends EvervaultService {
     }
     public String[] getEvervaultDecryptionDomains() {
         return evervaultDecryptionDomains;
+    }
+
+    public boolean isEnableOutboundRelay() {
+        return enableOutboundRelay;
     }
 
     private void setEvervaultApiHost() {
@@ -61,6 +66,10 @@ public class Evervault extends EvervaultService {
         }
     }
 
+    public void setEnableOutboundRelay(boolean enableOutboundRelay) {
+        this.enableOutboundRelay = enableOutboundRelay;
+    }
+
     private String[] mergeIgnoreDomains(String[] defaultDomains, String[] ignoreDomains) {
         var defaultLength = defaultDomains.length;
         var ignoreDomainsLength = ignoreDomains.length;
@@ -78,9 +87,9 @@ public class Evervault extends EvervaultService {
         this(apiKey, null, EcdhCurve.SECP256K1);
     }
 
-    public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, intercept, null, null, false);
-    }
+        public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
+            this(apiKey, EcdhCurve.SECP256K1, intercept, null, null, false);
+        }
 
     public Evervault(String apiKey, String[] decryptionDomains) throws EvervaultException {
         this(apiKey, decryptionDomains, EcdhCurve.SECP256K1);
@@ -121,6 +130,7 @@ public class Evervault extends EvervaultService {
         setEvervaultRelayUrl();
         setEvervaultIgnoreDomains(ignoreDomains);
         this.evervaultDecryptionDomains = decryptionDomains;
+        this.setEnableOutboundRelay(enableOutboundRelay);
 
         var httpHandler = new HttpHandler(apiKey);
         var encryptService = EncryptionServiceFactory.build(ecdhCurve);

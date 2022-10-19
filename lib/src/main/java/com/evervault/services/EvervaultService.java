@@ -3,6 +3,7 @@
  */
 package com.evervault.services;
 
+import com.evervault.Evervault;
 import com.evervault.contracts.*;
 import com.evervault.exceptions.*;
 import com.evervault.models.CageRunResult;
@@ -22,7 +23,7 @@ import java.time.Instant;
 
 public abstract class EvervaultService {
     protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
-    protected IProvideOutboundRelayConfigFromHttpApi relayOutboundConfigFromHttpApi;
+    protected IProvideRelayOutboundConfigFromHttpApi relayOutboundConfigFromHttpApi;
     protected IProvideECPublicKey ecPublicKeyProvider;
     protected IProvideSharedKey sharedKeyProvider;
     protected IProvideEncryptionForObject encryptionProvider;
@@ -33,11 +34,14 @@ public abstract class EvervaultService {
 
     protected HttpRoutePlanner httpRoutePlanner;
 
+    protected OutboundRelayConfig outboundRelayConfig;
+
     protected final static int NEW_KEY_TIMESTAMP = 15;
     protected final static String RELAY_PORT = "443";
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
     protected final int createRunTokenHash = "createRunToken".hashCode();
+    protected final int getRelayOutboundConfigHash = "getRelayOutboundConfig".hashCode();
     protected Instant currentSharedKeyTimestamp;
     protected byte[] generatedEcdhKey;
     protected byte[] sharedKey;
@@ -179,9 +183,13 @@ public abstract class EvervaultService {
         this.setupHttpRoutePlannerV2(decryptionDomains);
     }
 
-    protected void setupOutboundRelay() {
-        String[] decryptionDomains = getEvervaultDecryptionDomains();
-        this.setupHttpRoutePlannerV2(decryptionDomains);
+    protected void setupOutboundRelay() throws EvervaultException {
+        try {
+            this.outboundRelayConfig = circuitBreakerProvider.execute(getRelayOutboundConfigHash, () -> relayOutboundConfigFromHttpApi.getRelayOutboundConfig(getEvervaultApiUrl()));
+        } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
+            throw new EvervaultException(e);
+        }
+        //this.setupHttpRoutePlannerV2(decryptionDomains);
     }
 
     //Used for Apache Http Clients
