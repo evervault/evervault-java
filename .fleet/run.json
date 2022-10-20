@@ -10,17 +10,6 @@
               "ENVIRONMENT_API_KEY": "Mjkw:3PKAVb8dtc2X8qKXo31Qu7oSq2loBjSpQrMIXtKqDKO58UDgaOMy4Gtqext3Ir8hb",
               "EV_CAGE_NAME": "java-integration-tests"
             }
-        },
-        {
-          "type": "gradle",
-          "name": "interceptWorksThroughApacheHttpLibraryWithRelayOutboundConfig",
-          "tasks": [
-            "test"
-          ],
-          "environment": {
-            "ENVIRONMENT_API_KEY": "Mjkw:3PKAVb8dtc2X8qKXo31Qu7oSq2loBjSpQrMIXtKqDKO58UDgaOMy4Gtqext3Ir8hb",
-            "EV_CAGE_NAME": "java-integration-tests"
-          }
         }
     ]
 }

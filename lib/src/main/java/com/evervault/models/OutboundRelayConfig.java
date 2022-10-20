@@ -1,5 +1,7 @@
 package com.evervault.models;
 
+import java.util.Map;
+
 public class OutboundRelayConfig {
   public String appUuid;
 
@@ -7,5 +9,5 @@ public class OutboundRelayConfig {
 
   public boolean strictMode;
 
-  public Object outboundDestinations;
+  public Map<String, OutboundRelayConfigMetadata> outboundDestinations;
 }

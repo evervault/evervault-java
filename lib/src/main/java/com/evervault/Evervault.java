@@ -87,9 +87,13 @@ public class Evervault extends EvervaultService {
         this(apiKey, null, EcdhCurve.SECP256K1);
     }
 
-        public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
-            this(apiKey, EcdhCurve.SECP256K1, intercept, null, null, false);
-        }
+    public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
+        this(apiKey, EcdhCurve.SECP256K1, intercept, null, null, false);
+    }
+
+    public Evervault(String apiKey, Boolean intercept, Boolean enableOutboundRelay) throws EvervaultException {
+        this(apiKey, EcdhCurve.SECP256K1, intercept, null, null, enableOutboundRelay);
+    }
 
     public Evervault(String apiKey, String[] decryptionDomains) throws EvervaultException {
         this(apiKey, decryptionDomains, EcdhCurve.SECP256K1);
@@ -140,6 +144,7 @@ public class Evervault extends EvervaultService {
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
         this.setupRunTokenProvider(httpHandler);
+        this.setupRelayOutboundConfigProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);

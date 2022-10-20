@@ -1,0 +1,13 @@
+{
+    "java.test.config": [
+        {
+            "name": "javaTestConfig",
+            "vmargs": [
+                "-Xmx512M"
+            ],
+            "env": {
+                "ENVIRONMENT_API_KEY": "NTk1:3QHaMsQ6gV7Yk726fk84UtLv2V93SWyuZEdIK6MRR157MT1NbwHnBIpocjhV5glEz"
+            },
+        }
+    ]
+}

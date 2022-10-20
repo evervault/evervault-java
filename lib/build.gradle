@@ -61,6 +61,14 @@ testing {
     }
 }
 
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+        showStackTraces true
+    }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {

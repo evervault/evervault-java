@@ -98,6 +98,14 @@ public abstract class EvervaultService {
         this.runTokenProvider = runTokenProvider;
     }
 
+    protected void setupRelayOutboundConfigProvider(IProvideRelayOutboundConfigFromHttpApi relayOutboundProvider) {
+        if (relayOutboundProvider == null) {
+            throw new NullPointerException(IProvideRelayOutboundConfigFromHttpApi.class.getName());
+        }
+
+        this.relayOutboundConfigFromHttpApi = relayOutboundProvider;
+    }
+
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
                                      IProvideSharedKey sharedKeyProvider,
@@ -186,6 +194,8 @@ public abstract class EvervaultService {
     protected void setupOutboundRelay() throws EvervaultException {
         try {
             this.outboundRelayConfig = circuitBreakerProvider.execute(getRelayOutboundConfigHash, () -> relayOutboundConfigFromHttpApi.getRelayOutboundConfig(getEvervaultApiUrl()));
+            var keySet = this.outboundRelayConfig.outboundDestinations;
+            System.out.println(keySet);
         } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
             throw new EvervaultException(e);
         }

@@ -272,7 +272,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     void interceptWorksThroughApacheHttpLibraryWithRelayOutboundConfig() throws IOException, NoSuchAlgorithmException, EvervaultException, KeyManagementException {
 
         var enableOutboundRelay = true;
-        var evervault = new Evervault(getEnvironmentApiKey(), enableOutboundRelay);
+        var evervault = new Evervault(getEnvironmentApiKey(), false, enableOutboundRelay);
 
         var encryptedString = evervault.encrypt("Secret info");
 
