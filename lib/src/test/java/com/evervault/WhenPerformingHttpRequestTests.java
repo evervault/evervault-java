@@ -308,4 +308,85 @@ public class WhenPerformingHttpRequestTests {
 
         assertThrows(HttpFailureException.class, () -> client.createRunToken(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data));
     }
+
+    @Test
+    void hittingGetOutboundRelayConfigurationEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                    {
+                      "appUuid": "app_2c364a9566e4",
+                      "teamUuid": "team_5e71a82322c7",
+                      "strictMode": false,
+                      "outboundDestinations": {
+                        "api.twilio.com": {
+                          "id": 210,
+                          "appUuid": "app_2c364a9566e4",
+                          "createdAt": "2022-11-24T09:01:48.354Z",
+                          "updatedAt": "2022-11-24T09:01:48.354Z",
+                          "deletedAt": null,
+                          "routeSpecificFieldsToEncrypt": [],
+                          "deterministicFieldsToEncrypt": [],
+                          "encryptEmptyStrings": true,
+                          "curve": "secp256k1",
+                          "uuid": "outbound_destination_ade4771a1ccf",
+                          "destinationDomain": "api.twilio.com"
+                        }
+                      }
+                    }
+                    """)
+                .withStatus(200)));
+
+        var actual = client.getRelayOutboundConfig(wireMockRuntimeInfo.getHttpBaseUrl());
+        Assertions.assertNotNull(actual.outboundDestinations);
+        Assertions.assertNotNull(actual.outboundDestinations.get("api.twilio.com"));
+        Assertions.assertEquals("api.twilio.com", actual.outboundDestinations.get("api.twilio.com").destinationDomain);
+
+        verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
+                .withHeader("API-KEY", equalTo(API_KEY))
+        );
+    }
+
+    @Test
+    void hittingGetOutboundRelayConfigurationEndpointWorksCorrectlyWhenNoDestinationDomainIsSet(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                    {
+                      "appUuid": "app_2c364a9566e4",
+                      "teamUuid": "team_5e71a82322c7",
+                      "strictMode": false,
+                      "outboundDestinations": {}
+                    }
+                    """)
+                .withStatus(200)));
+
+        var actual = client.getRelayOutboundConfig(wireMockRuntimeInfo.getHttpBaseUrl());
+        Assertions.assertTrue(actual.outboundDestinations.isEmpty());
+
+        verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
+                .withHeader("API-KEY", equalTo(API_KEY))
+        );
+    }
+
+    @Test
+    void hittingGetOutboundRelayConfigurationEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
+                .withStatus(500)));
+
+        assertThrows(HttpFailureException.class, () -> client.getRelayOutboundConfig(wireMockRuntimeInfo.getHttpBaseUrl()));
+
+        verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
+                .withHeader("API-KEY", equalTo(API_KEY))
+        );
+    }
 }

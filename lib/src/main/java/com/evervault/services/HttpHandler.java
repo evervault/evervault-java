@@ -2,10 +2,12 @@ package com.evervault.services;
 
 import com.evervault.contracts.IProvideCageExecution;
 import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
+import com.evervault.contracts.IProvideRelayOutboundConfig;
 import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.CagePublicKey;
 import com.evervault.models.CageRunResult;
+import com.evervault.models.RelayOutboundConfigResult;
 import com.evervault.models.RunTokenResult;
 import com.google.gson.Gson;
 
@@ -18,7 +20,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideRelayOutboundConfig {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -137,5 +139,29 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         }
 
         return new Gson().fromJson(response.body(), RunTokenResult.class);
+    }
+
+    @Override
+    public RelayOutboundConfigResult getRelayOutboundConfig(String url) throws HttpFailureException, IOException, InterruptedException {
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/v2/relay-outbound");
+
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(finalAddress)
+                .setHeader("Api-Key", apiKey)
+                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+                .setHeader("Accept", CONTENT_TYPE)
+                .setHeader("AcceptEncoding", "gzip, deflate")
+                .timeout(httpTimeout)
+                .GET();
+
+        var request = requestBuilder.build();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(response.statusCode(), response.body());
+        }
+
+        return new Gson().fromJson(response.body(), RelayOutboundConfigResult.class);
     }
 }
