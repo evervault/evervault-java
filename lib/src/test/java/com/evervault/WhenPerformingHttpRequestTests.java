@@ -316,28 +316,7 @@ public class WhenPerformingHttpRequestTests {
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody("""
-                    {
-                      "appUuid": "app_2c364a9566e4",
-                      "teamUuid": "team_5e71a82322c7",
-                      "strictMode": false,
-                      "outboundDestinations": {
-                        "api.twilio.com": {
-                          "id": 210,
-                          "appUuid": "app_2c364a9566e4",
-                          "createdAt": "2022-11-24T09:01:48.354Z",
-                          "updatedAt": "2022-11-24T09:01:48.354Z",
-                          "deletedAt": null,
-                          "routeSpecificFieldsToEncrypt": [],
-                          "deterministicFieldsToEncrypt": [],
-                          "encryptEmptyStrings": true,
-                          "curve": "secp256k1",
-                          "uuid": "outbound_destination_ade4771a1ccf",
-                          "destinationDomain": "api.twilio.com"
-                        }
-                      }
-                    }
-                    """)
+                .withBody("{\"appUuid\":\"app_2c364a9566e4\",\"teamUuid\":\"team_5e71a82322c7\",\"strictMode\":false,\"outboundDestinations\":{\"api.twilio.com\":{\"id\":210,\"appUuid\":\"app_2c364a9566e4\",\"createdAt\":\"2022-11-24T09:01:48.354Z\",\"updatedAt\":\"2022-11-24T09:01:48.354Z\",\"deletedAt\":null,\"routeSpecificFieldsToEncrypt\":[],\"deterministicFieldsToEncrypt\":[],\"encryptEmptyStrings\":true,\"curve\":\"secp256k1\",\"uuid\":\"outbound_destination_ade4771a1ccf\",\"destinationDomain\":\"api.twilio.com\"}}}")
                 .withStatus(200)));
 
         var actual = client.getRelayOutboundConfig(wireMockRuntimeInfo.getHttpBaseUrl());
@@ -357,14 +336,7 @@ public class WhenPerformingHttpRequestTests {
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody("""
-                    {
-                      "appUuid": "app_2c364a9566e4",
-                      "teamUuid": "team_5e71a82322c7",
-                      "strictMode": false,
-                      "outboundDestinations": {}
-                    }
-                    """)
+                .withBody("{\"appUuid\":\"app_2c364a9566e4\",\"teamUuid\":\"team_5e71a82322c7\",\"strictMode\":false,\"outboundDestinations\":{}}")
                 .withStatus(200)));
 
         var actual = client.getRelayOutboundConfig(wireMockRuntimeInfo.getHttpBaseUrl());
