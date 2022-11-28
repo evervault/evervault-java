@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.2.0'
+implementation 'com.evervault:lib:3.3.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.2.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.2.0</version>
+  <version>3.3.0</version>
 </dependency>
 ```
 
@@ -214,3 +214,8 @@ void encryptAndRun() throws EvervaultException {
 ### 3.2.0
 
 * Add createRunToken
+
+### 3.3.0
+
+* Allow enabling Outbound Relay using `enableOutboundRelay` config option.
+* Removed `ignoreDomains` and `intercept` config options
