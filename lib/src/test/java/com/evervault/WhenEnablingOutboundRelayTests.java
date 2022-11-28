@@ -1,5 +1,6 @@
 package com.evervault;
 
+import com.evervault.TestUtils.RelayHostResolver;
 import com.evervault.contracts.*;
 import com.evervault.exceptions.EvervaultException;
 import com.evervault.exceptions.HttpFailureException;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -65,7 +67,7 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
-        assertEquals("strict.relay.evervault.com", proxyHost.getHostName());
+        assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
     }
 
     @Test
@@ -83,7 +85,7 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("hey.example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
-        assertEquals("strict.relay.evervault.com", proxyHost.getHostName());
+        assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
     }
 
     @Test
@@ -101,7 +103,7 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("hello.hey.example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
-        assertEquals("strict.relay.evervault.com", proxyHost.getHostName());
+        assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
     }
 
     @Test
@@ -119,7 +121,7 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
-        assertEquals("strict.relay.evervault.com", proxyHost.getHostName());
+        assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
     }
 
     @Test
@@ -169,8 +171,7 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
-        System.out.println(proxyHost);
-        assertEquals("strict.relay.evervault.com", proxyHost.getHostName());
+        assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
     }
 

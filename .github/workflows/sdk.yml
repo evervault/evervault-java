@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: failed_integration_tests
-          path: ${GITHUB_WORKSPACE}/lib/build/reports/tests/integrationTests
+          path: ${{ github.workspace }}/lib/build/reports/tests/integrationTests
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: [ ci ]
