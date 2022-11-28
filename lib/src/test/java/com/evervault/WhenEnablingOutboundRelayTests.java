@@ -25,16 +25,22 @@ public class WhenEnablingOutboundRelayTests {
     private IProvideOutboundRelayConfigFromHttpApi outboundRelayConfigProvider = mock(IProvideOutboundRelayConfigFromHttpApi.class);
 
     private class Evervault extends EvervaultService {
+        private String[] ignoreDomains = new String[0];
+
         public void setupWrapper(IProvideOutboundRelayConfigFromHttpApi outboundRelayConfigProvider) throws EvervaultException {
             this.setupOutboundRelayConfigProvider(outboundRelayConfigProvider);
         }
 
+        public void setupIgnoreDomains(String[] ignoreDomains) {
+            this.ignoreDomains = ignoreDomains;
+        }
+
         public void enableOutboundRelay() throws EvervaultException {
-            this.setupIntercept(null);
+            this.setupIntercept(null, ignoreDomains);
         }
 
         public void setupDecryptionDomains(String[] decryptionDomains) throws EvervaultException {
-            this.setupIntercept(decryptionDomains);
+            this.setupIntercept(decryptionDomains, ignoreDomains);
         }
     }
 
@@ -131,6 +137,25 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("anotherexample.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
+        assertNull(proxyHost);
+    }
+
+    @Test
+    public void shouldSetupRoutePlannerSoThatIgnoredDomainsAreNotRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
+        // Given
+        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OuboundDestination>();
+        destinationDomains.put("**", new OutboundRelayConfigResult.OuboundDestination("**"));
+        when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(destinationDomains));
+
+        // When
+        var evervault = new Evervault();
+        evervault.setupWrapper(outboundRelayConfigProvider);
+        evervault.setupIgnoreDomains(new String[]{"example.com"});
+        evervault.enableOutboundRelay();
+
+        // Then
+        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertNull(proxyHost);
     }
 

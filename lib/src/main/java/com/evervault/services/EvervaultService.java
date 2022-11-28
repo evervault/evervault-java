@@ -63,11 +63,6 @@ public abstract class EvervaultService {
     // Virtual method
     protected String getEvervaultRelayHost() { return ""; }
 
-    // Virtual method
-    protected String[] getEvervaultIgnoreDomains() { return new String[0]; }
-
-    protected String[] getEvervaultDecryptionDomains() { return new String[0]; }
-
     protected void setupCircuitBreaker(IProvideCircuitBreaker provideCircuitBreaker) {
         if (provideCircuitBreaker == null) {
             throw new NullPointerException(IProvideCircuitBreaker.class.getName());
@@ -156,13 +151,13 @@ public abstract class EvervaultService {
         generateSharedKey();
     }
 
-    protected void setupIntercept(String[] decryptionDomains) throws EvervaultException {
+    protected void setupIntercept(String[] decryptionDomains, String[] ignoreDomains) throws EvervaultException {
         IProvideDecryptionAndIgnoreDomains domainsProvider;
         if (decryptionDomains != null) {
-            domainsProvider = new StaticOutboundRelayConfigService(getEvervaultIgnoreDomains(), decryptionDomains);
+            domainsProvider = new StaticOutboundRelayConfigService(ignoreDomains, decryptionDomains);
         } else {
             try {
-                domainsProvider = new CachedOutboundRelayConfigService(outboundRelayConfigProvider, getEvervaultApiUrl(), getEvervaultIgnoreDomains());
+                domainsProvider = new CachedOutboundRelayConfigService(outboundRelayConfigProvider, getEvervaultApiUrl(), ignoreDomains);
             } catch (Exception e) {
                 throw new EvervaultException(e);
             }

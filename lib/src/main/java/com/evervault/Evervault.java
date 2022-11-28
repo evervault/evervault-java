@@ -105,7 +105,7 @@ public class Evervault extends EvervaultService {
         this.setupCredentialsProvider(apiKey);
 
         if (decryptionDomains != null || enableOutboundRelay != null && enableOutboundRelay) {
-            this.setupIntercept(decryptionDomains);
+            this.setupIntercept(decryptionDomains, evervaultIgnoreDomains);
         }
     }
 }
