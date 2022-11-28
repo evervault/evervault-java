@@ -121,12 +121,12 @@ Evervault constructor expects your api key which you can retrieve from evervault
 var Evervault = new Evervault("<API_KEY>")
 ```
 
-| Parameter              | Type                  | Description                                                                                                                                                       |
-|------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `apiKey`               | `String`              | The API key of your Evervault Team                                                                                                                                |
-| `curve`                | `Evervault.EcdhCurve` | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more.                              |
-| `decryptionDomains`    | `String[]`            | An array of hostnames which will  be routed through Evervault for decryption, supports wildcards. eg [ "api.example.com", "support.example.com, "*.example.com" ] |
-| `enableOutboundRelay`  | `boolean`             | Enables Outbound Relay by syncing your Outbound Relay Destinations configured in your Evervault App. This feature is currently in beta.                           |
+| Parameter              | Type                  | Description                                                                                                                                                      |
+|------------------------|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `apiKey`               | `String`              | The API key of your Evervault Team                                                                                                                               |
+| `curve`                | `Evervault.EcdhCurve` | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more.                             |
+| `decryptionDomains`    | `String[]`            | An array of hostnames which will be routed through Evervault for decryption, supports wildcards. eg [ "api.example.com", "support.example.com, "*.example.com" ] |
+| `enableOutboundRelay`  | `boolean`             | Enables Outbound Relay by syncing your configuration from the Evervault App. This feature is currently in beta.                                                  |
 
 
 ### Example
