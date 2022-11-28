@@ -52,26 +52,8 @@ public class Evervault extends EvervaultService {
         this.evervaultRelayHost = Objects.requireNonNullElse(envRelayHost, EVERVAULT_RELAY_HOST);
     }
 
-    private void setEvervaultIgnoreDomains(String[] ignoreDomains) {
-        String[] defaultDomains = {getEvervaultApiHost(), getEvervaultRunHost()};
-        if (ignoreDomains == null) {
-            this.evervaultIgnoreDomains = defaultDomains;
-        } else {
-            this.evervaultIgnoreDomains = mergeIgnoreDomains(defaultDomains, ignoreDomains);
-        }
-    }
-
-    private String[] mergeIgnoreDomains(String[] defaultDomains, String[] ignoreDomains) {
-        var defaultLength = defaultDomains.length;
-        var ignoreDomainsLength = ignoreDomains.length;
-
-        var mergedLength = defaultLength + ignoreDomainsLength;
-        String[] mergedDomains = new String[mergedLength];
-
-        System.arraycopy(defaultDomains, 0, mergedDomains, 0, defaultLength);
-        System.arraycopy(ignoreDomains, 0, mergedDomains, defaultLength, ignoreDomainsLength);
-
-        return mergedDomains;
+    private void setEvervaultIgnoreDomains() {
+        this.evervaultIgnoreDomains = new String[]{ getEvervaultApiHost(), getEvervaultRunHost() };
     }
 
     public Evervault(String apiKey) throws EvervaultException {
@@ -102,6 +84,7 @@ public class Evervault extends EvervaultService {
         setEvervaultApiHost();
         setEvervaultRunHost();
         setEvervaultRelayUrl();
+        setEvervaultIgnoreDomains();
 
         this.evervaultDecryptionDomains = decryptionDomains;
 

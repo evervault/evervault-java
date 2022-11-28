@@ -1,6 +1,6 @@
 package com.evervault.utils;
 
-import com.evervault.contracts.IProvideDecryptionAndAlwaysIgnoreDomains;
+import com.evervault.contracts.IProvideDecryptionAndIgnoreDomains;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 public class ProxyRoutePlanner {
-    public static HttpRoutePlanner getOutboundRelayRoutePlanner(IProvideDecryptionAndAlwaysIgnoreDomains configProvider) {
+    public static HttpRoutePlanner getOutboundRelayRoutePlanner(IProvideDecryptionAndIgnoreDomains configProvider) {
         return buildRoutePlanner(new Predicate<String>() {
             @Override
             public boolean test(String hostname) {

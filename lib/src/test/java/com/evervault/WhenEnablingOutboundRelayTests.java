@@ -4,7 +4,7 @@ import com.evervault.contracts.*;
 import com.evervault.exceptions.EvervaultException;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.OutboundRelayConfigResult;
-import com.evervault.services.ApiOutboundRelayConfigService;
+import com.evervault.services.CachedOutboundRelayConfigService;
 import com.evervault.services.EvervaultService;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -40,7 +40,7 @@ public class WhenEnablingOutboundRelayTests {
 
     @BeforeEach
     public void setup() {
-        ApiOutboundRelayConfigService.clearCache();
+        CachedOutboundRelayConfigService.clearCache();
         reset(outboundRelayConfigProvider);
     }
 

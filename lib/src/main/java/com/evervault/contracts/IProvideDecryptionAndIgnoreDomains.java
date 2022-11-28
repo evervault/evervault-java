@@ -1,6 +1,6 @@
 package com.evervault.contracts;
 
-public interface IProvideDecryptionAndAlwaysIgnoreDomains {
+public interface IProvideDecryptionAndIgnoreDomains {
     public String[] getAlwaysIgnoreDomains();
     public String[] getDecryptionDomains();
 }

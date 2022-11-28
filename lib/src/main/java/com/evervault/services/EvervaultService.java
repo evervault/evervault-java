@@ -157,18 +157,18 @@ public abstract class EvervaultService {
     }
 
     protected void setupIntercept(String[] decryptionDomains) throws EvervaultException {
-        IProvideDecryptionAndAlwaysIgnoreDomains decryptionDomainsProvider;
+        IProvideDecryptionAndIgnoreDomains domainsProvider;
         if (decryptionDomains != null) {
-            decryptionDomainsProvider = new StaticOutboundRelayConfigService(getEvervaultIgnoreDomains(), decryptionDomains);
+            domainsProvider = new StaticOutboundRelayConfigService(getEvervaultIgnoreDomains(), decryptionDomains);
         } else {
             try {
-                decryptionDomainsProvider = new ApiOutboundRelayConfigService(outboundRelayConfigProvider, getEvervaultApiUrl(), getEvervaultIgnoreDomains());
+                domainsProvider = new CachedOutboundRelayConfigService(outboundRelayConfigProvider, getEvervaultApiUrl(), getEvervaultIgnoreDomains());
             } catch (Exception e) {
                 throw new EvervaultException(e);
             }
         }
         this.httpRoutePlanner = ProxyRoutePlanner
-                .getOutboundRelayRoutePlanner(decryptionDomainsProvider);
+                .getOutboundRelayRoutePlanner(domainsProvider);
     }
 
     //Used for Apache Http Clients

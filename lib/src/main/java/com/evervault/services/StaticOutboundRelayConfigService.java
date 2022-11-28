@@ -1,8 +1,8 @@
 package com.evervault.services;
 
-import com.evervault.contracts.IProvideDecryptionAndAlwaysIgnoreDomains;
+import com.evervault.contracts.IProvideDecryptionAndIgnoreDomains;
 
-public class StaticOutboundRelayConfigService implements IProvideDecryptionAndAlwaysIgnoreDomains {
+public class StaticOutboundRelayConfigService implements IProvideDecryptionAndIgnoreDomains {
     private String[] alwaysIgnoreDomains;
     private String[] decryptionDomains;
 

@@ -1,6 +1,6 @@
 package com.evervault.services;
 
-import com.evervault.contracts.IProvideDecryptionAndAlwaysIgnoreDomains;
+import com.evervault.contracts.IProvideDecryptionAndIgnoreDomains;
 import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.OutboundRelayConfigResult;
@@ -8,7 +8,9 @@ import com.evervault.models.OutboundRelayConfigResult;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class ApiOutboundRelayConfigService implements IProvideDecryptionAndAlwaysIgnoreDomains {
+public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIgnoreDomains {
+
+    private static final Object lock = new Object();
 
     private static OutboundRelayConfigResult cachedConfig;
 
@@ -18,20 +20,24 @@ public class ApiOutboundRelayConfigService implements IProvideDecryptionAndAlway
 
     private String[] alwaysIgnoreDomains;
 
-    public ApiOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl, String[] alwaysIgnoreDomains)
+    public CachedOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl, String[] alwaysIgnoreDomains)
             throws HttpFailureException, IOException, InterruptedException {
         this(httpHandler, evervaultApiUrl, new ExecutableSchedulerService(1), alwaysIgnoreDomains);
     }
 
-    private ApiOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl, ExecutableSchedulerService executableSchedulerService, String[] alwaysIgnoreDomains)
+    private CachedOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl, ExecutableSchedulerService executableSchedulerService, String[] alwaysIgnoreDomains)
             throws HttpFailureException, IOException, InterruptedException {
         this.alwaysIgnoreDomains = alwaysIgnoreDomains;
         if (cachedConfig == null) {
-            cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
-            executableSchedulerService.schedule(() -> {
-                cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
-                return cachedConfig;
-            }, 2, 2, TimeUnit.MINUTES);
+            synchronized (lock) {
+                if (cachedConfig == null) {
+                    cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
+                    executableSchedulerService.schedule(() -> {
+                        cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
+                        return cachedConfig;
+                    }, 2, 2, TimeUnit.MINUTES);
+                }
+            }
         }
     }
 
