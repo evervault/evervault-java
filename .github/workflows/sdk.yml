@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: failed_unit_tests
-          path: ${GITHUB_WORKSPACE}/lib/build/reports/tests/test
+          path: ${{ github.workspace }}/lib/build/reports/tests/test
       - name: integration tests
         env:
           ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
