@@ -26,9 +26,9 @@ public abstract class EvervaultService {
     protected IProvideEncryptionForObject encryptionProvider;
     protected IProvideCageExecution cageExecutionProvider;
     protected IProvideRunToken runTokenProvider;
+    protected IProvideOutboundRelayConfigFromHttpApi outboundRelayConfigProvider;
     protected IProvideCircuitBreaker circuitBreakerProvider;
     protected CredentialsProvider credentialsProvider;
-
     protected HttpRoutePlanner httpRoutePlanner;
 
     protected final static int NEW_KEY_TIMESTAMP = 15;
@@ -92,6 +92,15 @@ public abstract class EvervaultService {
         this.runTokenProvider = runTokenProvider;
     }
 
+    protected void setupOutboundRelayConfigProvider(IProvideOutboundRelayConfigFromHttpApi outboundRelayConfigProvider) {
+        if (outboundRelayConfigProvider == null) {
+            throw new NullPointerException(IProvideOutboundRelayConfigFromHttpApi.class.getName());
+        }
+
+        this.outboundRelayConfigProvider = outboundRelayConfigProvider;
+    }
+
+
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
                                      IProvideSharedKey sharedKeyProvider,
@@ -147,34 +156,19 @@ public abstract class EvervaultService {
         generateSharedKey();
     }
 
-    protected void setupIntercept(String apiKey) {
-
-        String user = teamUuid;
-        String password = apiKey;
-        String proxyHost = getEvervaultRelayHost();
-        String proxyPort = RELAY_PORT;
-
-        String[] evervaultIgnoreDomains = getEvervaultIgnoreDomains();
-        this.setupHttpRoutePlanner(evervaultIgnoreDomains);
-        String ignoreDomains = String.join("|", evervaultIgnoreDomains);
-
-        System.setProperty("jdk.https.auth.tunneling.disabledSchemes", "");
-        System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
-
-        System.setProperty("https.proxyHost", proxyHost);
-        System.setProperty("https.proxyPort", proxyPort);
-        System.setProperty("https.proxyUser", user);
-        System.setProperty("https.proxyPassword", password);
-        System.setProperty("https.nonProxyHosts", ignoreDomains);
-        
-        System.setProperty("http.proxyUser", user);
-        System.setProperty("http.proxyPassword", password);
-        System.setProperty("http.nonProxyHosts", ignoreDomains);
-    }
-
-    protected void setupInterceptV2() {
-        String[] decryptionDomains = getEvervaultDecryptionDomains();
-        this.setupHttpRoutePlannerV2(decryptionDomains);
+    protected void setupIntercept(String[] decryptionDomains) throws EvervaultException {
+        IProvideDecryptionAndAlwaysIgnoreDomains decryptionDomainsProvider;
+        if (decryptionDomains != null) {
+            decryptionDomainsProvider = new StaticOutboundRelayConfigService(getEvervaultIgnoreDomains(), decryptionDomains);
+        } else {
+            try {
+                decryptionDomainsProvider = new ApiOutboundRelayConfigService(outboundRelayConfigProvider, getEvervaultApiUrl(), getEvervaultIgnoreDomains());
+            } catch (Exception e) {
+                throw new EvervaultException(e);
+            }
+        }
+        this.httpRoutePlanner = ProxyRoutePlanner
+                .getOutboundRelayRoutePlanner(decryptionDomainsProvider);
     }
 
     //Used for Apache Http Clients
@@ -187,16 +181,6 @@ public abstract class EvervaultService {
     // Apache HttpClient with the Evervault Proxy.
     public CredentialsProvider getEvervaultProxyCredentials() {
         return this.credentialsProvider;
-    }
-
-    protected void setupHttpRoutePlanner(String[] ignoreDomains) {
-        this.httpRoutePlanner = ProxyRoutePlanner
-                .getEvervaultRoutePlanner(ignoreDomains);
-    }
-
-    protected void setupHttpRoutePlannerV2(String[] decryptionDomains) {
-        this.httpRoutePlanner = ProxyRoutePlanner
-                .getEvervaultRoutePlannerV2(decryptionDomains, getEvervaultIgnoreDomains());
     }
 
     public HttpRoutePlanner getEvervaultHttpRoutePlanner() { return this.httpRoutePlanner; }
