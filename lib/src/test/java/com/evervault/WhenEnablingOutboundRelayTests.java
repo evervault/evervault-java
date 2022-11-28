@@ -169,6 +169,7 @@ public class WhenEnablingOutboundRelayTests {
         // Then
         var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
+        System.out.println(proxyHost);
         assertEquals("strict.relay.evervault.com", proxyHost.getHostName());
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
     }
