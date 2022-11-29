@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: failed_unit_tests
-          path: ${GITHUB_WORKSPACE}/lib/build/reports/tests/test
+          path: ${{ github.workspace }}/lib/build/reports/tests/test
       - name: integration tests
         env:
           ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: failed_integration_tests
-          path: ${GITHUB_WORKSPACE}/lib/build/reports/tests/integrationTests
+          path: ${{ github.workspace }}/lib/build/reports/tests/integrationTests
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: [ ci ]
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: gradle.properties
-        run: ./generate_gradle_properties.bash ${GITHUB_WORKSPACE}
+        run: ./generate_gradle_properties.bash ${{ github.workspace }}
       - name: install dependencies
         run: sudo ./install_dependencies.bash
       - name: publish

@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.2.0'
+implementation 'com.evervault:lib:3.3.0'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.2.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.2.0</version>
+  <version>3.3.0</version>
 </dependency>
 ```
 
@@ -121,11 +121,12 @@ Evervault constructor expects your api key which you can retrieve from evervault
 var Evervault = new Evervault("<API_KEY>")
 ```
 
-| Parameter           | Type                         | Description                                                                                                                                                       |
-|---------------------| ---------------------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `apiKey`            | `String`                     | The API key of your Evervault Team                                                                                                                                |
-| `curve`             | `Evervault.EcdhCurve`        | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more.                              |
-| `decryptionDomains` | `String[]`                   | An array of hostnames which will  be routed through Evervault for decryption, supports wildcards. eg [ "api.example.com", "support.example.com, "*.example.com" ] |
+| Parameter              | Type                  | Description                                                                                                                                                      |
+|------------------------|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `apiKey`               | `String`              | The API key of your Evervault Team                                                                                                                               |
+| `curve`                | `Evervault.EcdhCurve` | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more.                             |
+| `decryptionDomains`    | `String[]`            | An array of hostnames which will be routed through Evervault for decryption, supports wildcards. eg [ "api.example.com", "support.example.com, "*.example.com" ] |
+| `enableOutboundRelay`  | `boolean`             | Enables Outbound Relay by syncing your configuration from the Evervault App. This feature is currently in beta.                                                  |
 
 
 ### Example
@@ -213,3 +214,8 @@ void encryptAndRun() throws EvervaultException {
 ### 3.2.0
 
 * Add createRunToken
+
+### 3.3.0
+
+* Allow enabling Outbound Relay using `enableOutboundRelay` config option.
+* Removed `ignoreDomains` and `intercept` config options

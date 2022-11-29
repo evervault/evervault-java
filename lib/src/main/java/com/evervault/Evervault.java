@@ -32,6 +32,7 @@ public class Evervault extends EvervaultService {
     public String[] getEvervaultIgnoreDomains() {
         return evervaultIgnoreDomains;
     }
+
     public String[] getEvervaultDecryptionDomains() {
         return evervaultDecryptionDomains;
     }
@@ -51,74 +52,40 @@ public class Evervault extends EvervaultService {
         this.evervaultRelayHost = Objects.requireNonNullElse(envRelayHost, EVERVAULT_RELAY_HOST);
     }
 
-    private void setEvervaultIgnoreDomains(String[] ignoreDomains) {
-        String[] defaultDomains = {getEvervaultApiHost(), getEvervaultRunHost()};
-        if (ignoreDomains == null) {
-            this.evervaultIgnoreDomains = defaultDomains;
-        } else {
-            this.evervaultIgnoreDomains = mergeIgnoreDomains(defaultDomains, ignoreDomains);
-        }
-    }
-
-    private String[] mergeIgnoreDomains(String[] defaultDomains, String[] ignoreDomains) {
-        var defaultLength = defaultDomains.length;
-        var ignoreDomainsLength = ignoreDomains.length;
-
-        var mergedLength = defaultLength + ignoreDomainsLength;
-        String[] mergedDomains = new String[mergedLength];
-
-        System.arraycopy(defaultDomains, 0, mergedDomains, 0, defaultLength);
-        System.arraycopy(ignoreDomains, 0, mergedDomains, defaultLength, ignoreDomainsLength);
-
-        return mergedDomains;
+    private void setEvervaultIgnoreDomains() {
+        this.evervaultIgnoreDomains = new String[]{ getEvervaultApiHost(), getEvervaultRunHost() };
     }
 
     public Evervault(String apiKey) throws EvervaultException {
-        this(apiKey, null, EcdhCurve.SECP256K1);
+        this(apiKey, EcdhCurve.SECP256K1, null, false);
     }
 
-    public Evervault(String apiKey, Boolean intercept) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, intercept, null);
+    public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
+        this(apiKey, ecdhCurve, null, false);
     }
 
     public Evervault(String apiKey, String[] decryptionDomains) throws EvervaultException {
         this(apiKey, decryptionDomains, EcdhCurve.SECP256K1);
     }
 
-    public Evervault(String apiKey, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, intercept, ignoreDomains);
-    }
-
-    public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, null, ecdhCurve);
-    }
-
-    public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept) throws EvervaultException {
-        this(apiKey, ecdhCurve, intercept, null);
-    }
-
-    public Evervault(String apiKey, EcdhCurve ecdhCurve, String[] ignoreDomains) throws EvervaultException {
-        this(apiKey, ecdhCurve, true, ignoreDomains);
-    }
-
-    public Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains) throws EvervaultException {
-        this(apiKey, ecdhCurve, intercept, ignoreDomains, null);
-        System.out.println(
-                "The `intercept` and `ignoreDomains` config options in Evervault Node.js SDK are deprecated and slated for removal." +
-                "\nPlease switch to the `decryptionDomains` config option." +
-                "\nMore details: https://docs.evervault.com/reference/nodejs-sdk#evervaultsdk"
-        );
-    }
-
     public Evervault(String apiKey, String[] decryptionDomains, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, ecdhCurve, false, null, decryptionDomains);
+        this(apiKey, ecdhCurve, decryptionDomains, false);
     }
 
-    private Evervault(String apiKey, EcdhCurve ecdhCurve, Boolean intercept, String[] ignoreDomains, String[] decryptionDomains) throws EvervaultException {
+    public Evervault(String apiKey, Boolean enableOutboundRelay, EcdhCurve ecdhCurve) throws EvervaultException {
+        this(apiKey, ecdhCurve, null, enableOutboundRelay);
+    }
+
+    public Evervault(String apiKey, Boolean enableOutboundRelay) throws EvervaultException {
+        this(apiKey, EcdhCurve.SECP256K1, null, enableOutboundRelay);
+    }
+
+    private Evervault(String apiKey, EcdhCurve ecdhCurve, String[] decryptionDomains, Boolean enableOutboundRelay) throws EvervaultException {
         setEvervaultApiHost();
         setEvervaultRunHost();
         setEvervaultRelayUrl();
-        setEvervaultIgnoreDomains(ignoreDomains);
+        setEvervaultIgnoreDomains();
+
         this.evervaultDecryptionDomains = decryptionDomains;
 
         var httpHandler = new HttpHandler(apiKey);
@@ -129,6 +96,7 @@ public class Evervault extends EvervaultService {
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
         this.setupRunTokenProvider(httpHandler);
+        this.setupOutboundRelayConfigProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);
@@ -136,10 +104,8 @@ public class Evervault extends EvervaultService {
         this.setupEncryption(encryptForObject);
         this.setupCredentialsProvider(apiKey);
 
-        if (intercept) { this.setupIntercept(apiKey); }
-
-        if (decryptionDomains != null && decryptionDomains.length > 0) {
-            this.setupInterceptV2();
+        if (decryptionDomains != null || enableOutboundRelay != null && enableOutboundRelay) {
+            this.setupIntercept(decryptionDomains, evervaultIgnoreDomains);
         }
     }
 }
