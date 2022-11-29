@@ -20,7 +20,6 @@ public class ProxyRoutePlanner {
                 if (Arrays.asList(configProvider.getAlwaysIgnoreDomains()).contains(hostname))
                     return false;
                 return Arrays.stream(configProvider.getDecryptionDomains()).anyMatch(domain ->
-                        domain.equals("**") ||
                                 domain.equals(hostname) ||
                                 domain.charAt(0) == '*' && hostname.endsWith(domain.substring(1))
                 );

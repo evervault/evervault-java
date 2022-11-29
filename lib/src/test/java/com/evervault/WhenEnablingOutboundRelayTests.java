@@ -107,24 +107,6 @@ public class WhenEnablingOutboundRelayTests {
     }
 
     @Test
-    public void shouldSetupRoutePlannerSoThatAllDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
-        // Given
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OuboundDestination>();
-        destinationDomains.put("**", new OutboundRelayConfigResult.OuboundDestination("**"));
-        when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(destinationDomains));
-
-        // When
-        var evervault = new Evervault();
-        evervault.setupWrapper(outboundRelayConfigProvider);
-        evervault.enableOutboundRelay();
-
-        // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
-        HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
-        assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
-    }
-
-    @Test
     public void shouldSetupRoutePlannerSoThatAllNonMatchingDomainsAreNotRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // Given
         var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OuboundDestination>();
