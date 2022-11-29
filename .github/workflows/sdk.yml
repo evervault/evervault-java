@@ -56,4 +56,4 @@ jobs:
       - name: install dependencies
         run: sudo ./install_dependencies.bash
       - name: publish
-        run: ./gradlew publishMavenjavaPublicationToSonatypeRepository
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
