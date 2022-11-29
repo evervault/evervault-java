@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: gradle.properties
-        run: ./generate_gradle_properties.bash ${GITHUB_WORKSPACE}
+        run: ./generate_gradle_properties.bash ${{ github.workspace }}
       - name: install dependencies
         run: sudo ./install_dependencies.bash
       - name: publish
