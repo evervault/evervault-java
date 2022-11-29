@@ -35,7 +35,7 @@ public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIg
                     executableSchedulerService.schedule(() -> {
                         cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
                         return cachedConfig;
-                    }, 2, 2, TimeUnit.MINUTES);
+                    }, 1, 1, TimeUnit.MINUTES);
                 }
             }
         }
