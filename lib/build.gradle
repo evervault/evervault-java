@@ -13,14 +13,6 @@ repositories {
     mavenLocal()
 }
 
-def getRepositoryUsername() {
-    return hasProperty("ossrhUsername") ? ossrhUsername : ""
-}
-
-def getRepositoryPassword() {
-    return hasProperty("ossrhPassword") ? ossrhPassword : ""
-}
-
 def getKeyFile() {
     return hasProperty("signingKey") ? signingKey : ""
 }
@@ -91,18 +83,6 @@ publishing {
                     name = 'Evervault'
                     url = 'https://www.evervault.com/'
                 }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = 'sonatype'
-            def releasesRepoUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-            def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials {
-                username getRepositoryUsername()
-                password getRepositoryPassword()
             }
         }
     }
