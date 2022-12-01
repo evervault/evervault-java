@@ -92,11 +92,13 @@ public class Evervault extends EvervaultService {
         var encryptService = EncryptionServiceFactory.build(ecdhCurve);
         var circuitBreaker = new CircuitBreaker();
         var timeService = new TimeService();
+        var taskScheduler = new RepeatableTaskSchedulerService();
 
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
         this.setupRunTokenProvider(httpHandler);
         this.setupOutboundRelayConfigProvider(httpHandler);
+        this.setupRepeatableTaskScheduler(taskScheduler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);

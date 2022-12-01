@@ -9,9 +9,15 @@ import java.util.concurrent.*;
 
 public class RepeatableTaskSchedulerService implements IScheduleRepeatableTask {
 
+    private static final int DEFAULT_THREAD_POOL_SIZE = 1;
+
     private final ScheduledExecutorService scheduledExecutor;
 
     private final Map<IExecuteRepeatableTask, Future<?>> scheduledFutures;
+
+    public RepeatableTaskSchedulerService() {
+        this(DEFAULT_THREAD_POOL_SIZE);
+    }
 
     public RepeatableTaskSchedulerService(int threadPoolSize) {
         scheduledFutures = new HashMap<>();
@@ -19,20 +25,20 @@ public class RepeatableTaskSchedulerService implements IScheduleRepeatableTask {
     }
 
     @Override
-    public void schedule(IExecuteRepeatableTask executable) {
+    public void schedule(IExecuteRepeatableTask task) {
         var future = scheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 try {
-                    executable.execute();
+                    task.execute();
                 } catch (Exception e) {
                     // Silently ignoring exceptions
                 } finally {
-                    scheduledExecutor.schedule(this, executable.getDelay(), executable.getTimeUnit());
+                    scheduledExecutor.schedule(this, task.getDelay(), task.getTimeUnit());
                 }
             }
-        }, executable.getDelay(), executable.getTimeUnit());
-        scheduledFutures.put(executable, future);
+        }, task.getDelay(), task.getTimeUnit());
+        scheduledFutures.put(task, future);
     }
 
     public void cancel(IExecuteRepeatableTask executable) {
