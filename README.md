@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.3.0'
+implementation 'com.evervault:lib:3.3.1'
 ```
 
 ### Maven
@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.3.0'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.3.0</version>
+  <version>3.3.1</version>
 </dependency>
 ```
 
@@ -219,3 +219,7 @@ void encryptAndRun() throws EvervaultException {
 
 * Allow enabling Outbound Relay using `enableOutboundRelay` config option.
 * Removed `ignoreDomains` and `intercept` config options
+
+### 3.3.1
+
+* Reduce delay for Outbound Relay cache refresh. Add support of server-set polling interval.
