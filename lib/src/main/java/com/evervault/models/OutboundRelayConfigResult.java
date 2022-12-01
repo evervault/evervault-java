@@ -1,19 +1,33 @@
 package com.evervault.models;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class OutboundRelayConfigResult {
-    public Map<String, OuboundDestination> outboundDestinations;
 
-    public OutboundRelayConfigResult(Map<String, OuboundDestination> outboundDestinations) {
-        this.outboundDestinations = outboundDestinations;
+    public Integer pollInterval;
+
+    public OutboundRelayConfig config;
+
+    public OutboundRelayConfigResult(Integer pollInterval, OutboundRelayConfig config) {
+        this.pollInterval = pollInterval;
+        this.config = config;
     }
 
-    public static class OuboundDestination {
-        public String destinationDomain;
+    public static class OutboundRelayConfig {
+        public Map<String, OutboundDestination> outboundDestinations;
 
-        public OuboundDestination(String destinationDomain) {
-            this.destinationDomain = destinationDomain;
+        public OutboundRelayConfig(HashMap<String, OutboundDestination> outboundDestinations) {
+            this.outboundDestinations = outboundDestinations;
+        }
+
+        public static class OutboundDestination {
+            public String destinationDomain;
+
+            public OutboundDestination(String destinationDomain) {
+                this.destinationDomain = destinationDomain;
+            }
         }
     }
+
 }

@@ -1,6 +1,7 @@
 package com.evervault;
 
-import com.evervault.services.ExecutableSchedulerService;
+import com.evervault.contracts.IExecuteRepeatableTask;
+import com.evervault.services.RepeatableTaskSchedulerService;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -10,18 +11,62 @@ public class WhenSchedulingAnExecutable {
     @Test
     public void shouldScheduleAnExecutable() throws InterruptedException {
         // Given
-        var executableSchedulerService = new ExecutableSchedulerService(1);
+        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
         var counter = new Counter();
 
         // When
-        executableSchedulerService.schedule(() -> {
-            counter.increment();
-            return null;
-        }, 0, 50, TimeUnit.MILLISECONDS);
-        Thread.sleep(200);
+        executableSchedulerService.schedule(
+                new IExecuteRepeatableTask(50, TimeUnit.MILLISECONDS) {
+                    @Override
+                    public void execute() throws Exception {
+                        counter.increment();
+                    }
+                }
+        );
+        Thread.sleep(190);
 
         // Then
-        assert counter.value >= 3;
+        assert counter.value == 3;
+    }
+
+    @Test
+    public void shouldScheduleAnExecutableAndDynamicallyUpdateDelay() throws InterruptedException {
+        // Given
+        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
+        var counter = new Counter();
+
+        // When
+        executableSchedulerService.schedule(
+                new IExecuteRepeatableTask(50, TimeUnit.MILLISECONDS) {
+                    @Override
+                    public void execute() throws Exception {
+                        counter.increment();
+                        updateDelay(100, TimeUnit.MILLISECONDS);
+                    }
+                }
+        );
+        Thread.sleep(190);
+
+        // Then
+        assert counter.value == 2;
+    }
+
+    @Test
+    public void shouldSilentlyIgnoreExceptions() throws InterruptedException {
+        // Given
+        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
+        var counter = new Counter();
+
+        // When
+        executableSchedulerService.schedule(
+                new IExecuteRepeatableTask(5, TimeUnit.MILLISECONDS) {
+                    @Override
+                    public void execute() throws Exception {
+                        throw new Exception();
+                    }
+                }
+        );
+        Thread.sleep(100);
     }
 
     private static class Counter {

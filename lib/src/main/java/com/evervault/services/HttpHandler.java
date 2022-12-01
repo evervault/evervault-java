@@ -19,15 +19,17 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
-    private final static String CONTENT_TYPE = "application/json";
+    private final static String JSON_CONTENT_TYPE = "application/json";
     private final static int OK_HTTP_STATUS_CODE = 200;
-    private final static String HEADER_FOR_ASYNC_FIELD = "x-async";
-    private final static String HEADER_FOR_VERSION_FIELD = "x-version-id";
+    private final static String POLL_INTERVAL_HEADER_NAME = "X-Poll-Interval";
+    private final static String ASYNC_HEADER_NAME = "x-async";
+    private final static String VERSION_ID_HEADER_NAME = "x-version-id";
     private final static long TIMEOUT_SECONDS_DEFAULT = 30;
     private final static String CAGES_KEY_SUFFIX = "/cages/key";
     private final String apiKey;
@@ -56,8 +58,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .timeout(httpTimeout)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("AcceptEncoding", "gzip, deflate")
-                .setHeader("Accept", CONTENT_TYPE)
-                .setHeader("Content-Type", CONTENT_TYPE)
+                .setHeader("Accept", JSON_CONTENT_TYPE)
+                .setHeader("Content-Type", JSON_CONTENT_TYPE)
                 .setHeader("Api-Key", apiKey)
                 .GET();
 
@@ -90,17 +92,17 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", CONTENT_TYPE)
-                .setHeader("Content-Type", CONTENT_TYPE)
+                .setHeader("Accept", JSON_CONTENT_TYPE)
+                .setHeader("Content-Type", JSON_CONTENT_TYPE)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
         if (async) {
-            requestBuilder.setHeader(HEADER_FOR_ASYNC_FIELD, "true");
+            requestBuilder.setHeader(ASYNC_HEADER_NAME, "true");
         }
 
         if (version != null && !version.isEmpty()) {
-            requestBuilder.setHeader(HEADER_FOR_VERSION_FIELD, version);
+            requestBuilder.setHeader(VERSION_ID_HEADER_NAME, version);
         }
 
         var request = requestBuilder.build();
@@ -125,8 +127,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", CONTENT_TYPE)
-                .setHeader("Content-Type", CONTENT_TYPE)
+                .setHeader("Accept", JSON_CONTENT_TYPE)
+                .setHeader("Content-Type", JSON_CONTENT_TYPE)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -149,7 +151,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", CONTENT_TYPE)
+                .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("AcceptEncoding", "gzip, deflate")
                 .timeout(httpTimeout)
                 .GET();
@@ -161,6 +163,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             throw new HttpFailureException(response.statusCode(), response.body());
         }
 
-        return new Gson().fromJson(response.body(), OutboundRelayConfigResult.class);
+        var config = new Gson().fromJson(response.body(), OutboundRelayConfigResult.OutboundRelayConfig.class);
+        var pollInterval = response.headers().firstValue(POLL_INTERVAL_HEADER_NAME).flatMap(s -> {
+            try {
+                return Optional.of(Integer.valueOf(s));
+            } catch (NumberFormatException e) {
+                return Optional.empty();
+            }
+        }).orElse(null);
+        return new OutboundRelayConfigResult(pollInterval, config);
     }
 }
