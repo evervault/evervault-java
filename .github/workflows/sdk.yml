@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: sudo ./install_dependencies.bash
+      - name: check gradle version
+        run: gradle -v
       - name: build project
         run: gradle clean build
       - name: unit tests
