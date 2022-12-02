@@ -170,7 +170,7 @@ public class WhenEnablingOutboundRelayTests {
         int delay = 5;
         TimeUnit timeUnit = TimeUnit.SECONDS;
         String evervaultApiUrl = "http://api.evervault.com";
-        var task = new CachedOutboundRelayConfigService.GetOutboundDelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
+        var task = new CachedOutboundRelayConfigService.GetOutboundRelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
         var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(
@@ -194,7 +194,7 @@ public class WhenEnablingOutboundRelayTests {
         int delay = 5;
         TimeUnit timeUnit = TimeUnit.SECONDS;
         String evervaultApiUrl = "http://api.evervault.com";
-        var task = new CachedOutboundRelayConfigService.GetOutboundDelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
+        var task = new CachedOutboundRelayConfigService.GetOutboundRelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
         var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(

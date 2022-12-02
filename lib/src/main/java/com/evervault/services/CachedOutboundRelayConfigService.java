@@ -27,7 +27,7 @@ public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIg
         if (cachedConfig == null) {
             synchronized (lock) {
                 if (cachedConfig == null) {
-                    var task = new GetOutboundDelayConfigTask(DEFAULT_POLL_INTERVAL, TimeUnit.SECONDS, httpHandler, evervaultApiUrl);
+                    var task = new GetOutboundRelayConfigTask(DEFAULT_POLL_INTERVAL, TimeUnit.SECONDS, httpHandler, evervaultApiUrl);
                     task.execute();
                     repeatableTaskScheduler.schedule(task);
                 }
@@ -47,13 +47,13 @@ public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIg
                 .toArray(String[]::new);
     }
 
-    public static class GetOutboundDelayConfigTask extends IExecuteRepeatableTask {
+    public static class GetOutboundRelayConfigTask extends IExecuteRepeatableTask {
 
         private final IProvideOutboundRelayConfigFromHttpApi httpHandler;
 
         private final String evervaultApiUrl;
 
-        public GetOutboundDelayConfigTask(int delay, TimeUnit timeUnit, IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl) {
+        public GetOutboundRelayConfigTask(int delay, TimeUnit timeUnit, IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl) {
             super(delay, timeUnit);
             this.httpHandler = httpHandler;
             this.evervaultApiUrl = evervaultApiUrl;
