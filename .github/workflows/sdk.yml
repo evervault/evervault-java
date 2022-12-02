@@ -19,8 +19,6 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
-      - name: check java version
-        run: java -version
       - name: build project
         run: ./gradlew clean build
       - name: unit tests
