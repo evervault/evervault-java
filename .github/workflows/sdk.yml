@@ -15,12 +15,8 @@ jobs:
       EV_RELAY_HOST: strict.relay.evervault.io
     steps:
       - uses: actions/checkout@v2
-      - name: install dependencies
-        run: sudo ./install_dependencies.bash
-      - name: check gradle version
-        run: gradle -v
       - name: build project
-        run: gradle clean build
+        run: ./gradlew clean build
       - name: unit tests
         run: ./gradlew test --info
       - name: Upload unit test report on failure
@@ -55,7 +51,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: gradle.properties
         run: ./generate_gradle_properties.bash ${{ github.workspace }}
-      - name: install dependencies
-        run: sudo ./install_dependencies.bash
       - name: publish
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
