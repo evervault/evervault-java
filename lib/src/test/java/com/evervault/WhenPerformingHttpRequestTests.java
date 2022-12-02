@@ -1,6 +1,8 @@
 package com.evervault;
 
+import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.exceptions.HttpFailureException;
+import com.evervault.services.CachedOutboundRelayConfigService;
 import com.evervault.services.HttpHandler;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -320,9 +323,10 @@ public class WhenPerformingHttpRequestTests {
                 .withStatus(200)));
 
         var actual = client.getOutboundRelayConfig(wireMockRuntimeInfo.getHttpBaseUrl());
-        Assertions.assertNotNull(actual.outboundDestinations);
-        Assertions.assertNotNull(actual.outboundDestinations.get("api.twilio.com"));
-        Assertions.assertEquals("api.twilio.com", actual.outboundDestinations.get("api.twilio.com").destinationDomain);
+        Assertions.assertNull(actual.pollInterval);
+        Assertions.assertNotNull(actual.config.outboundDestinations);
+        Assertions.assertNotNull(actual.config.outboundDestinations.get("api.twilio.com"));
+        Assertions.assertEquals("api.twilio.com", actual.config.outboundDestinations.get("api.twilio.com").destinationDomain);
 
         verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
                 .withHeader("API-KEY", equalTo(API_KEY))
@@ -340,7 +344,70 @@ public class WhenPerformingHttpRequestTests {
                 .withStatus(200)));
 
         var actual = client.getOutboundRelayConfig(wireMockRuntimeInfo.getHttpBaseUrl());
-        Assertions.assertTrue(actual.outboundDestinations.isEmpty());
+        Assertions.assertTrue(actual.config.outboundDestinations.isEmpty());
+
+        verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
+                .withHeader("API-KEY", equalTo(API_KEY))
+        );
+    }
+
+    @Test
+    void hittingGetOutboundRelayConfigurationEndpointWorksCorrectlyWhenThePollIntervalResponseHeaderIsSet(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withHeader("X-Poll-Interval", "5")
+                .withBody("{\"appUuid\":\"app_2c364a9566e4\",\"teamUuid\":\"team_5e71a82322c7\",\"strictMode\":false,\"outboundDestinations\":{\"api.twilio.com\":{\"id\":210,\"appUuid\":\"app_2c364a9566e4\",\"createdAt\":\"2022-11-24T09:01:48.354Z\",\"updatedAt\":\"2022-11-24T09:01:48.354Z\",\"deletedAt\":null,\"routeSpecificFieldsToEncrypt\":[],\"deterministicFieldsToEncrypt\":[],\"encryptEmptyStrings\":true,\"curve\":\"secp256k1\",\"uuid\":\"outbound_destination_ade4771a1ccf\",\"destinationDomain\":\"api.twilio.com\"}}}")
+                .withStatus(200)));
+
+        var actual = client.getOutboundRelayConfig(wireMockRuntimeInfo.getHttpBaseUrl());
+        Assertions.assertNotNull(actual.config.outboundDestinations);
+        Assertions.assertNotNull(actual.config.outboundDestinations.get("api.twilio.com"));
+        Assertions.assertEquals("api.twilio.com", actual.config.outboundDestinations.get("api.twilio.com").destinationDomain);
+
+        verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
+                .withHeader("API-KEY", equalTo(API_KEY))
+        );
+    }
+
+    @Test
+    void hittingGetOutboundRelayConfigurationEndpointDoesNotThrowWhenThePollIntervalResponseHeaderIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withHeader("X-Poll-Interval", "invalid")
+                .withBody("{\"appUuid\":\"app_2c364a9566e4\",\"teamUuid\":\"team_5e71a82322c7\",\"strictMode\":false,\"outboundDestinations\":{\"api.twilio.com\":{\"id\":210,\"appUuid\":\"app_2c364a9566e4\",\"createdAt\":\"2022-11-24T09:01:48.354Z\",\"updatedAt\":\"2022-11-24T09:01:48.354Z\",\"deletedAt\":null,\"routeSpecificFieldsToEncrypt\":[],\"deterministicFieldsToEncrypt\":[],\"encryptEmptyStrings\":true,\"curve\":\"secp256k1\",\"uuid\":\"outbound_destination_ade4771a1ccf\",\"destinationDomain\":\"api.twilio.com\"}}}")
+                .withStatus(200)));
+
+        var actual = client.getOutboundRelayConfig(wireMockRuntimeInfo.getHttpBaseUrl());
+        Assertions.assertNotNull(actual.config.outboundDestinations);
+        Assertions.assertNotNull(actual.config.outboundDestinations.get("api.twilio.com"));
+        Assertions.assertEquals("api.twilio.com", actual.config.outboundDestinations.get("api.twilio.com").destinationDomain);
+
+        verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
+                .withHeader("API-KEY", equalTo(API_KEY))
+        );
+    }
+
+    @Test
+    void hittingGetOutboundRelayConfigurationEndpointDoesNotThrowWhenThePollIntervalResponseHeaderIsNotSet(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
+        var client = new HttpHandler(API_KEY);
+
+        stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withHeader("X-Poll-Interval", "")
+                .withBody("{\"appUuid\":\"app_2c364a9566e4\",\"teamUuid\":\"team_5e71a82322c7\",\"strictMode\":false,\"outboundDestinations\":{\"api.twilio.com\":{\"id\":210,\"appUuid\":\"app_2c364a9566e4\",\"createdAt\":\"2022-11-24T09:01:48.354Z\",\"updatedAt\":\"2022-11-24T09:01:48.354Z\",\"deletedAt\":null,\"routeSpecificFieldsToEncrypt\":[],\"deterministicFieldsToEncrypt\":[],\"encryptEmptyStrings\":true,\"curve\":\"secp256k1\",\"uuid\":\"outbound_destination_ade4771a1ccf\",\"destinationDomain\":\"api.twilio.com\"}}}")
+                .withStatus(200)));
+
+        var actual = client.getOutboundRelayConfig(wireMockRuntimeInfo.getHttpBaseUrl());
+        Assertions.assertNotNull(actual.config.outboundDestinations);
+        Assertions.assertNotNull(actual.config.outboundDestinations.get("api.twilio.com"));
+        Assertions.assertEquals("api.twilio.com", actual.config.outboundDestinations.get("api.twilio.com").destinationDomain);
 
         verify(getRequestedFor(urlEqualTo(getRelayOutboundConfigEndpoint))
                 .withHeader("API-KEY", equalTo(API_KEY))

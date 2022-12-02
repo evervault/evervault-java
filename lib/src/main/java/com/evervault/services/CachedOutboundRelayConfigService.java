@@ -1,41 +1,35 @@
 package com.evervault.services;
 
+import com.evervault.contracts.IExecuteRepeatableTask;
 import com.evervault.contracts.IProvideDecryptionAndIgnoreDomains;
 import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
-import com.evervault.exceptions.HttpFailureException;
+import com.evervault.contracts.IScheduleRepeatableTask;
 import com.evervault.models.OutboundRelayConfigResult;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIgnoreDomains {
 
+    private static final int DEFAULT_POLL_INTERVAL = 5;
     private static final Object lock = new Object();
 
-    private static OutboundRelayConfigResult cachedConfig;
+    private static volatile OutboundRelayConfigResult.OutboundRelayConfig cachedConfig;
 
     public static void clearCache() {
         cachedConfig = null;
     }
 
-    private String[] alwaysIgnoreDomains;
+    private final String[] alwaysIgnoreDomains;
 
-    public CachedOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl, String[] alwaysIgnoreDomains)
-            throws HttpFailureException, IOException, InterruptedException {
-        this(httpHandler, evervaultApiUrl, new ExecutableSchedulerService(1), alwaysIgnoreDomains);
-    }
-
-    private CachedOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl, ExecutableSchedulerService executableSchedulerService, String[] alwaysIgnoreDomains)
-            throws HttpFailureException, IOException, InterruptedException {
+    public CachedOutboundRelayConfigService(IProvideOutboundRelayConfigFromHttpApi httpHandler, IScheduleRepeatableTask repeatableTaskScheduler, String evervaultApiUrl, String[] alwaysIgnoreDomains)
+            throws Exception {
         this.alwaysIgnoreDomains = alwaysIgnoreDomains;
         if (cachedConfig == null) {
             synchronized (lock) {
                 if (cachedConfig == null) {
-                    cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
-                    executableSchedulerService.schedule(() -> {
-                        cachedConfig = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
-                        return cachedConfig;
-                    }, 2, 2, TimeUnit.MINUTES);
+                    var task = new GetOutboundRelayConfigTask(DEFAULT_POLL_INTERVAL, TimeUnit.SECONDS, httpHandler, evervaultApiUrl);
+                    task.execute();
+                    repeatableTaskScheduler.schedule(task);
                 }
             }
         }
@@ -51,6 +45,26 @@ public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIg
                 .stream()
                 .map(domain -> domain.destinationDomain)
                 .toArray(String[]::new);
+    }
+
+    public static class GetOutboundRelayConfigTask extends IExecuteRepeatableTask {
+
+        private final IProvideOutboundRelayConfigFromHttpApi httpHandler;
+
+        private final String evervaultApiUrl;
+
+        public GetOutboundRelayConfigTask(int delay, TimeUnit timeUnit, IProvideOutboundRelayConfigFromHttpApi httpHandler, String evervaultApiUrl) {
+            super(delay, timeUnit);
+            this.httpHandler = httpHandler;
+            this.evervaultApiUrl = evervaultApiUrl;
+        }
+
+        @Override
+        public void execute() throws Exception {
+            var result = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
+            cachedConfig = result.config;
+            updateDelay((result.pollInterval != null) ? result.pollInterval : getDelay(), getTimeUnit());
+        }
     }
 
 }

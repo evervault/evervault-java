@@ -27,6 +27,8 @@ public abstract class EvervaultService {
     protected IProvideCageExecution cageExecutionProvider;
     protected IProvideRunToken runTokenProvider;
     protected IProvideOutboundRelayConfigFromHttpApi outboundRelayConfigProvider;
+
+    protected IScheduleRepeatableTask repeatableTaskScheduler;
     protected IProvideCircuitBreaker circuitBreakerProvider;
     protected CredentialsProvider credentialsProvider;
     protected HttpRoutePlanner httpRoutePlanner;
@@ -95,6 +97,14 @@ public abstract class EvervaultService {
         this.outboundRelayConfigProvider = outboundRelayConfigProvider;
     }
 
+    protected void setupRepeatableTaskScheduler(IScheduleRepeatableTask repeatableTaskScheduler) {
+        if (repeatableTaskScheduler == null) {
+            throw new NullPointerException(IScheduleRepeatableTask.class.getName());
+        }
+
+        this.repeatableTaskScheduler = repeatableTaskScheduler;
+    }
+
 
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
@@ -157,7 +167,7 @@ public abstract class EvervaultService {
             domainsProvider = new StaticOutboundRelayConfigService(ignoreDomains, decryptionDomains);
         } else {
             try {
-                domainsProvider = new CachedOutboundRelayConfigService(outboundRelayConfigProvider, getEvervaultApiUrl(), ignoreDomains);
+                domainsProvider = new CachedOutboundRelayConfigService(outboundRelayConfigProvider, repeatableTaskScheduler, getEvervaultApiUrl(), ignoreDomains);
             } catch (Exception e) {
                 throw new EvervaultException(e);
             }
