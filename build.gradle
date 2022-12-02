@@ -4,11 +4,6 @@ plugins {
 
 group 'com.evervault'
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 def getRepositoryUsername() {
     return hasProperty("ossrhUsername") ? ossrhUsername : ""
 }
