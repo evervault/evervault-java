@@ -55,7 +55,6 @@ public class WhenSchedulingAnExecutable {
     public void shouldSilentlyIgnoreExceptions() throws InterruptedException {
         // Given
         var executableSchedulerService = new RepeatableTaskSchedulerService(1);
-        var counter = new Counter();
 
         // When
         executableSchedulerService.schedule(
