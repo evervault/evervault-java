@@ -42,7 +42,7 @@ jobs:
           name: failed_integration_tests
           path: ${{ github.workspace }}/lib/build/reports/tests/integrationTests
   publish:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push'
     needs: [ ci ]
     runs-on: ubuntu-latest
     env:

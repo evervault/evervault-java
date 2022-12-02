@@ -68,8 +68,28 @@ public class WhenSchedulingAnExecutable {
         Thread.sleep(100);
     }
 
+    @Test
+    public void shouldScheduleAnExecutableAndDynamicallyUpdateDelayStressTest() throws InterruptedException {
+        // Given
+        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
+        var counter = new Counter();
+
+        // When
+        executableSchedulerService.schedule(
+                new IExecuteRepeatableTask(1, TimeUnit.MILLISECONDS) {
+                    @Override
+                    public void execute() throws Exception {
+                        counter.increment();
+                        updateDelay(1, TimeUnit.MILLISECONDS);
+                    }
+                }
+        );
+        Thread.sleep(28800000);
+        System.out.println(counter.value);
+    }
+
     private static class Counter {
-        public int value = 0;
+        public long value = 0;
 
         public void increment() {
             value++;
