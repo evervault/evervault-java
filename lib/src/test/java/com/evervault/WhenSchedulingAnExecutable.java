@@ -69,7 +69,7 @@ public class WhenSchedulingAnExecutable {
     }
 
     private static class Counter {
-        public long value = 0;
+        public int value = 0;
 
         public void increment() {
             value++;
