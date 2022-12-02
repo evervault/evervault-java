@@ -15,6 +15,10 @@ jobs:
       EV_RELAY_HOST: strict.relay.evervault.io
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
       - name: check java version
         run: java -version
       - name: build project
