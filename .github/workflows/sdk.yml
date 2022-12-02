@@ -15,6 +15,8 @@ jobs:
       EV_RELAY_HOST: strict.relay.evervault.io
     steps:
       - uses: actions/checkout@v2
+      - name: check java version
+        run: java -version
       - name: build project
         run: ./gradlew clean build
       - name: unit tests
