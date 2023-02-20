@@ -118,7 +118,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     @Override
     public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
+        // Allow non pre-approved payloads for run tokens
+        // If data is null, convert to an empty object
+        String serializedData;
+        if (data == null) {
+            serializedData = new Gson().toJson(new Object());
+        } else {
+            serializedData = new Gson().toJson(data);
+        }
 
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");

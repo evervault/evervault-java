@@ -243,9 +243,6 @@ public abstract class EvervaultService {
             throw new EvervaultException(new MandatoryParameterException("cageName"));
         }
 
-        if (data == null) {
-            throw new EvervaultException(new MandatoryParameterException("data"));
-        }
 
         try {
             return circuitBreakerProvider.execute(createRunTokenHash, () -> runTokenProvider.createRunToken(getEvervaultApiUrl(), cageName, data));
