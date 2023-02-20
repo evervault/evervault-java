@@ -67,6 +67,19 @@ public class WhenUsingApisCreateRunTokenTests {
     }
 
     @Test
+    void callingToCreateRunTokenReturnsTheHttpContentWhenNoDataPassed() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
+        var createRunTokenResult = new RunTokenResult();
+        createRunTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
+        when(runTokenProvider.createRunToken(anyString(), anyString())).thenReturn(createRunTokenResult);
+
+        evervaultService.setupWrapper(runTokenProvider, circuitBreakerProvider);
+
+        var result = evervaultService.createRunToken("somecage");
+
+        assert createRunTokenResult.equals(result);
+    }
+
+    @Test
     void providerNotSetThrows() {
         assertThrows(NullPointerException.class, () -> evervaultService.setupWrapper(null, circuitBreakerProvider));
     }
