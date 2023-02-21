@@ -223,3 +223,7 @@ void encryptAndRun() throws EvervaultException {
 ### 3.3.1
 
 * Reduce delay for Outbound Relay cache refresh. Add support of server-set polling interval.
+
+### 3.3.2
+
+* Allow unsigned payloads when creating run tokens

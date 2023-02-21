@@ -143,6 +143,35 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         return new Gson().fromJson(response.body(), RunTokenResult.class);
     }
 
+    @Override
+    public RunTokenResult createRunToken(String url, String cageName) throws HttpFailureException, IOException, InterruptedException {
+        // Allow non pre-approved payloads for run tokens
+        // If data is null, convert to an empty object
+        var serializedData = new Gson().toJson(new Object());
+
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
+
+        var requestBuilder = HttpRequest.newBuilder()
+                .uri(finalAddress)
+                .setHeader("Api-Key", apiKey)
+                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+                .setHeader("Accept", JSON_CONTENT_TYPE)
+                .setHeader("Content-Type", JSON_CONTENT_TYPE)
+                .timeout(httpTimeout)
+                .POST(BodyPublishers.ofString(serializedData));
+
+        var request = requestBuilder.build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(response.statusCode(), response.body());
+        }
+
+        return new Gson().fromJson(response.body(), RunTokenResult.class);
+    }
+
     public OutboundRelayConfigResult getOutboundRelayConfig(String url) throws HttpFailureException, IOException, InterruptedException {
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/v2/relay-outbound");

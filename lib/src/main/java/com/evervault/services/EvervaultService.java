@@ -253,4 +253,16 @@ public abstract class EvervaultService {
             throw new EvervaultException(e);
         }
     }
+
+    public RunTokenResult createRunToken(String cageName) throws EvervaultException {
+        if (cageName == null || cageName.isEmpty()) {
+            throw new EvervaultException(new MandatoryParameterException("cageName"));
+        }
+
+        try {
+            return circuitBreakerProvider.execute(createRunTokenHash, () -> runTokenProvider.createRunToken(getEvervaultApiUrl(), cageName));
+        } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
+            throw new EvervaultException(e);
+        }
+    }
 }

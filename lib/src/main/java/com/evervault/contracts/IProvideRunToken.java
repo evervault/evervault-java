@@ -7,4 +7,5 @@ import java.io.IOException;
 
 public interface IProvideRunToken {
     RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException;
+    RunTokenResult createRunToken(String url, String cageName) throws HttpFailureException, IOException, InterruptedException;
 }
