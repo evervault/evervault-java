@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @WireMockTest
 public class WhenDealingWithHttpTimeoutsTests {
     private static final String API_KEY = "Foo";
+    private static final String APP_UUID = "Bar";
 
     @Test
     void triggersExceptionWhenHittingPublicKeyEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) {
@@ -27,7 +28,7 @@ public class WhenDealingWithHttpTimeoutsTests {
                         .withHeader("Content-Type", "application/json")
                         .withFixedDelay(1)));
 
-        var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
+        var client = new HttpHandler(API_KEY, APP_UUID, Duration.ofMillis(10));
         assertThrows(HttpTimeoutException.class, () -> client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + endpoint));
     }
 
@@ -40,7 +41,7 @@ public class WhenDealingWithHttpTimeoutsTests {
                         .withHeader("Content-Type", "application/json")
                         .withFixedDelay(1)));
 
-        var client = new HttpHandler(API_KEY, Duration.ofMillis(10));
+        var client = new HttpHandler(API_KEY, APP_UUID, Duration.ofMillis(10));
 
         assertThrows(HttpTimeoutException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "Foo", "Foo", true, null));
     }

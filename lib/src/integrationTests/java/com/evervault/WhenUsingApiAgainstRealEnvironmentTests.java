@@ -95,13 +95,13 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void doesThrowWhenInvalidKey() {
-        assertThrows(EvervaultException.class, () -> new Evervault("foo"));
+        assertThrows(EvervaultException.class, () -> new Evervault("foo", "bar"));
     }
 
     @Test
     void encryptSomeDataCorrectly() throws EvervaultException {
         final String someDataToEncrypt = "Foo";
-        var evervault = new Evervault(getEnvironmentApiKey());
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar");
 
         var result = (String) evervault.encrypt(someDataToEncrypt);
 
@@ -127,7 +127,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRun() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey());
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar");
         var data = Bar.createFooStructure(evervault);
         var cageResult = evervault.run(cageName, data, false, null);
 
@@ -136,7 +136,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRunR1Curve() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar", EcdhCurve.SECP256R1);
         var data = Bar.createFooStructure(evervault);
         var cageResult = evervault.run(cageName, data, false, null);
 
@@ -145,7 +145,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void createRunToken() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey());
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar");
         var data = Bar.createFooStructure(evervault);
         var runTokenResult = evervault.createRunToken(cageName, data);
         
@@ -153,8 +153,8 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     }
 
     private static class OwnEvervault extends Evervault {
-        public OwnEvervault(String apiKey) throws EvervaultException {
-            super(apiKey);
+        public OwnEvervault(String apiKey, String appUuid) throws EvervaultException {
+            super(apiKey, appUuid);
         }
 
         public byte[] getSharedKey() {
@@ -167,7 +167,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void decryptDataWorksAsExpected() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException {
-        var evervault = new OwnEvervault(getEnvironmentApiKey());
+        var evervault = new OwnEvervault(getEnvironmentApiKey(), "bar");
 
         var bar = Bar.createFooStructure(evervault);
 
@@ -198,7 +198,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     @Test
     void interceptWorksThroughApacheHttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
 
-        var evervault = new Evervault(getEnvironmentApiKey(), EcdhCurve.SECP256R1);
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar", EcdhCurve.SECP256R1);
 
         var encryptedString = evervault.encrypt("Secret info");
 
@@ -234,7 +234,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void interceptWithDecryptionDomainsWorksThroughApacheHttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
-        var evervault = new Evervault(getEnvironmentApiKey(), new String[] {"*.pipedream.net"}, EcdhCurve.SECP256R1);
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar", new String[] {"*.pipedream.net"}, EcdhCurve.SECP256R1);
 
         var encryptedString = evervault.encrypt("Secret info");
 
@@ -270,7 +270,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void interceptWithOutboundRelayConfigWorksThroughApacheHttpLibrary() throws HttpFailureException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, MaxRetryReachedException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NoSuchProviderException, InterruptedException, InvalidCipherTextException, NotImplementedException, EvervaultException, KeyManagementException {
-        var evervault = new Evervault(getEnvironmentApiKey(), true, EcdhCurve.SECP256R1);
+        var evervault = new Evervault(getEnvironmentApiKey(), "bar", true, EcdhCurve.SECP256R1);
 
         var encryptedString = evervault.encrypt("Secret info");
 
