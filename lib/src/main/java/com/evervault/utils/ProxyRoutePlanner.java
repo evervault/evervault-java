@@ -14,17 +14,12 @@ import java.util.function.Predicate;
 
 public class ProxyRoutePlanner {
     public static HttpRoutePlanner getOutboundRelayRoutePlanner(IProvideDecryptionAndIgnoreDomains configProvider) {
-        return buildRoutePlanner(new Predicate<String>() {
-            @Override
-            public boolean test(String hostname) {
-                if (Arrays.asList(configProvider.getAlwaysIgnoreDomains()).contains(hostname))
-                    return false;
-                return Arrays.stream(configProvider.getDecryptionDomains()).anyMatch(domain ->
-                                domain.equals(hostname) ||
-                                domain.charAt(0) == '*' && hostname.endsWith(domain.substring(1))
-                );
-            }
-        });
+        return buildRoutePlanner(hostname -> {
+                return !Arrays.stream(configProvider.getAlwaysIgnoreDomainRegexes())
+                    .anyMatch(pattern -> pattern.matcher(hostname).matches())
+                    && Arrays.stream(configProvider.getDecryptionDomainRegexes())
+                    .anyMatch(pattern -> pattern.matcher(hostname).matches());
+            });
     }
 
     private static HttpRoutePlanner buildRoutePlanner(Predicate<String> shouldDomainBeDecryptedPredicate) {
