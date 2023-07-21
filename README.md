@@ -160,7 +160,7 @@ void encryptAndRun() throws EvervaultException {
 
 ```
 
-### Decrypt Examaple
+### Decrypt Example
 ```java
 private static class Bar {
     public String name;
@@ -259,3 +259,7 @@ void encryptAndDecrypt() throws EvervaultException {
 ### 3.3.2
 
 * Allow unsigned payloads when creating run tokens
+
+### 4.0.0
+
+* Introduce decrypt method
