@@ -77,7 +77,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     };
 
     public String getEnvironmentAppUuid() {
-        return System.getenv(ENV_APP_UUID);
+        return "app_12345678987";
     }
 
     public String getEnvironmentApiKey() {
