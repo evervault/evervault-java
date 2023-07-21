@@ -100,7 +100,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     @Test
     void encryptSomeDataCorrectly() throws EvervaultException {
         final String someDataToEncrypt = "Foo";
-        var evervault = new Evervault(getEnvironmentApiKey(), "bar");
+        var evervault = new Evervault("app_id", getEnvironmentApiKey());
 
         var result = (String) evervault.encrypt(someDataToEncrypt);
 
@@ -126,7 +126,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void encryptAndRun() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey(), "bar");
+        var evervault = new Evervault( "app_id", getEnvironmentApiKey());
         var data = Bar.createFooStructure(evervault);
         var cageResult = evervault.run(cageName, data, false, null);
 
@@ -144,7 +144,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void createRunToken() throws EvervaultException {
-        var evervault = new Evervault(getEnvironmentApiKey(), "bar");
+        var evervault = new Evervault("app_id", getEnvironmentApiKey(),);
         var data = Bar.createFooStructure(evervault);
         var runTokenResult = evervault.createRunToken(cageName, data);
         
