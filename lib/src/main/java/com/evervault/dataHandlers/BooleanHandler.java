@@ -1,5 +1,6 @@
 package com.evervault.dataHandlers;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 import com.evervault.contracts.DataHeader;
@@ -31,8 +32,8 @@ public class BooleanHandler implements IDataHandler {
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
         var original = (boolean) data;
-        var byteToEncrypt = original ? (byte)1 : (byte)0;
+        var formatted_data = original ? "true" : "false";
 
-        return encryptionProvider.encryptData(DataHeader.Boolean, generatedEcdhKey, new byte[] { byteToEncrypt }, sharedKey, teamPublicKey);
+        return encryptionProvider.encryptData(DataHeader.Boolean, generatedEcdhKey, formatted_data.getBytes(StandardCharsets.UTF_8), sharedKey, teamPublicKey);
     }
 }

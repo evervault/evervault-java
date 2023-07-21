@@ -57,7 +57,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var input = appUuid + ":" + apiKey;
         var encodedValue = Base64Handler.encodeBase64(input.getBytes());
         StringBuilder builder = new StringBuilder();
-        builder.append("Bearer ")
+        builder.append("Basic ")
             .append(encodedValue);
         return builder.toString();
     }
@@ -143,7 +143,6 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
             .uri(finalAddress)
-            .setHeader("Api-Key", apiKey)
             .setHeader("User-Agent", VERSION_PREFIX + 1.0)
             .setHeader("Accept", JSON_CONTENT_TYPE)
             .setHeader("Content-Type", JSON_CONTENT_TYPE)
