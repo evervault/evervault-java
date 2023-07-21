@@ -144,7 +144,7 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
 
     @Test
     void createRunToken() throws EvervaultException {
-        var evervault = new Evervault("app_id", getEnvironmentApiKey(),);
+        var evervault = new Evervault("app_id", getEnvironmentApiKey());
         var data = Bar.createFooStructure(evervault);
         var runTokenResult = evervault.createRunToken(cageName, data);
         
