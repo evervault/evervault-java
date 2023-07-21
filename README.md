@@ -49,6 +49,7 @@ The Evervault Java SDK exposes a constructor and two functions:
 * `evervault.encrypt()`
 * `evervault.run()`
 * `evervault.createRunToken()`
+* `evervault.decrypt()`
 
 ### Relay Interception
 
@@ -103,7 +104,13 @@ If you use a different http client to the Apache HTTPClient above, and it suppor
 
 In case you pass a map<literal, literal> then the key will be preserved and the value will be an encrypted string. If value is another map for example, it will follow the sample principle recursively.
 
-In case you pass a vector with literals the return will be vector with encrypted strings. 
+In case you pass a vector with literals the return will be vector with encrypted strings.
+
+### decrypt
+
+**decrypt** will take your encrypted data and decrypt it. It will also deserialise the data into an object of a specified type.
+
+The decrypt function requires the type of `data` is of `Map<String, Object>`.
 
 ### run
 
@@ -115,15 +122,16 @@ createRunToken will create a single use, time bound token for invoking a cage.
 
 ### constructor
 
-Evervault constructor expects your api key which you can retrieve from evervault website. There are also optional parameters.
+Evervault constructor expects your api key which you can retrieve from evervault dashboard and your App ID which can also be retrieved from the dashboard. There are also optional parameters.
 
 ```java
-var Evervault = new Evervault("<API_KEY>")
+var Evervault = new Evervault("<API_KEY>", "<APP_ID>")
 ```
 
 | Parameter              | Type                  | Description                                                                                                                                                      |
 |------------------------|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `apiKey`               | `String`              | The API key of your Evervault Team                                                                                                                               |
+| `apiKey`               | `String`              | The API key of your Evervault App                                                                                                                                |
+| `appUuid`              | `String`              | The App ID of your Evervault App
 | `curve`                | `Evervault.EcdhCurve` | The elliptic curve used for cryptographic operations. See [Elliptic Curve Support](/reference/elliptic-curve-support) to learn more.                             |
 | `decryptionDomains`    | `String[]`            | An array of hostnames which will be routed through Evervault for decryption, supports wildcards. eg [ "api.example.com", "support.example.com, "*.example.com" ] |
 | `enableOutboundRelay`  | `boolean`             | Enables Outbound Relay by syncing your configuration from the Evervault App. This feature is currently in beta.                                                  |
@@ -145,9 +153,33 @@ private static class Bar {
 }
 
 void encryptAndRun() throws EvervaultException {
-    var evervault = new Evervault(getEnvironmentApiKey());
+    var evervault = new Evervault(getEnvironmentApiKey(), getEnvironmentAppUuid());
 
     var cageResult = evervault.run(cageName, Bar.createFooStructure(evervault), false, null);
+}
+
+```
+
+### Decrypt Example
+```java
+private static class Bar {
+    public String name;
+}
+
+void encryptAndDecrypt() throws EvervaultException {
+    var evervault = new Evervault(getEnvironmentApiKey(), getEnvironmentAppUuid());
+
+    // Encrypt some data
+    var encryptedName = (String) evervault.encrypt("foo");
+
+    // Decrypt the previously encrypted data
+    var dataToDecrypt = new HashMap<String, String>();
+    dataToDecrypt.put("name", encryptedName);
+
+    // Decrypts and deserialises the encrypted data into a `Bar` instance
+    Bar decryptedData = evervault.decrypt(dataToDecrypt, Bar.class);
+
+    System.out.println(decryptedData.name); // Prints `foo`
 }
 
 ```
@@ -227,3 +259,7 @@ void encryptAndRun() throws EvervaultException {
 ### 3.3.2
 
 * Allow unsigned payloads when creating run tokens
+
+### 4.0.0
+
+* Introduce decrypt method

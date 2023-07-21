@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -86,8 +87,8 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     void handlesBooleanCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
         var testSetup = getService();
 
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[]{1}), any(), any())).thenReturn("true");
-        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq(new byte[]{0}), any(), any())).thenReturn("false");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq("true".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("true");
+        when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq("false".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("false");
 
         assert "true".equals(testSetup.encryptionService.encrypt(true));
         assert "false".equals(testSetup.encryptionService.encrypt(false));

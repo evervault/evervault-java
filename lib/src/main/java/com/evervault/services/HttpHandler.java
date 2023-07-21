@@ -1,7 +1,9 @@
 package com.evervault.services;
 
+import com.evervault.utils.Base64Handler;
 import com.evervault.contracts.IProvideCageExecution;
 import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
+import com.evervault.contracts.IProvideDecrypt;
 import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
@@ -21,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -33,14 +35,16 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     private final static long TIMEOUT_SECONDS_DEFAULT = 30;
     private final static String CAGES_KEY_SUFFIX = "/cages/key";
     private final String apiKey;
+    private final String appUuid;
     private final Duration httpTimeout;
 
-    public HttpHandler(String apiKey) {
-        this(apiKey, Duration.ofSeconds(TIMEOUT_SECONDS_DEFAULT));
+    public HttpHandler(String apiKey, String appUuid) {
+        this(apiKey, appUuid, Duration.ofSeconds(TIMEOUT_SECONDS_DEFAULT));
     }
 
-    public HttpHandler(String apiKey, Duration httpTimeout) {
+    public HttpHandler(String apiKey, String appUuid, Duration httpTimeout) {
         this.apiKey = apiKey;
+        this.appUuid = appUuid;
         this.httpTimeout = httpTimeout;
         client = java.net.http.HttpClient.newHttpClient();
     }
@@ -49,10 +53,20 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         return this.getCagePublicKeyFromEndpoint(url, null);
     }
 
+    private String buildAuthorizationHeaderValue() {
+        var input = appUuid + ":" + apiKey;
+        var encodedValue = Base64Handler.encodeBase64(input.getBytes());
+        StringBuilder builder = new StringBuilder();
+        builder.append("Basic ")
+            .append(encodedValue);
+        return builder.toString();
+    }
+
     public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
         var uri = URI.create(url);
         var finalAddress = uri.resolve(CAGES_KEY_SUFFIX);
 
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .timeout(httpTimeout)
@@ -61,6 +75,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
                 .setHeader("Api-Key", apiKey)
+                .setHeader("Authorization", authHeaderValue)
                 .GET();
 
         if (headerMap != null) {
@@ -88,12 +103,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/" + cageName);
 
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
+                .setHeader("Authorization", authHeaderValue)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -117,18 +134,47 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     @Override
+    public <T> T decrypt(String url, Object data, Class<T> valueType) throws HttpFailureException, IOException, InterruptedException {
+        var serializedData = new Gson().toJson(data);
+
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/decrypt");
+
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
+        var requestBuilder = HttpRequest.newBuilder()
+            .uri(finalAddress)
+            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+            .setHeader("Accept", JSON_CONTENT_TYPE)
+            .setHeader("Content-Type", JSON_CONTENT_TYPE)
+            .setHeader("Authorization", authHeaderValue)
+            .timeout(httpTimeout)
+            .POST(BodyPublishers.ofString(serializedData));
+        var request = requestBuilder.build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != OK_HTTP_STATUS_CODE){
+            throw new HttpFailureException(response.statusCode(), response.body());
+        }
+
+        return new Gson().fromJson(response.body(), valueType);
+    }
+
+    @Override
     public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
         var serializedData = new Gson().toJson(data);
 
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
 
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
+                .setHeader("Authorization", authHeaderValue)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -152,12 +198,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
 
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
+                .setHeader("Authorization", authHeaderValue)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -176,12 +224,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/v2/relay-outbound");
 
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("AcceptEncoding", "gzip, deflate")
+                .setHeader("Authorization", authHeaderValue)
                 .timeout(httpTimeout)
                 .GET();
 

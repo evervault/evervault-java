@@ -9,3 +9,6 @@ build
 
 # bin dir
 lib/bin
+
+# Ignore VSCode directory
+.vscode
