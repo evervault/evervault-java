@@ -7,6 +7,7 @@ import com.evervault.contracts.*;
 import com.evervault.exceptions.*;
 import com.evervault.models.CageRunResult;
 import com.evervault.models.RunTokenResult;
+import com.evervault.models.TokenResult;
 import com.evervault.utils.EcdhCurve;
 import com.evervault.utils.ProxyCredentialsProvider;
 import com.evervault.utils.ProxyRoutePlanner;
@@ -29,6 +30,7 @@ public abstract class EvervaultService {
     protected IProvideRunToken runTokenProvider;
     protected IProvideOutboundRelayConfigFromHttpApi outboundRelayConfigProvider;
     protected IProvideDecrypt decryptProvider;
+    protected IProvideClientSideDecryptToken clientSideDecryptTokenProvider;
 
     protected IScheduleRepeatableTask repeatableTaskScheduler;
     protected IProvideCircuitBreaker circuitBreakerProvider;
@@ -40,6 +42,7 @@ public abstract class EvervaultService {
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
     protected final int createRunTokenHash = "createRunToken".hashCode();
+    protected final int createClientSideDecryptTokenHash = "createClientSideDecryptToken".hashCode();
     protected final int decryptHash = "decrypt".hashCode();
     protected Instant currentSharedKeyTimestamp;
     protected byte[] generatedEcdhKey;
@@ -106,6 +109,14 @@ public abstract class EvervaultService {
         }
 
         this.decryptProvider = decryptProvider;
+    }
+
+    protected void setupClientSideDecryptTokenProvider(IProvideClientSideDecryptToken clientSideDecryptTokenProvider) {
+        if (clientSideDecryptTokenProvider == null) {
+            throw new NullPointerException(IProvideClientSideDecryptToken.class.getName());
+        }
+
+        this.clientSideDecryptTokenProvider = clientSideDecryptTokenProvider;
     }
 
     protected void setupRepeatableTaskScheduler(IScheduleRepeatableTask repeatableTaskScheduler) {
@@ -260,6 +271,34 @@ public abstract class EvervaultService {
 
         try {
             return circuitBreakerProvider.execute(decryptHash, () -> decryptProvider.decrypt(getEvervaultApiUrl(), data, valueType));
+        } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
+            throw new EvervaultException(e);
+        }
+    }
+
+    public TokenResult createClientSideDecryptToken(Object data, Instant expiry) throws EvervaultException {
+        if (data == null) {
+            throw new EvervaultException(new MandatoryParameterException("data"));
+        }
+
+        if (expiry == null) {
+            throw new EvervaultException(new MandatoryParameterException("expiry"));
+        }
+
+        try {
+            return circuitBreakerProvider.execute(createClientSideDecryptTokenHash, () -> clientSideDecryptTokenProvider.createClientSideDecryptToken(getEvervaultApiUrl(), "decrypt:api", data, expiry));
+        } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
+            throw new EvervaultException(e);
+        }
+    }
+
+    public TokenResult createClientSideDecryptToken(Object data) throws EvervaultException {
+        if (data == null) {
+            throw new EvervaultException(new MandatoryParameterException("data"));
+        }
+
+        try {
+            return circuitBreakerProvider.execute(createClientSideDecryptTokenHash, () -> clientSideDecryptTokenProvider.createClientSideDecryptToken(getEvervaultApiUrl(), "decrypt:api", data));
         } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
             throw new EvervaultException(e);
         }

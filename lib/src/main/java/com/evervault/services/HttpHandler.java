@@ -3,14 +3,17 @@ package com.evervault.services;
 import com.evervault.utils.Base64Handler;
 import com.evervault.contracts.IProvideCageExecution;
 import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
+import com.evervault.contracts.IProvideClientSideDecryptToken;
 import com.evervault.contracts.IProvideDecrypt;
 import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.CagePublicKey;
 import com.evervault.models.CageRunResult;
+import com.evervault.models.CreateDecryptTokenPayload;
 import com.evervault.models.OutboundRelayConfigResult;
 import com.evervault.models.RunTokenResult;
+import com.evervault.models.TokenResult;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -19,11 +22,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt, IProvideClientSideDecryptToken {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
@@ -158,6 +162,64 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         }
 
         return new Gson().fromJson(response.body(), valueType);
+    }
+
+    @Override
+    public TokenResult createClientSideDecryptToken(String url, String action, Object data, Instant expiry) throws HttpFailureException, IOException, InterruptedException {
+        long expiryInMillis = expiry.toEpochMilli();
+
+        var payload = new CreateDecryptTokenPayload(action, expiryInMillis, data);
+        var serializedData = new Gson().toJson(payload);
+
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/client-side-tokens");
+
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
+        var requestBuilder = HttpRequest.newBuilder()
+            .uri(finalAddress)
+            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+            .setHeader("Accept", JSON_CONTENT_TYPE)
+            .setHeader("Content-Type", JSON_CONTENT_TYPE)
+            .setHeader("Authorization", authHeaderValue)
+            .timeout(httpTimeout)
+            .POST(BodyPublishers.ofString(serializedData));
+        var request = requestBuilder.build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(response.statusCode(), response.body());
+        }
+
+        return new Gson().fromJson(response.body(), TokenResult.class);
+    }
+
+    @Override
+    public TokenResult createClientSideDecryptToken(String url, String action, Object data) throws HttpFailureException, IOException, InterruptedException {
+        var payload = new CreateDecryptTokenPayload(action, data);
+        var serializedData = new Gson().toJson(payload);
+
+        var uri = URI.create(url);
+        var finalAddress = uri.resolve("/client-side-tokens");
+
+        var authHeaderValue = this.buildAuthorizationHeaderValue();
+        var requestBuilder = HttpRequest.newBuilder()
+            .uri(finalAddress)
+            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
+            .setHeader("Accept", JSON_CONTENT_TYPE)
+            .setHeader("Content-Type", JSON_CONTENT_TYPE)
+            .setHeader("Authorization", authHeaderValue)
+            .timeout(httpTimeout)
+            .POST(BodyPublishers.ofString(serializedData));
+        var request = requestBuilder.build();
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+            throw new HttpFailureException(response.statusCode(), response.body());
+        }
+
+        return new Gson().fromJson(response.body(), TokenResult.class);
     }
 
     @Override
