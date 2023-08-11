@@ -23,6 +23,7 @@ public class SerializableHandler implements IDataHandler {
         this.encryptionProvider = encryptionProvider;
         this.generatedEcdhKey = generatedEcdhKey;
         this.sharedKey = sharedKey;
+        this.teamPublicKey = teamPublicKey;
     }
 
     @Override

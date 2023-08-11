@@ -38,7 +38,7 @@ implementation 'com.evervault:lib:3.3.1'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>3.3.1</version>
+  <version>4.0.1</version>
 </dependency>
 ```
 
