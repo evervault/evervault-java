@@ -92,7 +92,7 @@ public class Evervault extends EvervaultService {
         this.setupOutboundRelayConfigProvider(httpHandler);
         this.setupDecryptProvider(httpHandler);
         this.setupRepeatableTaskScheduler(taskScheduler);
-        this.setupClientSideDecryptTokenProvider(httpHandler);
+        this.setupClientSideTokenProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);

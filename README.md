@@ -30,7 +30,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.3.1'
+implementation 'com.evervault:lib:4.1.0'
 ```
 
 ### Maven
@@ -263,3 +263,7 @@ void encryptAndDecrypt() throws EvervaultException {
 ### 4.0.0
 
 * Introduce decrypt method
+
+### 4.1.0
+
+* Introduce createClientSideDecryptToken() method

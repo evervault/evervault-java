@@ -9,23 +9,22 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import com.evervault.models.TokenResult;
-import com.evervault.models.CreateDecryptTokenPayload;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class WhenUsingApisCreateClientSideDecryptTokenTests {
-    private final IProvideClientSideDecryptToken clientSideDecryptTokenProvider;
+public class WhenUsingApisCreateClientSideTokenTests {
+    private final IProvideClientSideToken clientSideTokenProvider;
     private final Evervault evervaultService;
     private final IProvideCircuitBreaker circuitBreakerProvider;
 
     private static class Evervault extends EvervaultService {
-        public void setupWrapper(IProvideClientSideDecryptToken clientSideDecryptTokenProvider,
+        public void setupWrapper(IProvideClientSideToken clientSideTokenProvider,
                                  IProvideCircuitBreaker circuitBreakerProvider) {
             this.setupCircuitBreaker(circuitBreakerProvider);
-            this.setupClientSideDecryptTokenProvider(clientSideDecryptTokenProvider);
+            this.setupClientSideTokenProvider(clientSideTokenProvider);
         }
     }
 
@@ -36,35 +35,35 @@ public class WhenUsingApisCreateClientSideDecryptTokenTests {
         }
     }
 
-    public WhenUsingApisCreateClientSideDecryptTokenTests() {
-        clientSideDecryptTokenProvider = mock(IProvideClientSideDecryptToken.class);
+    public WhenUsingApisCreateClientSideTokenTests() {
+        clientSideTokenProvider = mock(IProvideClientSideToken.class);
         circuitBreakerProvider = new CircuitBreakerInternal();
         evervaultService = new Evervault();
     }
 
     @Test
-    void callingToCreateDecryptTokenReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
-        var createDecryptTokenResult = new TokenResult();
-        createDecryptTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
-        createDecryptTokenResult.expiry = 1234567890;
+    void callingToCreateTokenReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
+        var createTokenResult = new TokenResult();
+        createTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
+        createTokenResult.expiry = 1234567890;
 
-        when(clientSideDecryptTokenProvider.createClientSideDecryptToken(anyString(), anyString(), any())).thenReturn(createDecryptTokenResult);
+        when(clientSideTokenProvider.createClientSideToken(anyString(), anyString(), any())).thenReturn(createTokenResult);
 
-        evervaultService.setupWrapper(clientSideDecryptTokenProvider, circuitBreakerProvider);
+        evervaultService.setupWrapper(clientSideTokenProvider, circuitBreakerProvider);
 
         var result = evervaultService.createClientSideDecryptToken("somecage");
 
-        assert createDecryptTokenResult.equals(result);
+        assert createTokenResult.equals(result);
     }
 
     @Test
     void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException {
-        var createDecryptTokenResult = new TokenResult();
-        createDecryptTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
-        createDecryptTokenResult.expiry = 1234567890;
-        when(clientSideDecryptTokenProvider.createClientSideDecryptToken(anyString(), anyString(), any())).thenReturn(createDecryptTokenResult);
+        var createTokenResult = new TokenResult();
+        createTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
+        createTokenResult.expiry = 1234567890;
+        when(clientSideTokenProvider.createClientSideToken(anyString(), anyString(), any())).thenReturn(createTokenResult);
 
-        evervaultService.setupWrapper(clientSideDecryptTokenProvider, circuitBreakerProvider);
+        evervaultService.setupWrapper(clientSideTokenProvider, circuitBreakerProvider);
 
         assertThrows(EvervaultException.class, () -> evervaultService.createClientSideDecryptToken(null, null));
         assertThrows(EvervaultException.class, () -> evervaultService.createClientSideDecryptToken("", null));

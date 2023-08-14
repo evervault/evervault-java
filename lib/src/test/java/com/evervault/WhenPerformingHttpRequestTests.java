@@ -295,12 +295,12 @@ public class WhenPerformingHttpRequestTests {
         stubFor(post(urlEqualTo(createClientSideDecryptTokenEndpoint)).willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
-            .withStatus(200))); // POTENTIAL FAILURE REMOVE QUOTES AROUND EXPIRY
+            .withStatus(201))); // POTENTIAL FAILURE REMOVE QUOTES AROUND EXPIRY
         
         var data = new SomeData();
         data.name = "test";
 
-        var result = client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data, Instant.now());
+        var result = client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data, Instant.now());
 
         Assertions.assertEquals("token1234567890", result.token);
         Assertions.assertEquals(1234567890, result.expiry);
@@ -308,33 +308,33 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCreateClientSideDecryptTokenEndpointWithoutExpiryWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
-        final String createClientSideDecryptTokenEndpoint = "/client-side-tokens";
+        final String createClientSideTokenEndpoint = "/client-side-tokens";
         var expectedResult = new TokenResult();
         expectedResult.token = "token1234567890";
         var client = new HttpHandler(API_KEY, APP_UUID);
 
-        stubFor(post(urlEqualTo(createClientSideDecryptTokenEndpoint)).willReturn(aResponse()
+        stubFor(post(urlEqualTo(createClientSideTokenEndpoint)).willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
-            .withStatus(200))); // POTENTIAL FAILURE REMOVE QUOTES AROUND EXPIRY
+            .withStatus(201))); // POTENTIAL FAILURE REMOVE QUOTES AROUND EXPIRY
         
         var data = new SomeData();
         data.name = "test";
 
-        var result = client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data);
+        var result = client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data);
 
         Assertions.assertEquals("token1234567890", result.token);
         Assertions.assertEquals(1234567890, result.expiry);
     }
 
     @Test
-    void hittingCreateClientSideDecryptTokenEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
+    void hittingCreateClientSideTokenEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
         var client = new HttpHandler(API_KEY, APP_UUID);
         
         var data = new SomeData();
         data.name = "test";
 
-        assertThrows(HttpFailureException.class, () -> client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data));
+        assertThrows(HttpFailureException.class, () -> client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data));
     }
 
     @Test

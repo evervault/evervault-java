@@ -3,14 +3,14 @@ package com.evervault.services;
 import com.evervault.utils.Base64Handler;
 import com.evervault.contracts.IProvideCageExecution;
 import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
-import com.evervault.contracts.IProvideClientSideDecryptToken;
+import com.evervault.contracts.IProvideClientSideToken;
 import com.evervault.contracts.IProvideDecrypt;
 import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.models.CagePublicKey;
 import com.evervault.models.CageRunResult;
-import com.evervault.models.CreateDecryptTokenPayload;
+import com.evervault.models.CreateTokenPayload;
 import com.evervault.models.OutboundRelayConfigResult;
 import com.evervault.models.RunTokenResult;
 import com.evervault.models.TokenResult;
@@ -27,12 +27,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt, IProvideClientSideDecryptToken {
+public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt, IProvideClientSideToken {
 
     private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
     private final static String JSON_CONTENT_TYPE = "application/json";
     private final static int OK_HTTP_STATUS_CODE = 200;
+    private final static int OK_CREATED_HTTP_STATUS_CODE = 201;
     private final static String POLL_INTERVAL_HEADER_NAME = "X-Poll-Interval";
     private final static String ASYNC_HEADER_NAME = "x-async";
     private final static String VERSION_ID_HEADER_NAME = "x-version-id";
@@ -165,10 +166,10 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     @Override
-    public TokenResult createClientSideDecryptToken(String url, String action, Object data, Instant expiry) throws HttpFailureException, IOException, InterruptedException {
+    public TokenResult createClientSideToken(String url, String action, Object data, Instant expiry) throws HttpFailureException, IOException, InterruptedException {
         long expiryInMillis = expiry.toEpochMilli();
 
-        var payload = new CreateDecryptTokenPayload(action, expiryInMillis, data);
+        var payload = new CreateTokenPayload(action, expiryInMillis, data);
         var serializedData = new Gson().toJson(payload);
 
         var uri = URI.create(url);
@@ -187,7 +188,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+        if (response.statusCode() != OK_CREATED_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
         }
 
@@ -195,8 +196,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     @Override
-    public TokenResult createClientSideDecryptToken(String url, String action, Object data) throws HttpFailureException, IOException, InterruptedException {
-        var payload = new CreateDecryptTokenPayload(action, data);
+    public TokenResult createClientSideToken(String url, String action, Object data) throws HttpFailureException, IOException, InterruptedException {
+        var payload = new CreateTokenPayload(action, data);
         var serializedData = new Gson().toJson(payload);
 
         var uri = URI.create(url);
@@ -215,7 +216,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
+        if (response.statusCode() != OK_CREATED_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
         }
 
