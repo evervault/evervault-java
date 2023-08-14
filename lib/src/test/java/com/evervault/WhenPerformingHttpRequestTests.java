@@ -300,7 +300,7 @@ public class WhenPerformingHttpRequestTests {
         var data = new SomeData();
         data.name = "test";
 
-        var result = client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "decrypt:api", data, Instant.now());
+        var result = client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data, Instant.now());
 
         Assertions.assertEquals("token1234567890", result.token);
         Assertions.assertEquals(1234567890, result.expiry);
@@ -321,7 +321,7 @@ public class WhenPerformingHttpRequestTests {
         var data = new SomeData();
         data.name = "test";
 
-        var result = client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "decrypt:api", data);
+        var result = client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data);
 
         Assertions.assertEquals("token1234567890", result.token);
         Assertions.assertEquals(1234567890, result.expiry);
@@ -334,7 +334,7 @@ public class WhenPerformingHttpRequestTests {
         var data = new SomeData();
         data.name = "test";
 
-        assertThrows(HttpFailureException.class, () -> client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "decrypt:api", data));
+        assertThrows(HttpFailureException.class, () -> client.createClientSideDecryptToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data));
     }
 
     @Test

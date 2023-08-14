@@ -286,7 +286,7 @@ public abstract class EvervaultService {
         }
 
         try {
-            return circuitBreakerProvider.execute(createClientSideDecryptTokenHash, () -> clientSideDecryptTokenProvider.createClientSideDecryptToken(getEvervaultApiUrl(), "decrypt:api", data, expiry));
+            return circuitBreakerProvider.execute(createClientSideDecryptTokenHash, () -> clientSideDecryptTokenProvider.createClientSideDecryptToken(getEvervaultApiUrl(), "api:decrypt", data, expiry));
         } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
             throw new EvervaultException(e);
         }
@@ -298,7 +298,7 @@ public abstract class EvervaultService {
         }
 
         try {
-            return circuitBreakerProvider.execute(createClientSideDecryptTokenHash, () -> clientSideDecryptTokenProvider.createClientSideDecryptToken(getEvervaultApiUrl(), "decrypt:api", data));
+            return circuitBreakerProvider.execute(createClientSideDecryptTokenHash, () -> clientSideDecryptTokenProvider.createClientSideDecryptToken(getEvervaultApiUrl(), "api:decrypt", data));
         } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
             throw new EvervaultException(e);
         }
