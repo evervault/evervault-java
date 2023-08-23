@@ -188,7 +188,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() != OK_CREATED_HTTP_STATUS_CODE) {
+        if (response.statusCode() < 200 && response.statusCode() >= 300) {
             throw new HttpFailureException(response.statusCode(), response.body());
         }
 
