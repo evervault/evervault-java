@@ -18,8 +18,6 @@ You don’t need to change your database configuration. You can store Evervault-
 
 Before starting with the Evervault Java SDK, you will need to [create an account](https://app.evervault.com/register) and a team.
 
-For full installation support, [book time here](https://calendly.com/evervault/cages-onboarding).
-
 ## Documentation
 
 See the Evervault [Java SDK documentation](https://docs.evervault.com/reference/java-sdk).
@@ -30,7 +28,7 @@ Our Java SDK is distributed via [maven](https://search.maven.org/artifact/com.ev
 
 ### Gradle
 ```sh
-implementation 'com.evervault:lib:3.3.1'
+implementation 'com.evervault:lib:4.1.0'
 ```
 
 ### Maven
@@ -38,7 +36,7 @@ implementation 'com.evervault:lib:3.3.1'
 <dependency>
   <groupId>com.evervault</groupId>
   <artifactId>lib</artifactId>
-  <version>4.0.1</version>
+  <version>4.1.0</version>
 </dependency>
 ```
 
@@ -181,7 +179,36 @@ void encryptAndDecrypt() throws EvervaultException {
 
     System.out.println(decryptedData.name); // Prints `foo`
 }
+```
 
+### createClientSideDecryptToken
+
+`createClientSideDecryptToken()` creates a time-bound token for use in front end applications for decrypting data previously encrypted with Evervault.
+
+A payload of encrypted data must be provided to perform this operation. The payload ensures that the generated token will only be able to be used to decrypt this specific payload
+
+The expiry is the time at which the token will expire. The maximum expiry is 10 minutes from now. If not provided, it defaults to 5 minutes from now. The argument is an `Instant`;
+
+It returns a `TokenResult` consisting of the token and the expiry time.
+
+```java
+private static class Bar {
+    public String name;
+}
+
+void encryptAndCreateClientSideDecryptToken() throws EvervaultException {
+    var evervault = new Evervault(getEnvironmentAppUuid(), getEnvironmentApiKey());
+
+    // Encrypt some data
+    var encryptedName = (String) evervault.encrypt("foo");
+
+    // Decrypt the previously encrypted data
+    var payload = new HashMap<String, String>();
+    payload.put("name", encryptedName);
+
+    // Generates a client side decrypt token 
+    var token = evervault.createClientSideDecryptToken(payload); // TokenResult { token: <string>, expiry: <long> }
+}
 ```
 
 ### Changelog
@@ -263,3 +290,7 @@ void encryptAndDecrypt() throws EvervaultException {
 ### 4.0.0
 
 * Introduce decrypt method
+
+### 4.1.0
+
+* Introduce createClientSideDecryptToken() method

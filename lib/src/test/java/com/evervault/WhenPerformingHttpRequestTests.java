@@ -4,6 +4,7 @@ import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.services.CachedOutboundRelayConfigService;
 import com.evervault.services.HttpHandler;
+import com.evervault.models.TokenResult;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.gson.internal.LinkedTreeMap;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.time.Instant;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -280,6 +282,59 @@ public class WhenPerformingHttpRequestTests {
                 .withoutHeader("x-version-id");
 
         verify(pattern);
+    }
+
+    @Test
+    void hittingCreateClientSideDecryptTokenEndpointWithExpiryWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String createClientSideDecryptTokenEndpoint = "/client-side-tokens";
+        var expectedResult = new TokenResult();
+        expectedResult.token = "token1234567890";
+        expectedResult.expiry = 1234567890;
+        var client = new HttpHandler(API_KEY, APP_UUID);
+
+        stubFor(post(urlEqualTo(createClientSideDecryptTokenEndpoint)).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
+            .withStatus(201)));
+        
+        var data = new SomeData();
+        data.name = "test";
+
+        var result = client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data, Instant.now());
+
+        Assertions.assertEquals("token1234567890", result.token);
+        Assertions.assertEquals(1234567890, result.expiry);
+    }
+
+    @Test
+    void hittingCreateClientSideDecryptTokenEndpointWithoutExpiryWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String createClientSideTokenEndpoint = "/client-side-tokens";
+        var expectedResult = new TokenResult();
+        expectedResult.token = "token1234567890";
+        var client = new HttpHandler(API_KEY, APP_UUID);
+
+        stubFor(post(urlEqualTo(createClientSideTokenEndpoint)).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
+            .withStatus(201)));
+        
+        var data = new SomeData();
+        data.name = "test";
+
+        var result = client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data);
+
+        Assertions.assertEquals("token1234567890", result.token);
+        Assertions.assertEquals(1234567890, result.expiry);
+    }
+
+    @Test
+    void hittingCreateClientSideTokenEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        var client = new HttpHandler(API_KEY, APP_UUID);
+        
+        var data = new SomeData();
+        data.name = "test";
+
+        assertThrows(HttpFailureException.class, () -> client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data));
     }
 
     @Test
