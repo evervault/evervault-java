@@ -295,7 +295,7 @@ public class WhenPerformingHttpRequestTests {
         stubFor(post(urlEqualTo(createClientSideDecryptTokenEndpoint)).willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
-            .withStatus(201))); // POTENTIAL FAILURE REMOVE QUOTES AROUND EXPIRY
+            .withStatus(201)));
         
         var data = new SomeData();
         data.name = "test";
@@ -316,7 +316,7 @@ public class WhenPerformingHttpRequestTests {
         stubFor(post(urlEqualTo(createClientSideTokenEndpoint)).willReturn(aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
-            .withStatus(201))); // POTENTIAL FAILURE REMOVE QUOTES AROUND EXPIRY
+            .withStatus(201)));
         
         var data = new SomeData();
         data.name = "test";
