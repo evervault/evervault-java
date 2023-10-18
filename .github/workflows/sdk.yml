@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
-      EV_API_HOST: api.evervault.io
-      EV_CAGE_RUN_HOST: run.evervault.io
-      EV_RELAY_HOST: strict.relay.evervault.io
+      EV_API_HOST: api.evervault.com
+      EV_CAGE_RUN_HOST: run.evervault.com
+      EV_RELAY_HOST: strict.relay.evervault.com
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v3
