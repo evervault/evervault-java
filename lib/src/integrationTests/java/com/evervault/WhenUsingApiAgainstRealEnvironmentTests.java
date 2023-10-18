@@ -128,7 +128,6 @@ public class WhenUsingApiAgainstRealEnvironmentTests {
     void encryptAndRun() throws EvervaultException {
         var evervault = new Evervault( "app_id", getEnvironmentApiKey());
         var data = Bar.createFooStructure(evervault);
-        System.out.println(cageName);
         var cageResult = evervault.run(cageName, data, false, null);
 
         assert !cageResult.runId.isEmpty();

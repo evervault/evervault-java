@@ -254,6 +254,7 @@ public abstract class EvervaultService {
         }
 
         try {
+            System.out.println(getEvervaultRunUrl());
             return circuitBreakerProvider.execute(runCageHash, () -> cageExecutionProvider.runCage(getEvervaultRunUrl(), cageName, data, async, version));
         } catch (MaxRetryReachedException | HttpFailureException | NotPossibleToHandleDataTypeException | IOException | InterruptedException e) {
             throw new EvervaultException(e);
