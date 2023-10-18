@@ -2,7 +2,7 @@
 
 # Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/evervault/evervault-php/issues.
+Bug reports and pull requests are welcome on GitHub at https://github.com/evervault/evervault-java/issues.
 
 ## Commit Formatting & Releases
 
