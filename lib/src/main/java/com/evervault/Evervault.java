@@ -56,31 +56,23 @@ public class Evervault extends EvervaultService {
         this.evervaultIgnoreDomains = new String[]{ getEvervaultApiHost(), getEvervaultRunHost() };
     }
 
-    public Evervault(String apiKey) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, null, false);
+    public Evervault(String appId, String apiKey) throws EvervaultException {
+        this(apiKey, appId, EcdhCurve.SECP256K1, null, false);
     }
 
-    public Evervault(String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, ecdhCurve, null, false);
+    public Evervault(String appId, String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
+        this(apiKey, appId, ecdhCurve, null, false);
     }
 
-    public Evervault(String apiKey, String[] decryptionDomains) throws EvervaultException {
-        this(apiKey, decryptionDomains, EcdhCurve.SECP256K1);
+    public Evervault(String appId, String apiKey, Boolean enableOutboundRelay, EcdhCurve ecdhCurve) throws EvervaultException {
+        this(apiKey, appId, ecdhCurve, null, enableOutboundRelay);
     }
 
-    public Evervault(String apiKey, String[] decryptionDomains, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, ecdhCurve, decryptionDomains, false);
+    public Evervault(String appId, String apiKey, Boolean enableOutboundRelay) throws EvervaultException {
+        this(apiKey, appId, EcdhCurve.SECP256K1, null, enableOutboundRelay);
     }
 
-    public Evervault(String apiKey, Boolean enableOutboundRelay, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, ecdhCurve, null, enableOutboundRelay);
-    }
-
-    public Evervault(String apiKey, Boolean enableOutboundRelay) throws EvervaultException {
-        this(apiKey, EcdhCurve.SECP256K1, null, enableOutboundRelay);
-    }
-
-    private Evervault(String apiKey, EcdhCurve ecdhCurve, String[] decryptionDomains, Boolean enableOutboundRelay) throws EvervaultException {
+    private Evervault(String apiKey, String appUuid, EcdhCurve ecdhCurve, String[] decryptionDomains, Boolean enableOutboundRelay) throws EvervaultException {
         setEvervaultApiHost();
         setEvervaultRunHost();
         setEvervaultRelayUrl();
@@ -88,7 +80,7 @@ public class Evervault extends EvervaultService {
 
         this.evervaultDecryptionDomains = decryptionDomains;
 
-        var httpHandler = new HttpHandler(apiKey);
+        var httpHandler = new HttpHandler(apiKey, appUuid);
         var encryptService = EncryptionServiceFactory.build(ecdhCurve);
         var circuitBreaker = new CircuitBreaker();
         var timeService = new TimeService();
@@ -98,7 +90,9 @@ public class Evervault extends EvervaultService {
         this.setupCageExecutionProvider(httpHandler);
         this.setupRunTokenProvider(httpHandler);
         this.setupOutboundRelayConfigProvider(httpHandler);
+        this.setupDecryptProvider(httpHandler);
         this.setupRepeatableTaskScheduler(taskScheduler);
+        this.setupClientSideTokenProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);

@@ -4,9 +4,12 @@ import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
 import com.evervault.exceptions.HttpFailureException;
 import com.evervault.services.CachedOutboundRelayConfigService;
 import com.evervault.services.HttpHandler;
+import com.evervault.models.TokenResult;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.google.gson.internal.LinkedTreeMap;
+
+import org.eclipse.jetty.util.IO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.time.Instant;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +28,21 @@ public class WhenPerformingHttpRequestTests {
     private static final String USER_AGENT_HEADER = "evervault-java/1.0";
     private static final String CONTENT_TYPE = "application/json";
     private static final String API_KEY = "Foo";
+    private static final String APP_UUID = "Bar";
     private static final String RAW_TEXT_CAGES_KEY_ENDPOINT = "{\"teamUuid\":\"de7350990fd7\",\"key\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo7+jkmJ1uZsmiA5omE96RaepPYj2J6DzlE0DNWPoVZZNVb/ShqxSA4zKfE9Kh4MuI6fKpg0/pMhf8Re398ac9s2xKsjDvQHOhLLOfmgcrQgZyLGvdsrllcb1JY8kLNTdgONpn3S/BQetdEPG7oFp1RRIw60Iyy+v2R+r092zItbqLUpb0Vpu2z2uMxylZFc33VuDVIFF+fc9vE0gVPFoHezZ+1+EmqiJdkH/1GcPoVswzCvg3djmCo3Zhx3GdiB464GOl2ZlujwSN9dPkFhndIUZYK9iJhlcItyGkKH1OV/HAl8k2u/7pKUDLFe4lMWX9yASuj6y3CLdrPcbAuky3QIDAQAB\",\"ecdhKey\":\"AhmiyfX6dVt1IML5qF+giWEdCaX60oQE+d9b2FXOSOXr\"}";
+
+    protected class CardData {
+        String cardNumber;
+        int cvv;
+        String expiry; 
+    }
+
+    protected class SomeClass {
+        String foo;
+        String bar;
+        String baz;
+    }
+
 
     private void assertHeadersForCageKey(String endpoint, String apiKey, HashMap<String, String> headerMap) {
         var pattern = getRequestedFor(urlEqualTo(endpoint))
@@ -64,7 +82,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + "/");
     }
@@ -72,7 +90,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     public void runCageUrlEndingWithSlashDoesNotThrow(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -94,7 +112,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl());
 
@@ -110,7 +128,7 @@ public class WhenPerformingHttpRequestTests {
                         .withHeader("Content-Type", "application/json")
                         .withBody(RAW_TEXT_CAGES_KEY_ENDPOINT)));
 
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         var headerMap = new HashMap<String, String>();
         headerMap.put("Foo", "Bar");
@@ -123,7 +141,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCagePublicKeyEndpointParsesItCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws IOException, InterruptedException, HttpFailureException {
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
         final var urlPath = "/cages/key";
 
         stubFor(get(urlEqualTo(urlPath))
@@ -140,7 +158,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void httpStatusNotOkMustThrow(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
         final var urlPath = wireMockRuntimeInfo.getHttpBaseUrl() + "/cages/key";
 
         assertThrows(HttpFailureException.class, () -> client.getCagePublicKeyFromEndpoint(urlPath));
@@ -153,7 +171,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingCageRunEndpointValidatesBasicHeaders(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -171,7 +189,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingCageRunEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageName = "/test-cage";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(cageName)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -192,7 +210,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingCageRunEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         var data = new SomeData();
         data.name = "test";
@@ -203,7 +221,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void validatesAsyncTrueHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -225,7 +243,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void validatesAsyncFalseHeaderWhenHittingCageRunEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -247,7 +265,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void asyncHeaderIsIgnoredWhenVersionIsEmpty(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String cageNameEndpoint = "/test-cage";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(cageNameEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -267,9 +285,62 @@ public class WhenPerformingHttpRequestTests {
     }
 
     @Test
+    void hittingCreateClientSideDecryptTokenEndpointWithExpiryWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String createClientSideDecryptTokenEndpoint = "/client-side-tokens";
+        var expectedResult = new TokenResult();
+        expectedResult.token = "token1234567890";
+        expectedResult.expiry = 1234567890;
+        var client = new HttpHandler(API_KEY, APP_UUID);
+
+        stubFor(post(urlEqualTo(createClientSideDecryptTokenEndpoint)).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
+            .withStatus(201)));
+        
+        var data = new SomeData();
+        data.name = "test";
+
+        var result = client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data, Instant.now());
+
+        Assertions.assertEquals("token1234567890", result.token);
+        Assertions.assertEquals(1234567890, result.expiry);
+    }
+
+    @Test
+    void hittingCreateClientSideDecryptTokenEndpointWithoutExpiryWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        final String createClientSideTokenEndpoint = "/client-side-tokens";
+        var expectedResult = new TokenResult();
+        expectedResult.token = "token1234567890";
+        var client = new HttpHandler(API_KEY, APP_UUID);
+
+        stubFor(post(urlEqualTo(createClientSideTokenEndpoint)).willReturn(aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"token\":\"token1234567890\", \"expiry\": \"1234567890\"}")
+            .withStatus(201)));
+        
+        var data = new SomeData();
+        data.name = "test";
+
+        var result = client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data);
+
+        Assertions.assertEquals("token1234567890", result.token);
+        Assertions.assertEquals(1234567890, result.expiry);
+    }
+
+    @Test
+    void hittingCreateClientSideTokenEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
+        var client = new HttpHandler(API_KEY, APP_UUID);
+        
+        var data = new SomeData();
+        data.name = "test";
+
+        assertThrows(HttpFailureException.class, () -> client.createClientSideToken(wireMockRuntimeInfo.getHttpBaseUrl(), "api:decrypt", data));
+    }
+
+    @Test
     void hittingCreateRunTokenEndpointValidatesBasicHeaders(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String createRunTokenEndpoint = "/v2/functions/test-cage/run-token";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(createRunTokenEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -287,7 +358,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingCreateRunTokenEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String createRunTokenEndpoint = "/v2/functions/test-cage/run-token";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(post(urlEqualTo(createRunTokenEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -304,7 +375,7 @@ public class WhenPerformingHttpRequestTests {
 
     @Test
     void hittingRunTokenEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         var data = new SomeData();
         data.name = "test";
@@ -313,9 +384,34 @@ public class WhenPerformingHttpRequestTests {
     }
 
     @Test
+    void hittingDecryptEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
+        var expectedDecryptResult = new CardData();
+        expectedDecryptResult.cardNumber = "4242424242424242";
+        expectedDecryptResult.cvv = 123;
+        expectedDecryptResult.expiry = "12/24";
+
+        final String decryptEndpoint = "/decrypt";
+        var client = new HttpHandler(APP_UUID, API_KEY);
+        stubFor(post(urlEqualTo(decryptEndpoint)).willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"cardNumber\": \"4242424242424242\", \"cvv\": \"123\", \"expiry\": \"12/24\"}")
+                .withStatus(200)));
+        
+        var dataToDecrypt = new HashMap<String, String>();
+        dataToDecrypt.put("cardNumber", "ev:abc123:$");
+        dataToDecrypt.put("cvv", "ev:def456:$");
+        dataToDecrypt.put("expiry", "12/24");
+
+        CardData result = client.decrypt(wireMockRuntimeInfo.getHttpBaseUrl(), dataToDecrypt, CardData.class);
+        Assertions.assertEquals(result.cardNumber, expectedDecryptResult.cardNumber);
+        Assertions.assertEquals(result.cvv, expectedDecryptResult.cvv);
+        Assertions.assertEquals(result.expiry, expectedDecryptResult.expiry);
+    }
+
+    @Test
     void hittingGetOutboundRelayConfigurationEndpointWorksCorrectly(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -336,7 +432,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingGetOutboundRelayConfigurationEndpointWorksCorrectlyWhenNoDestinationDomainIsSet(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -354,7 +450,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingGetOutboundRelayConfigurationEndpointWorksCorrectlyWhenThePollIntervalResponseHeaderIsSet(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -375,7 +471,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingGetOutboundRelayConfigurationEndpointDoesNotThrowWhenThePollIntervalResponseHeaderIsInvalid(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -396,7 +492,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingGetOutboundRelayConfigurationEndpointDoesNotThrowWhenThePollIntervalResponseHeaderIsNotSet(WireMockRuntimeInfo wireMockRuntimeInfo) throws HttpFailureException, IOException, InterruptedException {
         final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
@@ -417,7 +513,7 @@ public class WhenPerformingHttpRequestTests {
     @Test
     void hittingGetOutboundRelayConfigurationEndpointThrows(WireMockRuntimeInfo wireMockRuntimeInfo) {
         final String getRelayOutboundConfigEndpoint = "/v2/relay-outbound";
-        var client = new HttpHandler(API_KEY);
+        var client = new HttpHandler(API_KEY, APP_UUID);
 
         stubFor(get(urlEqualTo(getRelayOutboundConfigEndpoint)).willReturn(aResponse()
                 .withStatus(500)));

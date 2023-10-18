@@ -13,3 +13,6 @@ lib/bin
 # Ignore changeset files
 package-lock.json
 node_modules
+
+# Ignore VSCode directory
+.vscode
