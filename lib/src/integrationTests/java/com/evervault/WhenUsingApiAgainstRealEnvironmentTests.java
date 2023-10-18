@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class WhenUsingApiAgainstRealEnvironmentTests {
     private static final String ENV_API_KEY = "ENVIRONMENT_API_KEY";
     private static final String ENV_APP_UUID = "ENVIRONMENT_APP_UUID";
-    private static final String DEFAULT_CAGE_NAME = "java-integration-test-cage";
+    private static final String DEFAULT_CAGE_NAME = "node-function-synthetic";
     private static final String EV_CAGE_ENV_KEY = "EV_CAGE_NAME";
     private String cageName;
 
