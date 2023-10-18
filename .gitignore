@@ -7,5 +7,9 @@
 # Ignore Gradle build output directory
 build
 
-# bin dir
+# Ignore bin directory
 lib/bin
+
+# Ignore changeset files
+package-lock.json
+node_modules
