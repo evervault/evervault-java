@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# https://central.sonatype.org/publish/publish-gradle/#metadata-definition-and-upload
-# first argument being the project root directory
-
 set -e
 
 echo "signingKey=${GPG_KEY_FILE}" >> ${1}/gradle.properties

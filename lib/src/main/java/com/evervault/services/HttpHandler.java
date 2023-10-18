@@ -108,14 +108,13 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         var uri = URI.create(url);
         var finalAddress = uri.resolve("/" + cageName);
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
         var requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Authorization", authHeaderValue)
+                .setHeader("Api-Key", apiKey)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -237,7 +236,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Authorization", authHeaderValue)
+                .setHeader("Api-Key", apiKey)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -268,7 +267,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Authorization", authHeaderValue)
+                .setHeader("Api-Key", apiKey)
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
@@ -294,7 +293,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
                 .setHeader("Accept", JSON_CONTENT_TYPE)
                 .setHeader("AcceptEncoding", "gzip, deflate")
-                .setHeader("Authorization", authHeaderValue)
+                .setHeader("Api-Key", apiKey)
                 .timeout(httpTimeout)
                 .GET();
 
