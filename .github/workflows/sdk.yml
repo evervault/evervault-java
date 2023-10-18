@@ -32,8 +32,8 @@ jobs:
       - name: integration tests
         env:
           ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
-          EV_API_URL: https://api.evervault.io
-          EV_CAGE_RUN_URL: https://run.evervault.io
+          EV_API_URL: https://api.evervault.com
+          EV_CAGE_RUN_URL: https://run.evervault.com
         run: ./gradlew integrationTests --info
       - name: Upload integration test report on failure
         if: ${{ failure() }}
