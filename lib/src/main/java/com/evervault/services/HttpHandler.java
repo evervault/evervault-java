@@ -103,7 +103,6 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     @Override
     public CageRunResult runCage(String url, String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
-        System.out.println( url + cageName);
         var serializedData = new Gson().toJson(data);
 
         var uri = URI.create(url);
