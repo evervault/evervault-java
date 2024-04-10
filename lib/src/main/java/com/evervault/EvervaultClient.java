@@ -1,5 +1,6 @@
 package com.evervault;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
@@ -18,5 +19,4 @@ public interface EvervaultClient {
     <T> T run(String functionName, Object payload, Class<T> resultType);
     String createClientSideToken(DecryptClientSideTokenOptions options);
     String createClientSideToken(RunClientSideTokenOptions options);
-    Proxy getRelayProxy();
 }
