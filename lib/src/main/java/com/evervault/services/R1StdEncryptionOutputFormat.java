@@ -17,7 +17,7 @@ public class R1StdEncryptionOutputFormat implements IProvideEncryptedFormat {
 
     @Override
     public String format(DataHeader header, String iv, String publicKey, String encryptedPayload) {
-        var prefix = "";
+        String prefix = "";
         if ( header != DataHeader.String) {
             prefix = String.format(":%s", header.toString());
         }

@@ -17,9 +17,9 @@ public class ArrayHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException, NotImplementedException {
-        var itemList = new Vector<>();
+        Vector<Object> itemList = new Vector<>();
 
-        for (var item: (Object[]) data) {
+        for (Object item: (Object[]) data) {
             itemList.add(context.encrypt(item));
         }
 

@@ -33,7 +33,7 @@ public class LongHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
-        var bytes = ByteBuffer.allocate(BUFFER_SIZE).putLong((long) data).array();
+        byte[] bytes = ByteBuffer.allocate(BUFFER_SIZE).putLong((long) data).array();
 
         return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey, teamPublicKey);
     }

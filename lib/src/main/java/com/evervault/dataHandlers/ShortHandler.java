@@ -32,7 +32,7 @@ public class ShortHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
-        var bytes = ByteBuffer.allocate(BUFFER_SIZE).putShort((short) data).array();
+        byte[] bytes = ByteBuffer.allocate(BUFFER_SIZE).putShort((short) data).array();
 
         return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey, teamPublicKey);
     }

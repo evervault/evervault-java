@@ -38,10 +38,10 @@ public class CircuitBreaker implements IProvideCircuitBreaker {
             control.put(methodIdentifier, GetNewResourceControl());
         }
 
-        var resourceControl = control.get(methodIdentifier);
+        ResourceControl resourceControl = control.get(methodIdentifier);
 
         try {
-            var result = (TReturn)executable.execute();
+            TReturn result = (TReturn)executable.execute();
             resourceControl.clear();
             return result;
         } catch (HttpTimeoutException httpTimeoutException) {

@@ -16,6 +16,7 @@ import com.evervault.models.RunTokenResult;
 import com.evervault.models.TokenResult;
 import com.google.gson.Gson;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -59,8 +60,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     private String buildAuthorizationHeaderValue() {
-        var input = appUuid + ":" + apiKey;
-        var encodedValue = Base64Handler.encodeBase64(input.getBytes());
+        String input = appUuid + ":" + apiKey;
+        String encodedValue = Base64Handler.encodeBase64(input.getBytes());
         StringBuilder builder = new StringBuilder();
         builder.append("Basic ")
             .append(encodedValue);
@@ -68,11 +69,11 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve(CAGES_KEY_SUFFIX);
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve(CAGES_KEY_SUFFIX);
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .timeout(httpTimeout)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
@@ -90,9 +91,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             }
         }
 
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var result = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (result.statusCode() != OK_HTTP_STATUS_CODE) {
             throw new HttpFailureException(result.statusCode(), result.body());
@@ -103,12 +104,12 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     @Override
     public CageRunResult runCage(String url, String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
+        String serializedData = new Gson().toJson(data);
 
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/" + cageName);
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/" + cageName);
 
-        var requestBuilder = HttpRequest.newBuilder()
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
@@ -126,9 +127,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             requestBuilder.setHeader(VERSION_ID_HEADER_NAME, version);
         }
 
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
@@ -139,13 +140,13 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     @Override
     public <T> T decrypt(String url, Object data, Class<T> valueType) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
+        String serializedData = new Gson().toJson(data);
 
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/decrypt");
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/decrypt");
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
             .uri(finalAddress)
             .setHeader("User-Agent", VERSION_PREFIX + 1.0)
             .setHeader("Accept", JSON_CONTENT_TYPE)
@@ -153,9 +154,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             .setHeader("Authorization", authHeaderValue)
             .timeout(httpTimeout)
             .POST(BodyPublishers.ofString(serializedData));
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_HTTP_STATUS_CODE){
             throw new HttpFailureException(response.statusCode(), response.body());
@@ -168,14 +169,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     public TokenResult createClientSideToken(String url, String action, Object data, Instant expiry) throws HttpFailureException, IOException, InterruptedException {
         long expiryInMillis = expiry.toEpochMilli();
 
-        var payload = new CreateTokenPayload(action, expiryInMillis, data);
-        var serializedData = new Gson().toJson(payload);
+        CreateTokenPayload payload = new CreateTokenPayload(action, expiryInMillis, data);
+        String serializedData = new Gson().toJson(payload);
 
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/client-side-tokens");
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/client-side-tokens");
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
             .uri(finalAddress)
             .setHeader("User-Agent", VERSION_PREFIX + 1.0)
             .setHeader("Accept", JSON_CONTENT_TYPE)
@@ -183,9 +184,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             .setHeader("Authorization", authHeaderValue)
             .timeout(httpTimeout)
             .POST(BodyPublishers.ofString(serializedData));
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() < 200 && response.statusCode() >= 300) {
             throw new HttpFailureException(response.statusCode(), response.body());
@@ -196,14 +197,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     @Override
     public TokenResult createClientSideToken(String url, String action, Object data) throws HttpFailureException, IOException, InterruptedException {
-        var payload = new CreateTokenPayload(action, data);
-        var serializedData = new Gson().toJson(payload);
+        CreateTokenPayload payload = new CreateTokenPayload(action, data);
+        String serializedData = new Gson().toJson(payload);
 
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/client-side-tokens");
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/client-side-tokens");
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
             .uri(finalAddress)
             .setHeader("User-Agent", VERSION_PREFIX + 1.0)
             .setHeader("Accept", JSON_CONTENT_TYPE)
@@ -211,9 +212,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             .setHeader("Authorization", authHeaderValue)
             .timeout(httpTimeout)
             .POST(BodyPublishers.ofString(serializedData));
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_CREATED_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
@@ -224,13 +225,13 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
 
     @Override
     public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
+        String serializedData = new Gson().toJson(data);
 
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
@@ -240,9 +241,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
@@ -255,13 +256,13 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     public RunTokenResult createRunToken(String url, String cageName) throws HttpFailureException, IOException, InterruptedException {
         // Allow non pre-approved payloads for run tokens
         // If data is null, convert to an empty object
-        var serializedData = new Gson().toJson(new Object());
+        String serializedData = new Gson().toJson(new Object());
 
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
@@ -271,9 +272,9 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .timeout(httpTimeout)
                 .POST(BodyPublishers.ofString(serializedData));
 
-        var request = requestBuilder.build();
+        HttpRequest request = requestBuilder.build();
 
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
@@ -283,11 +284,11 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     }
 
     public OutboundRelayConfigResult getOutboundRelayConfig(String url) throws HttpFailureException, IOException, InterruptedException {
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/v2/relay-outbound");
+        URI uri = URI.create(url);
+        URI finalAddress = uri.resolve("/v2/relay-outbound");
 
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
+        String authHeaderValue = this.buildAuthorizationHeaderValue();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(finalAddress)
                 .setHeader("Api-Key", apiKey)
                 .setHeader("User-Agent", VERSION_PREFIX + 1.0)
@@ -297,15 +298,16 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
                 .timeout(httpTimeout)
                 .GET();
 
-        var request = requestBuilder.build();
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpRequest request = requestBuilder.build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != OK_HTTP_STATUS_CODE) {
             throw new HttpFailureException(response.statusCode(), response.body());
         }
 
-        var config = new Gson().fromJson(response.body(), OutboundRelayConfigResult.OutboundRelayConfig.class);
-        var pollInterval = response.headers().firstValue(POLL_INTERVAL_HEADER_NAME).flatMap(s -> {
+        OutboundRelayConfigResult.OutboundRelayConfig config =
+                new Gson().fromJson(response.body(), OutboundRelayConfigResult.OutboundRelayConfig.class);
+        Integer pollInterval = response.headers().firstValue(POLL_INTERVAL_HEADER_NAME).flatMap(s -> {
             try {
                 return Optional.of(Integer.valueOf(s));
             } catch (NumberFormatException e) {

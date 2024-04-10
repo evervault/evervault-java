@@ -17,10 +17,10 @@ public class VectorHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException, NotImplementedException {
-        var content = (Vector<?>)data;
-        var result = new Vector<>();
+        Vector<?> content = (Vector<?>)data;
+        Vector<Object> result = new Vector<>();
 
-        for (var item :
+        for (Object item :
                 content) {
             result.add(context.encrypt(item));
         }

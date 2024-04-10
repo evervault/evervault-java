@@ -34,7 +34,7 @@ public class CharHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
-        var bytes = ByteBuffer.allocate(BUFFER_SIZE).putChar((char) data).array();
+        byte[] bytes = ByteBuffer.allocate(BUFFER_SIZE).putChar((char) data).array();
 
         return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, bytes, sharedKey, teamPublicKey);
     }

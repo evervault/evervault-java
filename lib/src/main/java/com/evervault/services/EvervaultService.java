@@ -5,9 +5,7 @@ package com.evervault.services;
 
 import com.evervault.contracts.*;
 import com.evervault.exceptions.*;
-import com.evervault.models.CageRunResult;
-import com.evervault.models.RunTokenResult;
-import com.evervault.models.TokenResult;
+import com.evervault.models.*;
 import com.evervault.utils.EcdhCurve;
 import com.evervault.utils.ProxyCredentialsProvider;
 import com.evervault.utils.ProxyRoutePlanner;
@@ -170,7 +168,7 @@ public abstract class EvervaultService {
     }
 
     private void setupKeys(EcdhCurve ecdhCurve) throws HttpFailureException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotPossibleToHandleDataTypeException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException, Asn1EncodingException {
-        var teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultApiUrl()));
+        CagePublicKey teamEcdhKey = circuitBreakerProvider.execute(getCageHash, () -> cagePublicKeyFromEndpointProvider.getCagePublicKeyFromEndpoint(getEvervaultApiUrl()));
 
         teamUuid = teamEcdhKey.teamUuid;
 
@@ -214,7 +212,7 @@ public abstract class EvervaultService {
 
     private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, Asn1EncodingException {
         currentSharedKeyTimestamp = timeProvider.GetNow();
-        var generated = sharedKeyProvider.generateSharedKeyBasedOn(teamKey);
+        GeneratedSharedKey generated = sharedKeyProvider.generateSharedKeyBasedOn(teamKey);
 
         this.sharedKey = generated.SharedKey;
         this.generatedEcdhKey = generated.GeneratedEcdhKey;

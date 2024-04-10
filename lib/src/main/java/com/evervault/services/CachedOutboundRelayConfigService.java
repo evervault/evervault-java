@@ -61,7 +61,7 @@ public class CachedOutboundRelayConfigService implements IProvideDecryptionAndIg
 
         @Override
         public void execute() throws Exception {
-            var result = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
+            OutboundRelayConfigResult result = httpHandler.getOutboundRelayConfig(evervaultApiUrl);
             cachedConfig = result.config;
             updateDelay((result.pollInterval != null) ? result.pollInterval : getDelay(), getTimeUnit());
         }

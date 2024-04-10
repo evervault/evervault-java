@@ -17,13 +17,13 @@ public class MapHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException, NotImplementedException {
-        var map = (Map)data;
+        Map map = (Map)data;
 
-        for (var item :
+        for (Object item :
                 map.entrySet()) {
-            var value = ((Map.Entry<?, ?>)item).getValue();
+            Object value = ((Map.Entry<?, ?>)item).getValue();
 
-            var encryptedContent = context.encrypt(value);
+            Object encryptedContent = context.encrypt(value);
             map.put(((Map.Entry<?, ?>) item).getKey(), encryptedContent);
         }
 
