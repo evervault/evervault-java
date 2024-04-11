@@ -133,7 +133,6 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
     @Override
     public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException {
         String serializedData = new Gson().toJson(data);
-
         URL connectionUrl = new URL(url + "/v2/functions/" + cageName + "/run-token");
 
         Map<String, String> additionalHeaders = new HashMap<>();

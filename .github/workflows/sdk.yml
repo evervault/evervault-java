@@ -28,6 +28,9 @@ jobs:
         run: ./gradlew clean build
       - name: unit tests
         run: ./gradlew test --info
+        env:
+          TEST_EV_APP_ID: ${{ secrets.TEST_EV_APP_ID }}
+          TEST_EV_API_KEY: ${{ secrets.TEST_EV_API_KEY }}
       - name: Upload unit test report on failure
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2

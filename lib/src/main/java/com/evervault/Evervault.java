@@ -19,11 +19,11 @@ public class Evervault extends EvervaultService {
 
     public String getEvervaultApiHost() { return evervaultApiHost; }
 
-    public String getEvervaultApiUrl() { return "https://" + evervaultApiHost + "/"; }
+    public String getEvervaultApiUrl() { return "https://" + evervaultApiHost; }
 
     public String getEvervaultRunHost() { return evervaultRunHost; };
 
-    public String getEvervaultRunUrl() { return "https://" + evervaultRunHost + "/"; }
+    public String getEvervaultRunUrl() { return "https://" + evervaultRunHost; }
 
     public String getEvervaultRelayHost() {
         return evervaultRelayHost;

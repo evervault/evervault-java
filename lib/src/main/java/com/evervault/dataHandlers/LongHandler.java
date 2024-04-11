@@ -9,6 +9,7 @@ import com.evervault.exceptions.NotImplementedException;
 import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 public class LongHandler implements IDataHandler {
@@ -33,8 +34,8 @@ public class LongHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
-        byte[] bytes = ByteBuffer.allocate(BUFFER_SIZE).putLong((long) data).array();
-
-        return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey, teamPublicKey);
+        long original = (long) data;
+        String formattedData = String.valueOf(original);
+        return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, formattedData.getBytes(StandardCharsets.UTF_8), sharedKey, teamPublicKey);
     }
 }

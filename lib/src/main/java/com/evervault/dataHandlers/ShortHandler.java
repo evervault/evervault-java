@@ -8,6 +8,7 @@ import com.evervault.exceptions.InvalidCipherException;
 import com.evervault.exceptions.NotImplementedException;
 import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 public class ShortHandler implements IDataHandler {
@@ -32,8 +33,8 @@ public class ShortHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
-        byte[] bytes = ByteBuffer.allocate(BUFFER_SIZE).putShort((short) data).array();
-
-        return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, bytes, sharedKey, teamPublicKey);
+        short original = (short) data;
+        String formattedData = String.valueOf(original);
+        return encryptionProvider.encryptData(DataHeader.Number, generatedEcdhKey, formattedData.getBytes(StandardCharsets.UTF_8), sharedKey, teamPublicKey);
     }
 }
