@@ -24,10 +24,8 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: ${{ matrix.java-version }}
-      - name: build project
-        run: ./gradlew clean build
       - name: unit tests
-        run: ./gradlew test --info
+        run: ./gradlew clean test --info
         env:
           TEST_EV_APP_ID: ${{ secrets.TEST_EV_APP_ID }}
           TEST_EV_API_KEY: ${{ secrets.TEST_EV_API_KEY }}
