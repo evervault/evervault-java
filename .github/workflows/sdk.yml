@@ -11,8 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - java-version: ['8', '11', '16', '17', '21']
+        java-version: ['8', '11', '16', '17', '21']
     env:
       ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
       EV_API_HOST: api.evervault.com
