@@ -39,17 +39,17 @@ public class Evervault extends EvervaultService {
 
     private void setEvervaultApiHost() {
         String envApiHost = System.getenv("EV_API_HOST");
-        this.evervaultApiHost = Objects.requireNonNullElse(envApiHost, EVERVAULT_API_HOST);
+        this.evervaultApiHost = envApiHost != null ? envApiHost : EVERVAULT_API_HOST;
     }
 
     private void setEvervaultRunHost() {
         String envRunHost = System.getenv("EV_CAGE_RUN_HOST");
-        this.evervaultRunHost = Objects.requireNonNullElse(envRunHost, EVERVAULT_RUN_HOST);
+        this.evervaultRunHost = envRunHost != null ? envRunHost : EVERVAULT_RUN_HOST;
     }
 
     private void setEvervaultRelayUrl() {
         String envRelayHost = System.getenv("EV_RELAY_HOST");
-        this.evervaultRelayHost = Objects.requireNonNullElse(envRelayHost, EVERVAULT_RELAY_HOST);
+        this.evervaultRelayHost = envRelayHost != null ? envRelayHost : EVERVAULT_RELAY_HOST;
     }
 
     private void setEvervaultIgnoreDomains() {

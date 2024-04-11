@@ -5,6 +5,7 @@ import com.evervault.contracts.IProvideEncryptedFormat;
 import com.evervault.exceptions.Asn1EncodingException;
 import com.evervault.exceptions.InvalidCipherException;
 import com.evervault.exceptions.NotImplementedException;
+import com.evervault.models.GeneratedSharedKey;
 import com.evervault.services.EncryptionService;
 import com.evervault.services.EncryptionServiceBasedOnCurve256K1;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -57,13 +58,13 @@ public final class WhenUsingEncryptionServiceTests {
 
     @Test
     void notDefiningCurveThrows() {
-        var es = new WithoutCurve(encryptFormatProvider);
+        WithoutCurve es = new WithoutCurve(encryptFormatProvider);
         assertThrows(NotImplementedException.class, () -> es.getEllipticCurvePublicKeyFrom(KeySample));
     }
 
     @Test
     void notDefiningAlgorithmThrows() {
-        var es = new WithoutAlgorithm(encryptFormatProvider);
+        WithoutAlgorithm es = new WithoutAlgorithm(encryptFormatProvider);
         assertThrows(NotImplementedException.class, () -> es.getEllipticCurvePublicKeyFrom(KeySample));
     }
 
@@ -75,32 +76,32 @@ public final class WhenUsingEncryptionServiceTests {
     @Test
     void decodedPublicKeyMustMatchAlgorithm() throws NoSuchAlgorithmException, InvalidKeySpecException, NotImplementedException {
 
-        var key = service.getEllipticCurvePublicKeyFrom(KeySample);
-        var algo = key.getAlgorithm();
+        PublicKey key = service.getEllipticCurvePublicKeyFrom(KeySample);
+        String algo = key.getAlgorithm();
         assert ALGORITHM_TO_MATCH.equals(algo);
     }
 
     @Test
     void generateSharedKeyWithDecodedStringDoesNotThrow() throws Asn1EncodingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException, NotImplementedException {
-        var publicKey = service.getEllipticCurvePublicKeyFrom(KeySample);
+        PublicKey publicKey = service.getEllipticCurvePublicKeyFrom(KeySample);
         service.generateSharedKeyBasedOn(publicKey);
     }
 
     @Test
     void generateSharedKeyDoesNotThrow() throws Asn1EncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
-        var provider = new BouncyCastleProvider();
-        var keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_TO_MATCH, provider);
-        var genParameter = new ECGenParameterSpec(SECP256K1_NAME);
+        BouncyCastleProvider provider = new BouncyCastleProvider();
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_TO_MATCH, provider);
+        ECGenParameterSpec genParameter = new ECGenParameterSpec(SECP256K1_NAME);
         keyPairGenerator.initialize(genParameter, new SecureRandom());
-        var keyPair = keyPairGenerator.generateKeyPair();
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-        var generated = service.generateSharedKeyBasedOn(keyPair.getPublic());
+        GeneratedSharedKey generated = service.generateSharedKeyBasedOn(keyPair.getPublic());
         assert generated.SharedKey.length > 0;
     }
 
     @Test
     void encryptStringReturnsOutputOfFormat() throws NotImplementedException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, InvalidCipherException {
-        var setup = new EncryptSetup();
+        EncryptSetup setup = new EncryptSetup();
         final String result = "Foo";
         System.out.println(setup.cageKey);
         when(encryptFormatProvider.format(any(), any(), any(), any())).thenReturn(result);
@@ -112,11 +113,11 @@ public final class WhenUsingEncryptionServiceTests {
     void encryptStringProvidesCorrectContent() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, InvalidCipherException {
         final String result = "Foo";
 
-        var setup = new EncryptSetup();
-        var dataHeaderTypeCapture = ArgumentCaptor.forClass(DataHeader.class);
-        var ivCapture = ArgumentCaptor.forClass(String.class);
-        var publicKeyCapture = ArgumentCaptor.forClass(String.class);
-        var encryptedPayloadCapture = ArgumentCaptor.forClass(String.class);
+        EncryptSetup setup = new EncryptSetup();
+        ArgumentCaptor<DataHeader> dataHeaderTypeCapture = ArgumentCaptor.forClass(DataHeader.class);
+        ArgumentCaptor<String> ivCapture = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> publicKeyCapture = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> encryptedPayloadCapture = ArgumentCaptor.forClass(String.class);
 
         when(encryptFormatProvider.format(any(), any(), any(), any())).thenReturn(result);
 

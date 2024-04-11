@@ -56,12 +56,12 @@ public class WhenUsingApisDecrypt {
 
     @Test
     void callingToDecryptReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
-        var decryptResult = new CardData();
+        CardData decryptResult = new CardData();
         decryptResult.cardNumber = "4242424242424242";
         decryptResult.cvv = 123;
         decryptResult.expiry = "12/24";
 
-        var dataToDecrypt = new HashMap<String, String>();
+        HashMap dataToDecrypt = new HashMap<String, String>();
         dataToDecrypt.put("cardNumber", "ev:abc123:$");
         dataToDecrypt.put("cvv", "ev:def456:$");
         dataToDecrypt.put("expiry", "12/24");
@@ -69,20 +69,20 @@ public class WhenUsingApisDecrypt {
         when(decryptProvider.decrypt(anyString(), any(), any())).thenReturn(decryptResult);
 
         evervaultService.setupWrapper(decryptProvider, circuitBreakerProvider);
-        
-        var result = evervaultService.decrypt(dataToDecrypt, CardData.class);
+
+        CardData result = evervaultService.decrypt(dataToDecrypt, CardData.class);
 
         assert decryptResult.equals(result);
     }
 
     @Test
     void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
-        var decryptResult = new CardData();
+        CardData decryptResult = new CardData();
         decryptResult.cardNumber = "4242424242424242";
         decryptResult.cvv = 123;
         decryptResult.expiry = "12/24";
 
-        var dataToDecrypt = new HashMap<String, String>();
+        HashMap dataToDecrypt = new HashMap<String, String>();
         dataToDecrypt.put("cardNumber", "ev:abc123:$");
         dataToDecrypt.put("cvv", "ev:def456:$");
         dataToDecrypt.put("expiry", "12/24");

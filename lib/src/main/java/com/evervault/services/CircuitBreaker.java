@@ -6,7 +6,7 @@ import com.evervault.contracts.IExecute;
 import com.evervault.exceptions.MaxRetryReachedException;
 import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 import java.io.IOException;
-import java.net.http.HttpTimeoutException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 
 public class CircuitBreaker implements IProvideCircuitBreaker {
@@ -41,10 +41,10 @@ public class CircuitBreaker implements IProvideCircuitBreaker {
         ResourceControl resourceControl = control.get(methodIdentifier);
 
         try {
-            TReturn result = (TReturn)executable.execute();
+            TReturn result = (TReturn) executable.execute();
             resourceControl.clear();
             return result;
-        } catch (HttpTimeoutException httpTimeoutException) {
+        } catch (SocketTimeoutException e) {
             resourceControl.timeOutOccurred();
 
             if (resourceControl.getBlocked()) {

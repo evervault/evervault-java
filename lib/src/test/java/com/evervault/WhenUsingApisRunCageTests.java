@@ -70,19 +70,19 @@ public class WhenUsingApisRunCageTests {
 
     @Test
     void callingToRunCageReturnsTheHttpContent() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, NotPossibleToHandleDataTypeException, InvalidCipherTextException, MaxRetryReachedException, NoSuchProviderException, NotImplementedException, EvervaultException {
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        var cageRunResult = new CageRunResult();
+        CageRunResult cageRunResult = new CageRunResult();
 
         cageRunResult.result = "foo";
         cageRunResult.runId = "bar";
@@ -90,26 +90,26 @@ public class WhenUsingApisRunCageTests {
 
         evervaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
-        var result = evervaultService.run("somecage", "somedata", true, "1");
+        CageRunResult result = evervaultService.run("somecage", "somedata", true, "1");
 
         assert cageRunResult.equals(result);
     }
 
     @Test
     void nullParameterThrows() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
         when(cagePublicKeyProvider.getCagePublicKeyFromEndpoint(any())).thenReturn(cagePublicKey);
         when(sharedKeyProvider.generateSharedKeyBasedOn(any())).thenReturn(generated);
 
-        var cageRunResult = new CageRunResult();
+        CageRunResult cageRunResult = new CageRunResult();
 
         cageRunResult.result = "foo";
         cageRunResult.runId = "bar";
@@ -124,12 +124,12 @@ public class WhenUsingApisRunCageTests {
 
     @Test
     void providerNotSetThrows() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 

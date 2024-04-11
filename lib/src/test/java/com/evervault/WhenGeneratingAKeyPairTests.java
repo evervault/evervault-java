@@ -32,9 +32,9 @@ public class WhenGeneratingAKeyPairTests {
 
     @Test
     void keyPairAlgorithmMustMatch() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NotImplementedException {
-        var service = new SomeNewService();
+        SomeNewService service = new SomeNewService();
 
-        var keypair = service.newKeyPair();
+        KeyPair keypair = service.newKeyPair();
 
         assert ELLIPTIC_CURVE_ALGORITHM.equals(keypair.getPublic().getAlgorithm());
     }
