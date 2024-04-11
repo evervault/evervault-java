@@ -12,12 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - distribution: 'corretto'
-            java-version: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-          - distribution: 'adopt'
-            java-version: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-          - distribution: 'oracle'
-            java-version: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+          - java-version: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     env:
       ENVIRONMENT_API_KEY: ${{ secrets.ENVIRONMENT_API_KEY }}
       EV_API_HOST: api.evervault.com
@@ -28,7 +23,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java-version }} with ${{ matrix.distribution }}
         uses: actions/setup-java@v3
         with:
-          distribution: ${{ matrix.distribution }}
+          distribution: 'corretto'
           java-version: ${{ matrix.java-version }}
       - name: build project
         run: ./gradlew clean build
