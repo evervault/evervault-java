@@ -73,12 +73,12 @@ class WhenUsingApisEncryptionTests {
 
     @Test
     void creatingANewServiceDoesNotThrow() throws Asn1EncodingException, HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
@@ -91,12 +91,12 @@ class WhenUsingApisEncryptionTests {
 
     @Test
     void newKeyMustBeGeneratedIf15MinutesHavePassed() throws Asn1EncodingException, HttpFailureException, IOException, InterruptedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, EvervaultException {
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
@@ -125,12 +125,12 @@ class WhenUsingApisEncryptionTests {
 
     @Test
     void tryingToEncryptNullThrows() throws Asn1EncodingException, HttpFailureException, InvalidAlgorithmParameterException, IOException, NoSuchAlgorithmException, InvalidKeyException, InterruptedException, NotImplementedException, EvervaultException {
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
@@ -157,15 +157,15 @@ class WhenUsingApisEncryptionTests {
 
     @Test
     void encryptionReturnsCorrectData() throws Exception {
-        final var someString = "Foo";
-        final var encryptedString = "Bar";
+        final String someString = "Foo";
+        final String encryptedString = "Bar";
 
-        var cagePublicKey = new CagePublicKey();
+        CagePublicKey cagePublicKey = new CagePublicKey();
         cagePublicKey.ecdhKey = "teamEcdhKey";
         cagePublicKey.key = "key";
         cagePublicKey.teamUuid = "teamUuid";
 
-        var generated = new GeneratedSharedKey();
+        GeneratedSharedKey generated = new GeneratedSharedKey();
         generated.SharedKey = new byte[]{};
         generated.SharedKey = new byte[]{};
 
@@ -176,7 +176,7 @@ class WhenUsingApisEncryptionTests {
 
         everVaultService.setupWrapper(cagePublicKeyProvider, ecPublicKeyProvider, sharedKeyProvider, encryptionForObjects, cageExecutionProvider, circuitBreakerProvider, timeProvider, EcdhCurve.SECP256K1);
 
-        var result = (String) everVaultService.encrypt(someString);
+        String result = (String) everVaultService.encrypt(someString);
 
         assert result.equals(encryptedString);
     }

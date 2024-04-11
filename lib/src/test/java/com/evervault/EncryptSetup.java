@@ -16,13 +16,13 @@ public class EncryptSetup {
     public PublicKey cageKey;
 
     public EncryptSetup() throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchAlgorithmException {
-        var provider = new BouncyCastleProvider();
-        var keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, provider);
-        var genParameter = new ECGenParameterSpec(STDNAME);
+        BouncyCastleProvider provider = new BouncyCastleProvider();
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, provider);
+        ECGenParameterSpec genParameter = new ECGenParameterSpec(STDNAME);
         keyPairGenerator.initialize(genParameter, new SecureRandom());
         keyPair = keyPairGenerator.generateKeyPair();
 
-        var agreement = KeyAgreement.getInstance(KEYAGREEMENT_ALGORITHM, provider);
+        KeyAgreement agreement = KeyAgreement.getInstance(KEYAGREEMENT_ALGORITHM, provider);
         agreement.init(keyPair.getPrivate());
         agreement.doPhase(keyPair.getPublic(), true);
 

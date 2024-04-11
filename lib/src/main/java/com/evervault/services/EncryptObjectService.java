@@ -16,7 +16,7 @@ public class EncryptObjectService implements IProvideEncryptionForObject {
 
     @Override
     public Object encrypt(Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException, NotImplementedException {
-        for (var handler: dataHandlers) {
+        for (IDataHandler handler: dataHandlers) {
             if (handler.canEncrypt(data)){
                 return handler.encrypt(this, data);
             }

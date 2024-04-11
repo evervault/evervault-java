@@ -19,11 +19,11 @@ public class Evervault extends EvervaultService {
 
     public String getEvervaultApiHost() { return evervaultApiHost; }
 
-    public String getEvervaultApiUrl() { return "https://" + evervaultApiHost + "/"; }
+    public String getEvervaultApiUrl() { return "https://" + evervaultApiHost; }
 
     public String getEvervaultRunHost() { return evervaultRunHost; };
 
-    public String getEvervaultRunUrl() { return "https://" + evervaultRunHost + "/"; }
+    public String getEvervaultRunUrl() { return "https://" + evervaultRunHost; }
 
     public String getEvervaultRelayHost() {
         return evervaultRelayHost;
@@ -38,18 +38,18 @@ public class Evervault extends EvervaultService {
     }
 
     private void setEvervaultApiHost() {
-        var envApiHost = System.getenv("EV_API_HOST");
-        this.evervaultApiHost = Objects.requireNonNullElse(envApiHost, EVERVAULT_API_HOST);
+        String envApiHost = System.getenv("EV_API_HOST");
+        this.evervaultApiHost = envApiHost != null ? envApiHost : EVERVAULT_API_HOST;
     }
 
     private void setEvervaultRunHost() {
-        var envRunHost = System.getenv("EV_CAGE_RUN_HOST");
-        this.evervaultRunHost = Objects.requireNonNullElse(envRunHost, EVERVAULT_RUN_HOST);
+        String envRunHost = System.getenv("EV_CAGE_RUN_HOST");
+        this.evervaultRunHost = envRunHost != null ? envRunHost : EVERVAULT_RUN_HOST;
     }
 
     private void setEvervaultRelayUrl() {
-        var envRelayHost = System.getenv("EV_RELAY_HOST");
-        this.evervaultRelayHost = Objects.requireNonNullElse(envRelayHost, EVERVAULT_RELAY_HOST);
+        String envRelayHost = System.getenv("EV_RELAY_HOST");
+        this.evervaultRelayHost = envRelayHost != null ? envRelayHost : EVERVAULT_RELAY_HOST;
     }
 
     private void setEvervaultIgnoreDomains() {
@@ -80,11 +80,11 @@ public class Evervault extends EvervaultService {
 
         this.evervaultDecryptionDomains = decryptionDomains;
 
-        var httpHandler = new HttpHandler(apiKey, appUuid);
-        var encryptService = EncryptionServiceFactory.build(ecdhCurve);
-        var circuitBreaker = new CircuitBreaker();
-        var timeService = new TimeService();
-        var taskScheduler = new RepeatableTaskSchedulerService();
+        HttpHandler httpHandler = new HttpHandler(apiKey, appUuid);
+        EncryptionService encryptService = EncryptionServiceFactory.build(ecdhCurve);
+        CircuitBreaker circuitBreaker = new CircuitBreaker();
+        TimeService timeService = new TimeService();
+        RepeatableTaskSchedulerService taskScheduler = new RepeatableTaskSchedulerService();
 
         this.setupCircuitBreaker(circuitBreaker);
         this.setupCageExecutionProvider(httpHandler);
@@ -95,7 +95,7 @@ public class Evervault extends EvervaultService {
         this.setupClientSideTokenProvider(httpHandler);
 
         this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
-        var encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);
+        EvervaultEncryptionService encryptForObject = new EvervaultEncryptionService(encryptService, this.generatedEcdhKey, this.sharedKey, this.teamKey);
 
         this.setupEncryption(encryptForObject);
         this.setupCredentialsProvider(apiKey);

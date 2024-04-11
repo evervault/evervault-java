@@ -26,9 +26,9 @@ public abstract class EncryptionServiceCommon {
     }
 
     protected KeyPair generateNewKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NotImplementedException {
-        var provider = new BouncyCastleProvider();
-        var keyPairGenerator = KeyPairGenerator.getInstance(getKeyGeneratorAlgorithm(), provider);
-        var genParameter = new ECGenParameterSpec(getCurveName());
+        BouncyCastleProvider provider = new BouncyCastleProvider();
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(getKeyGeneratorAlgorithm(), provider);
+        ECGenParameterSpec genParameter = new ECGenParameterSpec(getCurveName());
         keyPairGenerator.initialize(genParameter, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }

@@ -12,7 +12,7 @@ public class DEREncoder {
     }
 
     public byte[] publicKeyToDer(byte[] decompressedPublicKey) throws Asn1EncodingException {
-        var ASN1 = new ASN1Encoder(this.curveValues);
+        ASN1Encoder ASN1 = new ASN1Encoder(this.curveValues);
         String encoded = ASN1.encode(
             "30",
             ASN1.encode(

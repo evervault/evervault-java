@@ -16,302 +16,226 @@ import com.evervault.models.RunTokenResult;
 import com.evervault.models.TokenResult;
 import com.google.gson.Gson;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
-import java.time.Duration;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt, IProvideClientSideToken {
-
-    private final java.net.http.HttpClient client;
     private final static String VERSION_PREFIX = "evervault-java/";
     private final static String JSON_CONTENT_TYPE = "application/json";
-    private final static int OK_HTTP_STATUS_CODE = 200;
-    private final static int OK_CREATED_HTTP_STATUS_CODE = 201;
+
     private final static String POLL_INTERVAL_HEADER_NAME = "X-Poll-Interval";
     private final static String ASYNC_HEADER_NAME = "x-async";
     private final static String VERSION_ID_HEADER_NAME = "x-version-id";
-    private final static long TIMEOUT_SECONDS_DEFAULT = 30;
+    private final static int TIMEOUT_MILLIS_DEFAULT = 30000;
     private final static String CAGES_KEY_SUFFIX = "/cages/key";
     private final String apiKey;
     private final String appUuid;
-    private final Duration httpTimeout;
+    private final String basicAuthorizationHeaderValue;
+    private final int httpTimeout;
 
     public HttpHandler(String apiKey, String appUuid) {
-        this(apiKey, appUuid, Duration.ofSeconds(TIMEOUT_SECONDS_DEFAULT));
+        this(apiKey, appUuid, TIMEOUT_MILLIS_DEFAULT);
     }
 
-    public HttpHandler(String apiKey, String appUuid, Duration httpTimeout) {
+    public HttpHandler(String apiKey, String appUuid, int httpTimeout) {
         this.apiKey = apiKey;
         this.appUuid = appUuid;
+        this.basicAuthorizationHeaderValue = buildAuthorizationHeaderValue(appUuid, apiKey);
         this.httpTimeout = httpTimeout;
-        client = java.net.http.HttpClient.newHttpClient();
     }
 
     public CagePublicKey getCagePublicKeyFromEndpoint(String url) throws IOException, InterruptedException, HttpFailureException {
         return this.getCagePublicKeyFromEndpoint(url, null);
     }
 
-    private String buildAuthorizationHeaderValue() {
-        var input = appUuid + ":" + apiKey;
-        var encodedValue = Base64Handler.encodeBase64(input.getBytes());
+    public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
+        URL connectionUrl = new URL(url + CAGES_KEY_SUFFIX);
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Api-Key", apiKey);
+        if (headerMap != null) {
+            headerMap.forEach((key, value) -> additionalHeaders.put(key, value));
+        }
+        HttpURLConnection connection = createConnection(connectionUrl, "GET", additionalHeaders);
+        sendRequest(connection);
+        return parseResponseBody(connection, CagePublicKey.class);
+    }
+
+    @Override
+    public CageRunResult runCage(String url, String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException {
+        String serializedData = new Gson().toJson(data);
+
+        URL connectionUrl = new URL(url + "/" + cageName);
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Api-Key", apiKey);
+        if (async) {
+            additionalHeaders.put(ASYNC_HEADER_NAME, "true");
+        }
+        if (version != null && !version.isEmpty()) {
+            additionalHeaders.put(VERSION_ID_HEADER_NAME, version);
+        }
+
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders);
+        setRequestBody(connection, serializedData);
+        sendRequest(connection);
+
+        return parseResponseBody(connection, CageRunResult.class);
+    }
+
+    @Override
+    public <T> T decrypt(String url, Object data, Class<T> valueType) throws HttpFailureException, IOException {
+        String serializedData = new Gson().toJson(data);
+
+        URL connectionUrl = new URL(url + "/decrypt");
+
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Authorization", basicAuthorizationHeaderValue);
+
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders);
+        setRequestBody(connection, serializedData);
+        sendRequest(connection);
+
+        return parseResponseBody(connection, valueType);
+    }
+
+    @Override
+    public TokenResult createClientSideToken(String url, String action, Object data, Instant expiry) throws HttpFailureException, IOException {
+        Long expiryInMillis;
+        if (expiry != null) {
+            expiryInMillis = expiry.toEpochMilli();
+        } else {
+            expiryInMillis = null;
+        }
+
+        CreateTokenPayload payload = new CreateTokenPayload(action, expiryInMillis, data);
+        String serializedData = new Gson().toJson(payload);
+
+        URL connectionUrl = new URL(url + "/client-side-tokens");
+
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Authorization", basicAuthorizationHeaderValue);
+
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders);
+        setRequestBody(connection, serializedData);
+        sendRequest(connection);
+
+        return parseResponseBody(connection, TokenResult.class);
+    }
+
+    @Override
+    public TokenResult createClientSideToken(String url, String action, Object data) throws HttpFailureException, IOException {
+        return createClientSideToken(url, action, data, null);
+    }
+
+    @Override
+    public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException {
+        String serializedData = new Gson().toJson(data);
+        URL connectionUrl = new URL(url + "/v2/functions/" + cageName + "/run-token");
+
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Api-key", apiKey);
+
+        HttpURLConnection connection = createConnection(
+                connectionUrl,
+                "POST",
+                additionalHeaders
+        );
+        setRequestBody(connection, serializedData);
+        sendRequest(connection);
+
+        return parseResponseBody(connection, RunTokenResult.class);
+    }
+
+    @Override
+    public RunTokenResult createRunToken(String url, String cageName) throws HttpFailureException, IOException {
+        // Allow non pre-approved payloads for run tokens
+        // If data is null, convert to an empty object
+        return createRunToken(url, cageName, new Object());
+    }
+
+    public OutboundRelayConfigResult getOutboundRelayConfig(String url) throws HttpFailureException, IOException {
+        URL connectionUrl = new URL(url + "/v2/relay-outbound");
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Api-key", apiKey);
+        HttpURLConnection connection = createConnection(
+                connectionUrl,
+                "GET",
+                additionalHeaders
+        );
+
+        sendRequest(connection);
+
+        OutboundRelayConfigResult.OutboundRelayConfig config =
+                parseResponseBody(connection, OutboundRelayConfigResult.OutboundRelayConfig.class);
+        String pollIntervalHeaderValue = connection.getHeaderField(POLL_INTERVAL_HEADER_NAME);
+        Integer pollInterval;
+        try {
+            pollInterval = Integer.valueOf(pollIntervalHeaderValue);
+        } catch (NumberFormatException e) {
+            pollInterval = null;
+        }
+        return new OutboundRelayConfigResult(pollInterval, config);
+    }
+
+    private String buildAuthorizationHeaderValue(String appUuid, String apiKey) {
+        String input = appUuid + ":" + apiKey;
+        String encodedValue = Base64Handler.encodeBase64(input.getBytes());
         StringBuilder builder = new StringBuilder();
         builder.append("Basic ")
-            .append(encodedValue);
+                .append(encodedValue);
         return builder.toString();
     }
 
-    public CagePublicKey getCagePublicKeyFromEndpoint(String url, Map<String, String> headerMap) throws IOException, InterruptedException, HttpFailureException {
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve(CAGES_KEY_SUFFIX);
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(finalAddress)
-                .timeout(httpTimeout)
-                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("AcceptEncoding", "gzip, deflate")
-                .setHeader("Accept", JSON_CONTENT_TYPE)
-                .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Api-Key", apiKey)
-                .setHeader("Authorization", authHeaderValue)
-                .GET();
-
-        if (headerMap != null) {
-            for (HashMap.Entry<String, String> set :
-                    headerMap.entrySet()) {
-                requestBuilder.setHeader(set.getKey(), set.getValue());
+    private HttpURLConnection createConnection(URL url, String method, Map<String, String> headers) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        if(headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                connection.setRequestProperty(entry.getKey(), entry.getValue());
             }
         }
-
-        var request = requestBuilder.build();
-
-        var result = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (result.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(result.statusCode(), result.body());
-        }
-
-        return new Gson().fromJson(result.body(), CagePublicKey.class);
+        connection.setRequestMethod(method);
+        connection.setConnectTimeout(httpTimeout);
+        connection.setReadTimeout(httpTimeout);
+        connection.setRequestProperty("User-Agent", VERSION_PREFIX + 1.0);
+        connection.setRequestProperty("Accept", JSON_CONTENT_TYPE);
+        return connection;
     }
 
-    @Override
-    public CageRunResult runCage(String url, String cageName, Object data, boolean async, String version) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
-
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/" + cageName);
-
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(finalAddress)
-                .setHeader("Api-Key", apiKey)
-                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", JSON_CONTENT_TYPE)
-                .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Api-Key", apiKey)
-                .timeout(httpTimeout)
-                .POST(BodyPublishers.ofString(serializedData));
-
-        if (async) {
-            requestBuilder.setHeader(ASYNC_HEADER_NAME, "true");
+    private void setRequestBody(HttpURLConnection connection, String body) throws IOException {
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type", JSON_CONTENT_TYPE);
+        try(OutputStream os = connection.getOutputStream()) {
+            byte[] input = body.getBytes("utf-8");
+            os.write(input, 0, input.length);
         }
-
-        if (version != null && !version.isEmpty()) {
-            requestBuilder.setHeader(VERSION_ID_HEADER_NAME, version);
-        }
-
-        var request = requestBuilder.build();
-
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        return new Gson().fromJson(response.body(), CageRunResult.class);
     }
 
-    @Override
-    public <T> T decrypt(String url, Object data, Class<T> valueType) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
-
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/decrypt");
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-            .uri(finalAddress)
-            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-            .setHeader("Accept", JSON_CONTENT_TYPE)
-            .setHeader("Content-Type", JSON_CONTENT_TYPE)
-            .setHeader("Authorization", authHeaderValue)
-            .timeout(httpTimeout)
-            .POST(BodyPublishers.ofString(serializedData));
-        var request = requestBuilder.build();
-
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != OK_HTTP_STATUS_CODE){
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        return new Gson().fromJson(response.body(), valueType);
-    }
-
-    @Override
-    public TokenResult createClientSideToken(String url, String action, Object data, Instant expiry) throws HttpFailureException, IOException, InterruptedException {
-        long expiryInMillis = expiry.toEpochMilli();
-
-        var payload = new CreateTokenPayload(action, expiryInMillis, data);
-        var serializedData = new Gson().toJson(payload);
-
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/client-side-tokens");
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-            .uri(finalAddress)
-            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-            .setHeader("Accept", JSON_CONTENT_TYPE)
-            .setHeader("Content-Type", JSON_CONTENT_TYPE)
-            .setHeader("Authorization", authHeaderValue)
-            .timeout(httpTimeout)
-            .POST(BodyPublishers.ofString(serializedData));
-        var request = requestBuilder.build();
-
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() < 200 && response.statusCode() >= 300) {
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        return new Gson().fromJson(response.body(), TokenResult.class);
-    }
-
-    @Override
-    public TokenResult createClientSideToken(String url, String action, Object data) throws HttpFailureException, IOException, InterruptedException {
-        var payload = new CreateTokenPayload(action, data);
-        var serializedData = new Gson().toJson(payload);
-
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/client-side-tokens");
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-            .uri(finalAddress)
-            .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-            .setHeader("Accept", JSON_CONTENT_TYPE)
-            .setHeader("Content-Type", JSON_CONTENT_TYPE)
-            .setHeader("Authorization", authHeaderValue)
-            .timeout(httpTimeout)
-            .POST(BodyPublishers.ofString(serializedData));
-        var request = requestBuilder.build();
-
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != OK_CREATED_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        return new Gson().fromJson(response.body(), TokenResult.class);
-    }
-
-    @Override
-    public RunTokenResult createRunToken(String url, String cageName, Object data) throws HttpFailureException, IOException, InterruptedException {
-        var serializedData = new Gson().toJson(data);
-
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(finalAddress)
-                .setHeader("Api-Key", apiKey)
-                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", JSON_CONTENT_TYPE)
-                .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Api-Key", apiKey)
-                .timeout(httpTimeout)
-                .POST(BodyPublishers.ofString(serializedData));
-
-        var request = requestBuilder.build();
-
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        return new Gson().fromJson(response.body(), RunTokenResult.class);
-    }
-
-    @Override
-    public RunTokenResult createRunToken(String url, String cageName) throws HttpFailureException, IOException, InterruptedException {
-        // Allow non pre-approved payloads for run tokens
-        // If data is null, convert to an empty object
-        var serializedData = new Gson().toJson(new Object());
-
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/v2/functions/" + cageName + "/run-token");
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(finalAddress)
-                .setHeader("Api-Key", apiKey)
-                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", JSON_CONTENT_TYPE)
-                .setHeader("Content-Type", JSON_CONTENT_TYPE)
-                .setHeader("Api-Key", apiKey)
-                .timeout(httpTimeout)
-                .POST(BodyPublishers.ofString(serializedData));
-
-        var request = requestBuilder.build();
-
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        return new Gson().fromJson(response.body(), RunTokenResult.class);
-    }
-
-    public OutboundRelayConfigResult getOutboundRelayConfig(String url) throws HttpFailureException, IOException, InterruptedException {
-        var uri = URI.create(url);
-        var finalAddress = uri.resolve("/v2/relay-outbound");
-
-        var authHeaderValue = this.buildAuthorizationHeaderValue();
-        var requestBuilder = HttpRequest.newBuilder()
-                .uri(finalAddress)
-                .setHeader("Api-Key", apiKey)
-                .setHeader("User-Agent", VERSION_PREFIX + 1.0)
-                .setHeader("Accept", JSON_CONTENT_TYPE)
-                .setHeader("AcceptEncoding", "gzip, deflate")
-                .setHeader("Api-Key", apiKey)
-                .timeout(httpTimeout)
-                .GET();
-
-        var request = requestBuilder.build();
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() != OK_HTTP_STATUS_CODE) {
-            throw new HttpFailureException(response.statusCode(), response.body());
-        }
-
-        var config = new Gson().fromJson(response.body(), OutboundRelayConfigResult.OutboundRelayConfig.class);
-        var pollInterval = response.headers().firstValue(POLL_INTERVAL_HEADER_NAME).flatMap(s -> {
-            try {
-                return Optional.of(Integer.valueOf(s));
-            } catch (NumberFormatException e) {
-                return Optional.empty();
+    private void sendRequest(HttpURLConnection connection) throws HttpFailureException, IOException {
+        int responseCode = connection.getResponseCode();
+        if (responseCode < 200 || responseCode >= 300) {
+            StringBuilder response = new StringBuilder();
+            InputStream is = connection.getErrorStream();
+            if (is != null) {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(is))) {
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                        response.append('\n');
+                    }
+                }
             }
-        }).orElse(null);
-        return new OutboundRelayConfigResult(pollInterval, config);
+            throw new HttpFailureException(responseCode, response.toString());
+        }
+    }
+
+    private <T> T parseResponseBody(HttpURLConnection connection, Class<T> clazz) throws IOException {
+        T parsed;
+        try (InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
+            parsed = new Gson().fromJson(reader, clazz);
+        }
+        return parsed;
     }
 }

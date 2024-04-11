@@ -9,17 +9,15 @@ import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 import com.evervault.services.EvervaultEncryptionService;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,12 +33,12 @@ public class WhenEncryptingDifferentTypesOfDataTests {
     }
 
     private TestSetup getService() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
-        var setup = new EncryptSetup();
+        EncryptSetup setup = new EncryptSetup();
 
-        var encryptionProvider = mock(IProvideEncryption.class);
+        IProvideEncryption encryptionProvider = mock(IProvideEncryption.class);
 
-        var testSetup = new TestSetup();
-        var key = setup.keyPair.getPublic().getEncoded();
+        TestSetup testSetup = new TestSetup();
+        byte[] key = setup.keyPair.getPublic().getEncoded();
         testSetup.encryptionService = new EvervaultEncryptionService(encryptionProvider, key, setup.sharedKey, setup.cageKey);
         testSetup.encryptionProvider = encryptionProvider;
 
@@ -49,10 +47,10 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesStringCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
-        var someString = "Foo";
-        var someReturn = "Bar";
+        String someString = "Foo";
+        String someReturn = "Bar";
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(someString.getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn(someReturn);
 
@@ -61,23 +59,23 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void ifNotAbleToHandleTypeThenThrows() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         assertThrows(NotPossibleToHandleDataTypeException.class, () -> testSetup.encryptionService.encrypt(null));
     }
 
     @Test
     void handlesDictionaryCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
-        var map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<String, String>();
         map.put("Foo", "Bar");
         map.put("Ever", "Vault");
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq("Bar".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("Foo");
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq("Vault".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("Ever");
 
-        var encrypted = (HashMap<String, String>) testSetup.encryptionService.encrypt(map);
+        Map<String, String> encrypted = (HashMap<String, String>) testSetup.encryptionService.encrypt(map);
 
         assert "Foo".equals(encrypted.get("Foo"));
         assert "Ever".equals(encrypted.get("Ever"));
@@ -85,7 +83,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesBooleanCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq("true".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("true");
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Boolean), any(), eq("false".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("false");
@@ -96,10 +94,10 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesIntegerCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         int someInt = 132;
-        var bytes = ByteBuffer.allocate(4).putInt(someInt).array();
+        byte[] bytes = String.valueOf(someInt).getBytes(StandardCharsets.UTF_8);
         final String result = "onetwothree";
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
@@ -109,12 +107,12 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesByteCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         final byte someByte = 1;
         final String result = "onetwothree";
 
-        var bytes = ByteBuffer.allocate(1).put(someByte).array();
+        byte[] bytes = ByteBuffer.allocate(1).put(someByte).array();
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -123,11 +121,11 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesShortCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         final short someShort = 1;
         final String result = "onetwothree";
-        var bytes = ByteBuffer.allocate(2).putShort(someShort).array();
+        byte[] bytes = String.valueOf(someShort).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -136,11 +134,11 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesLongCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         final long someLong = 1;
         final String result = "onetwothree";
-        var bytes = ByteBuffer.allocate(8).putLong(someLong).array();
+        byte[] bytes = String.valueOf(someLong).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -149,11 +147,11 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesFloatCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         final float someFloat = 1;
         final String result = "onetwothree";
-        var bytes = ByteBuffer.allocate(4).putFloat(someFloat).array();
+        byte[] bytes = String.valueOf(someFloat).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -162,11 +160,11 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesDoubleCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         final double someDouble = 1;
         final String result = "onetwothree";
-        var bytes = ByteBuffer.allocate(8).putDouble(someDouble).array();
+        byte[] bytes = String.valueOf(someDouble).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -175,36 +173,36 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesCharCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
         final char someChar = 'a';
         final String result = "onetwothree";
-        var bytes = ByteBuffer.allocate(2).putChar(someChar).array();
+        byte[] bytes = String.valueOf(someChar).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any(), any())).thenReturn(result);
 
-        var content = (String)testSetup.encryptionService.encrypt(someChar);
+        String content = (String)testSetup.encryptionService.encrypt(someChar);
 
         assert result.equals(content);
     }
 
     @Test
     void handlesVectorCorrectly() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotPossibleToHandleDataTypeException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
-        var list = new Vector<Integer>();
+        List<Integer> list = new Vector<Integer>();
         list.add(1);
         list.add(2);
 
-        var bytesFirstItem = ByteBuffer.allocate(4).putInt(1).array();
-        var bytesSecondItem = ByteBuffer.allocate(4).putInt(2).array();
-        final var firstTrans = "one";
-        final var secTrans = "two";
+        byte[] bytesFirstItem = String.valueOf(1).getBytes(StandardCharsets.UTF_8);
+        byte[] bytesSecondItem = String.valueOf(2).getBytes(StandardCharsets.UTF_8);
+        final String firstTrans = "one";
+        final String secTrans = "two";
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytesFirstItem), any(), any())).thenReturn(firstTrans);
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytesSecondItem), any(), any())).thenReturn(secTrans);
 
-        var result = (Vector<String>)testSetup.encryptionService.encrypt(list);
+        List<String> result = (Vector<String>)testSetup.encryptionService.encrypt(list);
 
         assert result.get(0).equals(firstTrans);
         assert result.get(1).equals(secTrans);
@@ -223,28 +221,28 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
     @Test
     void handlesCustomClass() throws NotImplementedException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException, NotPossibleToHandleDataTypeException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
-        var someInstance = new SomeClass();
+        SomeClass someInstance = new SomeClass();
         someInstance.Name = "Foo";
 
-        var outputStream = new ByteArrayOutputStream();
-        var objectOutputStream = new ObjectOutputStream(outputStream);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(someInstance);
-        var byteArray = outputStream.toByteArray();
+        byte[] byteArray = outputStream.toByteArray();
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(byteArray), any(), any())).thenReturn("Bar");
 
-        var encrypted = testSetup.encryptionService.encrypt(someInstance);
+        Object encrypted = testSetup.encryptionService.encrypt(someInstance);
 
         assert encrypted.equals("Bar");
     }
 
     @Test
     void handlesArrayCorrectly() throws NotImplementedException, NotPossibleToHandleDataTypeException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, IOException, InvalidCipherException {
-        var testSetup = getService();
+        TestSetup testSetup = getService();
 
-        var sampleArray = new String[]{
+        String[] sampleArray = new String[]{
                 "Foo",
                 "Ever"
         };
@@ -252,7 +250,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Foo".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("Bar");
         when(testSetup.encryptionProvider.encryptData(any(), any(), eq("Ever".getBytes(StandardCharsets.UTF_8)), any(), any())).thenReturn("Vault");
 
-        var encrypted = (Object[])testSetup.encryptionService.encrypt(sampleArray);
+        Object[] encrypted = (Object[])testSetup.encryptionService.encrypt(sampleArray);
 
         assert "Bar".equals(encrypted[0]);
         assert "Vault".equals(encrypted[1]);

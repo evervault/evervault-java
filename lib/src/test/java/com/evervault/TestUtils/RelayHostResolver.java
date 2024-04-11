@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class RelayHostResolver {
     public static String getRelayHost() {
-        var envRelayHost = System.getenv("EV_RELAY_HOST");
-        return Objects.requireNonNullElse(envRelayHost, "strict.relay.evervault.com");
+        String envRelayHost = System.getenv("EV_RELAY_HOST");
+    return envRelayHost != null ? envRelayHost : "strict.relay.evervault.com";
     };
 }

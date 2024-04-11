@@ -26,7 +26,7 @@ public class RepeatableTaskSchedulerService implements IScheduleRepeatableTask {
 
     @Override
     public void schedule(IExecuteRepeatableTask task) {
-        var future = scheduledExecutor.schedule(new Runnable() {
+        ScheduledFuture future = scheduledExecutor.schedule(new Runnable() {
             @Override
             public void run() {
                 try {

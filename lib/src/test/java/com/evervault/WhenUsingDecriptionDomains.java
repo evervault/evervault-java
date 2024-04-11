@@ -8,6 +8,7 @@ import com.evervault.services.EvervaultService;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,12 +43,12 @@ public class WhenUsingDecriptionDomains {
     @Test
     public void shouldSetupRoutePlannerSoThatAllMatchingDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider);
         evervault.setupDecryptionDomains(new String[]{"example.com"}, new String[0]);
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
@@ -56,12 +57,12 @@ public class WhenUsingDecriptionDomains {
     @Test
     public void shouldSetupRoutePlannerSoThatAllMatchingOneLevelSubDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider);
         evervault.setupDecryptionDomains(new String[]{"*.example.com"}, new String[0]);
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("hey.example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
@@ -70,12 +71,12 @@ public class WhenUsingDecriptionDomains {
     @Test
     public void shouldSetupRoutePlannerSoThatAllMatchingSubDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider);
         evervault.setupDecryptionDomains(new String[]{"*.example.com"}, new String[0]);
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("hello.hey.example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
@@ -84,12 +85,12 @@ public class WhenUsingDecriptionDomains {
     @Test
     public void shouldSetupRoutePlannerSoThatAllNonMatchingDomainsAreNotRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider);
         evervault.setupDecryptionDomains(new String[]{"example.com"}, new String[0]);
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("anotherexample.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertNull(proxyHost);
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
@@ -98,24 +99,24 @@ public class WhenUsingDecriptionDomains {
     @Test
     public void shouldSetupRoutePlannerSoThatAllIgnoredDomainsAreNotRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider);
         evervault.setupDecryptionDomains(new String[]{"**"}, new String[]{"example.com"});
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertNull(proxyHost);
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
     }
 
     private HttpRequest mockHttpRequest() {
-        var httpRequest = mock(HttpRequest.class);
+        HttpRequest httpRequest = mock(HttpRequest.class);
         return httpRequest;
     }
 
     private HttpContext mockHttpContext() {
-        var httpContext = mock(HttpContext.class);
+        HttpContext httpContext = mock(HttpContext.class);
         return httpContext;
     }
 

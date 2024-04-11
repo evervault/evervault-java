@@ -10,12 +10,14 @@ import com.evervault.services.EvervaultService;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.protocol.HttpContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,17 +59,17 @@ public class WhenEnablingOutboundRelayTests {
     @Test
     public void shouldSetupRoutePlannerSoThatAllMatchingDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // Given
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains)));
 
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider, repeatableTaskScheduler);
         evervault.enableOutboundRelay();
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(repeatableTaskScheduler, times(1)).schedule(any());
@@ -76,17 +78,17 @@ public class WhenEnablingOutboundRelayTests {
     @Test
     public void shouldSetupRoutePlannerSoThatAllMatchingOneLevelSubDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // Given
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("*.example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("*.example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains)));
 
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider, repeatableTaskScheduler);
         evervault.enableOutboundRelay();
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("hey.example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(repeatableTaskScheduler, times(1)).schedule(any());
@@ -95,17 +97,17 @@ public class WhenEnablingOutboundRelayTests {
     @Test
     public void shouldSetupRoutePlannerSoThatAllMatchingSubDomainsAreRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // Given
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("*.example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("*.example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains)));
 
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider, repeatableTaskScheduler);
         evervault.enableOutboundRelay();
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("hello.hey.example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(repeatableTaskScheduler, times(1)).schedule(any());
@@ -114,17 +116,17 @@ public class WhenEnablingOutboundRelayTests {
     @Test
     public void shouldSetupRoutePlannerSoThatAllNonMatchingDomainsAreNotRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // Given
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains)));
 
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider, repeatableTaskScheduler);
         evervault.enableOutboundRelay();
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("anotherexample.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertNull(proxyHost);
         verify(repeatableTaskScheduler, times(1)).schedule(any());
@@ -133,18 +135,18 @@ public class WhenEnablingOutboundRelayTests {
     @Test
     public void shouldSetupRoutePlannerSoThatIgnoredDomainsAreNotRoutedToRelayProxy() throws EvervaultException, HttpFailureException, IOException, InterruptedException, HttpException {
         // Given
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("**", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("**"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains)));
 
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider, repeatableTaskScheduler);
         evervault.setupIgnoreDomains(new String[]{"example.com"});
         evervault.enableOutboundRelay();
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertNull(proxyHost);
         verify(repeatableTaskScheduler, times(1)).schedule(any());
@@ -153,12 +155,12 @@ public class WhenEnablingOutboundRelayTests {
     @Test
     public void shouldSetupRoutePlannerButWithoutCallingTheApi() throws EvervaultException, HttpException, HttpFailureException, IOException, InterruptedException {
         // When
-        var evervault = new Evervault();
+        Evervault evervault = new Evervault();
         evervault.setupWrapper(outboundRelayConfigProvider, repeatableTaskScheduler);
         evervault.setupDecryptionDomains(new String[]{"example.com"});
 
         // Then
-        var httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
+        HttpRoutePlanner httpRoutePlanner = evervault.getEvervaultHttpRoutePlanner();
         HttpHost proxyHost = httpRoutePlanner.determineRoute(new HttpHost("example.com"), mockHttpRequest(), mockHttpContext()).getProxyHost();
         assertEquals(RelayHostResolver.getRelayHost(), proxyHost.getHostName());
         verify(outboundRelayConfigProvider, never()).getOutboundRelayConfig(any());
@@ -170,8 +172,8 @@ public class WhenEnablingOutboundRelayTests {
         int delay = 5;
         TimeUnit timeUnit = TimeUnit.SECONDS;
         String evervaultApiUrl = "http://api.evervault.com";
-        var task = new CachedOutboundRelayConfigService.GetOutboundRelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        CachedOutboundRelayConfigService.GetOutboundRelayConfigTask task = new CachedOutboundRelayConfigService.GetOutboundRelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(
                 new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains))
@@ -181,7 +183,7 @@ public class WhenEnablingOutboundRelayTests {
         task.execute();
 
         // Then
-        var decryptionDomains = (new CachedOutboundRelayConfigService(outboundRelayConfigProvider, repeatableTaskScheduler, evervaultApiUrl, new String[] {})).getDecryptionDomains();
+        String[] decryptionDomains = (new CachedOutboundRelayConfigService(outboundRelayConfigProvider, repeatableTaskScheduler, evervaultApiUrl, new String[] {})).getDecryptionDomains();
         assertEquals(1, decryptionDomains.length);
         assertEquals("example.com", decryptionDomains[0]);
         assertEquals(delay, task.getDelay());
@@ -194,8 +196,8 @@ public class WhenEnablingOutboundRelayTests {
         int delay = 5;
         TimeUnit timeUnit = TimeUnit.SECONDS;
         String evervaultApiUrl = "http://api.evervault.com";
-        var task = new CachedOutboundRelayConfigService.GetOutboundRelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
-        var destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
+        CachedOutboundRelayConfigService.GetOutboundRelayConfigTask task = new CachedOutboundRelayConfigService.GetOutboundRelayConfigTask(delay, timeUnit, outboundRelayConfigProvider, evervaultApiUrl);
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinationDomains = new HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination>();
         destinationDomains.put("example.com", new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination("example.com"));
         when(outboundRelayConfigProvider.getOutboundRelayConfig(any())).thenReturn(
                 new OutboundRelayConfigResult(10, new OutboundRelayConfigResult.OutboundRelayConfig(destinationDomains))
@@ -205,7 +207,7 @@ public class WhenEnablingOutboundRelayTests {
         task.execute();
 
         // Then
-        var decryptionDomains = (new CachedOutboundRelayConfigService(outboundRelayConfigProvider, repeatableTaskScheduler, evervaultApiUrl, new String[] {})).getDecryptionDomains();
+        String[] decryptionDomains = (new CachedOutboundRelayConfigService(outboundRelayConfigProvider, repeatableTaskScheduler, evervaultApiUrl, new String[] {})).getDecryptionDomains();
         assertEquals(1, decryptionDomains.length);
         assertEquals("example.com", decryptionDomains[0]);
         assertEquals(10, task.getDelay());
@@ -213,12 +215,12 @@ public class WhenEnablingOutboundRelayTests {
     }
 
     private HttpRequest mockHttpRequest() {
-        var httpRequest = mock(HttpRequest.class);
+        HttpRequest httpRequest = mock(HttpRequest.class);
         return httpRequest;
     }
 
     private HttpContext mockHttpContext() {
-        var httpContext = mock(HttpContext.class);
+        HttpContext httpContext = mock(HttpContext.class);
         return httpContext;
     }
 

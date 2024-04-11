@@ -8,13 +8,10 @@ import com.evervault.exceptions.InvalidCipherException;
 import com.evervault.exceptions.NotImplementedException;
 import com.evervault.exceptions.NotPossibleToHandleDataTypeException;
 
-import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 public class CharHandler implements IDataHandler {
-    /// Size of char in java is 16bit unicode
-    private static final int BUFFER_SIZE = 2;
-
     private final IProvideEncryption encryptionProvider;
     private final byte[] generatedEcdhKey;
     private final byte[] sharedKey;
@@ -34,8 +31,8 @@ public class CharHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
-        var bytes = ByteBuffer.allocate(BUFFER_SIZE).putChar((char) data).array();
-
-        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, bytes, sharedKey, teamPublicKey);
+        char original = (char) data;
+        String formattedData = String.valueOf(original);
+        return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, formattedData.getBytes(StandardCharsets.UTF_8), sharedKey, teamPublicKey);
     }
 }

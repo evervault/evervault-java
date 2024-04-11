@@ -33,13 +33,13 @@ public class SerializableHandler implements IDataHandler {
 
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, IOException, InvalidCipherException, NotImplementedException {
-        var content = (Serializable)data;
+        Serializable content = (Serializable)data;
 
-        var outputStream = new ByteArrayOutputStream();
-        var objectOutputStream = new ObjectOutputStream(outputStream);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(content);
 
-        var byteArray = outputStream.toByteArray();
+        byte[] byteArray = outputStream.toByteArray();
 
         return encryptionProvider.encryptData(DataHeader.String, generatedEcdhKey, byteArray, sharedKey, teamPublicKey);
     }

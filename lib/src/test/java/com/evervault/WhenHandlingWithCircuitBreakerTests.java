@@ -10,7 +10,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.net.http.HttpTimeoutException;
+import java.net.SocketTimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -18,9 +18,9 @@ import static org.mockito.Mockito.*;
 public class WhenHandlingWithCircuitBreakerTests {
     @Test
     void triesToExecuteThePassedMethod() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
-        var execution = mock(IExecute.class);
+        IExecute execution = mock(IExecute.class);
 
-        var circuitBreaker = new CircuitBreaker();
+        CircuitBreaker circuitBreaker = new CircuitBreaker();
 
         circuitBreaker.execute(0, execution);
 
@@ -29,24 +29,24 @@ public class WhenHandlingWithCircuitBreakerTests {
 
     @Test
     void throwsMaxRetriesReachedWhenReachesLimitOfTimeouts() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
-        var execution = mock(IExecute.class);
+        IExecute execution = mock(IExecute.class);
 
-        when(execution.execute()).thenThrow(new HttpTimeoutException("foo"));
+        when(execution.execute()).thenThrow(new SocketTimeoutException("foo"));
 
-        var circuitBreaker = new CircuitBreaker(0, 10);
+        CircuitBreaker circuitBreaker = new CircuitBreaker(0, 10);
 
         assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, execution));
     }
 
     @Test
     void handlesDifferentMethodsOnDifferentResources() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
-        var executionOne = mock(IExecute.class);
-        var executionTwo = mock(IExecute.class);
+        IExecute executionOne = mock(IExecute.class);
+        IExecute executionTwo = mock(IExecute.class);
 
-        when(executionOne.execute()).thenThrow(new HttpTimeoutException("Foo"));
-        when(executionTwo.execute()).thenThrow(new HttpTimeoutException("Foo"));
+        when(executionOne.execute()).thenThrow(new SocketTimeoutException("Foo"));
+        when(executionTwo.execute()).thenThrow(new SocketTimeoutException("Foo"));
 
-        var circuitBreaker = new CircuitBreaker(1, 10);
+        CircuitBreaker circuitBreaker = new CircuitBreaker(1, 10);
 
         assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, executionOne));
         assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(1, executionTwo));
@@ -57,11 +57,11 @@ public class WhenHandlingWithCircuitBreakerTests {
 
     @Test
     void retriesIfItFails() throws IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
-        var execution = mock(IExecute.class);
+        IExecute execution = mock(IExecute.class);
 
-        when(execution.execute()).thenThrow(new HttpTimeoutException("foo"));
+        when(execution.execute()).thenThrow(new SocketTimeoutException("foo"));
 
-        var circuitBreaker = new CircuitBreaker(1, 10);
+        CircuitBreaker circuitBreaker = new CircuitBreaker(1, 10);
 
         assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, execution));
 
@@ -70,23 +70,23 @@ public class WhenHandlingWithCircuitBreakerTests {
 
     @Test
     void returnTheContentFromExecuteBack() throws MaxRetryReachedException, IOException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
-        final var returnContent = "Foo";
-        var execution = mock(IExecute.class);
+        final String returnContent = "Foo";
+        IExecute execution = mock(IExecute.class);
 
         when(execution.execute()).thenReturn(returnContent);
-        var circuitBreaker = new CircuitBreaker();
+        CircuitBreaker circuitBreaker = new CircuitBreaker();
 
-        var result = circuitBreaker.execute(0, execution);
+        Object result = circuitBreaker.execute(0, execution);
 
         assertEquals(returnContent, result);
     }
 
     @Test
     void workingCorrectlyResetsCounter() throws IOException, MaxRetryReachedException, NotPossibleToHandleDataTypeException, HttpFailureException, InterruptedException {
-        var execution = mock(IExecute.class);
-        var sameExecId = mock(IExecute.class);
+        IExecute execution = mock(IExecute.class);
+        IExecute sameExecId = mock(IExecute.class);
 
-        when(sameExecId.execute()).thenThrow(new HttpTimeoutException("Foo"));
+        when(sameExecId.execute()).thenThrow(new SocketTimeoutException("Foo"));
         when(execution.execute()).thenAnswer(new Answer<String>() {
             private int nCall = 0;
 
@@ -97,11 +97,11 @@ public class WhenHandlingWithCircuitBreakerTests {
                 }
                 nCall++;
 
-                throw new HttpTimeoutException("test");
+                throw new SocketTimeoutException("test");
             }
         });
 
-        var circuitBreaker = new CircuitBreaker(1, 10);
+        CircuitBreaker circuitBreaker = new CircuitBreaker(1, 10);
         circuitBreaker.execute(0, execution);
 
         assertThrows(MaxRetryReachedException.class, () -> circuitBreaker.execute(0, sameExecId));

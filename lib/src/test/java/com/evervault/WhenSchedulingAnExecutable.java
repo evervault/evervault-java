@@ -11,8 +11,8 @@ public class WhenSchedulingAnExecutable {
     @Test
     public void shouldScheduleAnExecutable() throws InterruptedException {
         // Given
-        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
-        var counter = new Counter();
+        RepeatableTaskSchedulerService executableSchedulerService = new RepeatableTaskSchedulerService(1);
+        Counter counter = new Counter();
 
         // When
         executableSchedulerService.schedule(
@@ -32,8 +32,8 @@ public class WhenSchedulingAnExecutable {
     @Test
     public void shouldScheduleAnExecutableAndDynamicallyUpdateDelay() throws InterruptedException {
         // Given
-        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
-        var counter = new Counter();
+        RepeatableTaskSchedulerService executableSchedulerService = new RepeatableTaskSchedulerService(1);
+        Counter counter = new Counter();
 
         // When
         executableSchedulerService.schedule(
@@ -54,7 +54,7 @@ public class WhenSchedulingAnExecutable {
     @Test
     public void shouldSilentlyIgnoreExceptions() throws InterruptedException {
         // Given
-        var executableSchedulerService = new RepeatableTaskSchedulerService(1);
+        RepeatableTaskSchedulerService executableSchedulerService = new RepeatableTaskSchedulerService(1);
 
         // When
         executableSchedulerService.schedule(

@@ -43,7 +43,7 @@ public class WhenUsingApisCreateClientSideTokenTests {
 
     @Test
     void callingToCreateTokenReturnsTheHttpContent() throws HttpFailureException, IOException, InterruptedException, EvervaultException {
-        var createTokenResult = new TokenResult();
+        TokenResult createTokenResult = new TokenResult();
         createTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
         createTokenResult.expiry = 1234567890;
 
@@ -51,14 +51,14 @@ public class WhenUsingApisCreateClientSideTokenTests {
 
         evervaultService.setupWrapper(clientSideTokenProvider, circuitBreakerProvider);
 
-        var result = evervaultService.createClientSideDecryptToken("somecage");
+        TokenResult result = evervaultService.createClientSideDecryptToken("somecage");
 
         assert createTokenResult.equals(result);
     }
 
     @Test
     void nullParameterThrows() throws HttpFailureException, IOException, InterruptedException {
-        var createTokenResult = new TokenResult();
+        TokenResult createTokenResult = new TokenResult();
         createTokenResult.token = "s0m3RunT0kenW1thNumb3rs";
         createTokenResult.expiry = 1234567890;
         when(clientSideTokenProvider.createClientSideToken(anyString(), anyString(), any())).thenReturn(createTokenResult);
