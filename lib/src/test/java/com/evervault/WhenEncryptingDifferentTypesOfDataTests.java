@@ -97,7 +97,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         TestSetup testSetup = getService();
 
         int someInt = 132;
-        byte[] bytes = ByteBuffer.allocate(4).putInt(someInt).array();
+        byte[] bytes = String.valueOf(someInt).getBytes(StandardCharsets.UTF_8);
         final String result = "onetwothree";
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
@@ -125,7 +125,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         final short someShort = 1;
         final String result = "onetwothree";
-        byte[] bytes = ByteBuffer.allocate(2).putShort(someShort).array();
+        byte[] bytes = String.valueOf(someShort).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -138,7 +138,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         final long someLong = 1;
         final String result = "onetwothree";
-        byte[] bytes = ByteBuffer.allocate(8).putLong(someLong).array();
+        byte[] bytes = String.valueOf(someLong).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -151,7 +151,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         final float someFloat = 1;
         final String result = "onetwothree";
-        byte[] bytes = ByteBuffer.allocate(4).putFloat(someFloat).array();
+        byte[] bytes = String.valueOf(someFloat).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -164,7 +164,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         final double someDouble = 1;
         final String result = "onetwothree";
-        byte[] bytes = ByteBuffer.allocate(8).putDouble(someDouble).array();
+        byte[] bytes = String.valueOf(someDouble).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.Number), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -177,7 +177,7 @@ public class WhenEncryptingDifferentTypesOfDataTests {
 
         final char someChar = 'a';
         final String result = "onetwothree";
-        byte[] bytes = ByteBuffer.allocate(2).putChar(someChar).array();
+        byte[] bytes = String.valueOf(someChar).getBytes(StandardCharsets.UTF_8);
 
         when(testSetup.encryptionProvider.encryptData(eq(DataHeader.String), any(), eq(bytes), any(), any())).thenReturn(result);
 
@@ -194,8 +194,8 @@ public class WhenEncryptingDifferentTypesOfDataTests {
         list.add(1);
         list.add(2);
 
-        byte[] bytesFirstItem = ByteBuffer.allocate(4).putInt(1).array();
-        byte[] bytesSecondItem = ByteBuffer.allocate(4).putInt(2).array();
+        byte[] bytesFirstItem = String.valueOf(1).getBytes(StandardCharsets.UTF_8);
+        byte[] bytesSecondItem = String.valueOf(2).getBytes(StandardCharsets.UTF_8);
         final String firstTrans = "one";
         final String secTrans = "two";
 
