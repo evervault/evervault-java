@@ -36,21 +36,12 @@ dependencies {
 java {
     withJavadocJar()
     withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-testing {
-    suites {
-        test {
-            useJUnitJupiter()
-        }
-        integrationTests(JvmTestSuite) {
-            dependencies {
-                implementation project
-                implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.70'
-                implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-            }
-        }
-    }
+tasks.named('test', Test) {
+    useJUnitPlatform()
 }
 
 publishing {
