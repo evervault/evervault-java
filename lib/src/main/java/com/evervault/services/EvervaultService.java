@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 public abstract class EvervaultService {
+    private static final int DEFAULT_FUNCTION_RUN_REQUEST_TIMEOUT = 30000;
     protected IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider;
     protected IProvideECPublicKey ecPublicKeyProvider;
     protected IProvideSharedKey sharedKeyProvider;
@@ -34,7 +35,7 @@ public abstract class EvervaultService {
     protected IProvideCircuitBreaker circuitBreakerProvider;
     protected CredentialsProvider credentialsProvider;
     protected HttpRoutePlanner httpRoutePlanner;
-
+    protected IProvideFunctionRun functionRunProvider;
     protected final static int NEW_KEY_TIMESTAMP = 15;
     protected final static String RELAY_PORT = "443";
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
@@ -125,6 +126,13 @@ public abstract class EvervaultService {
         this.repeatableTaskScheduler = repeatableTaskScheduler;
     }
 
+    protected void setupFunctionRunProvider(IProvideFunctionRun functionRunProvider) {
+        if (functionRunProvider == null) {
+            throw new NullPointerException(IProvideFunctionRun.class.getName());
+        }
+
+        this.functionRunProvider = functionRunProvider;
+    }
 
     protected void setupKeyProviders(IProvideCagePublicKeyFromHttpApi cagePublicKeyFromEndpointProvider,
                                      IProvideECPublicKey ecPublicKeyProvider,
@@ -242,6 +250,60 @@ public abstract class EvervaultService {
         }
     }
 
+    public <T> T run(String functionName, Object payload, Class<T> responseType) throws EvervaultException {
+        return run(functionName, payload, responseType, DEFAULT_FUNCTION_RUN_REQUEST_TIMEOUT);
+    }
+
+
+    public <T> T run(String functionName, Object payload, Class<T> responseType, int timeout) throws EvervaultException {
+        if (functionName == null || functionName.isEmpty()) {
+            throw new EvervaultException(new MandatoryParameterException("functionName"));
+        }
+
+        if (payload == null) {
+            throw new EvervaultException(new MandatoryParameterException("payload"));
+        }
+
+        if (responseType == null) {
+            throw new EvervaultException(new MandatoryParameterException("responseType"));
+        }
+
+        if (timeout < 1) {
+            throw new EvervaultException(new IllegalArgumentException("The function run request timeout must be greater than 0 ms."));
+        }
+
+        try {
+            FunctionRun<T> functionRun = functionRunProvider.runFunction(getEvervaultApiUrl(), functionName, payload, responseType, false, timeout);
+            if (functionRun.getError() != null) {
+                throw new EvervaultException(new FunctionRunException(functionRun.getError().getMessage(), functionRun.getError().getStack()));
+            } else {
+                return functionRun.getResult();
+            }
+        } catch (Exception e) {
+            throw new EvervaultException(e);
+        }
+    }
+
+    public String runAsynchronously(String functionName, Object payload) throws EvervaultException {
+        if (functionName == null || functionName.isEmpty()) {
+            throw new EvervaultException(new MandatoryParameterException("functionName"));
+        }
+
+        if (payload == null) {
+            throw new EvervaultException(new MandatoryParameterException("payload"));
+        }
+
+        try {
+            FunctionRun<Object> functionRun =
+                    functionRunProvider.runFunction(getEvervaultApiUrl(), functionName, payload, Object.class, true, 50);
+            System.out.println(functionRun.getStatus());
+            return functionRun.getId();
+        } catch (Exception e) {
+            throw new EvervaultException(e);
+        }
+    }
+
+    @Deprecated
     public CageRunResult run(String cageName, Object data, boolean async, String version) throws EvervaultException {
         if (cageName == null || cageName.isEmpty()) {
             throw new EvervaultException(new MandatoryParameterException("cageName"));
