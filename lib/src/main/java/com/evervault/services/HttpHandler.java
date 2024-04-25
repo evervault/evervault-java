@@ -1,29 +1,21 @@
 package com.evervault.services;
 
+import com.evervault.contracts.*;
+import com.evervault.models.*;
 import com.evervault.utils.Base64Handler;
-import com.evervault.contracts.IProvideCageExecution;
-import com.evervault.contracts.IProvideCagePublicKeyFromHttpApi;
-import com.evervault.contracts.IProvideClientSideToken;
-import com.evervault.contracts.IProvideDecrypt;
-import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
-import com.evervault.contracts.IProvideRunToken;
 import com.evervault.exceptions.HttpFailureException;
-import com.evervault.models.CagePublicKey;
-import com.evervault.models.CageRunResult;
-import com.evervault.models.CreateTokenPayload;
-import com.evervault.models.OutboundRelayConfigResult;
-import com.evervault.models.RunTokenResult;
-import com.evervault.models.TokenResult;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt, IProvideClientSideToken {
+public class HttpHandler implements IProvideFunctionRun, IProvideCagePublicKeyFromHttpApi, IProvideCageExecution, IProvideRunToken, IProvideOutboundRelayConfigFromHttpApi, IProvideDecrypt, IProvideClientSideToken {
     private final static String VERSION_PREFIX = "evervault-java/";
     private final static String JSON_CONTENT_TYPE = "application/json";
 
@@ -59,7 +51,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         if (headerMap != null) {
             headerMap.forEach((key, value) -> additionalHeaders.put(key, value));
         }
-        HttpURLConnection connection = createConnection(connectionUrl, "GET", additionalHeaders);
+        HttpURLConnection connection = createConnection(connectionUrl, "GET", additionalHeaders, httpTimeout);
         sendRequest(connection);
         return parseResponseBody(connection, CagePublicKey.class);
     }
@@ -78,11 +70,28 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             additionalHeaders.put(VERSION_ID_HEADER_NAME, version);
         }
 
-        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders);
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders, httpTimeout);
         setRequestBody(connection, serializedData);
         sendRequest(connection);
 
         return parseResponseBody(connection, CageRunResult.class);
+    }
+
+    public <T> FunctionRun<T> runFunction(String url, String functionName, Object payload, Class<T> responseType, boolean async, int timeout) throws HttpFailureException, IOException {
+        CreateFunctionRunRequest request = new CreateFunctionRunRequest(payload, async);
+        String serializedData = new Gson().toJson(request);
+
+        URL connectionUrl = new URL(url + "/functions/" + functionName + "/runs");
+
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("Authorization", basicAuthorizationHeaderValue);
+
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders, timeout);
+        setRequestBody(connection, serializedData);
+        sendRequest(connection);
+
+        Type functionRunType = TypeToken.getParameterized(FunctionRun.class, responseType).getType();
+        return parseResponseBody(connection, functionRunType);
     }
 
     @Override
@@ -94,7 +103,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("Authorization", basicAuthorizationHeaderValue);
 
-        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders);
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders, httpTimeout);
         setRequestBody(connection, serializedData);
         sendRequest(connection);
 
@@ -118,7 +127,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("Authorization", basicAuthorizationHeaderValue);
 
-        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders);
+        HttpURLConnection connection = createConnection(connectionUrl, "POST", additionalHeaders, httpTimeout);
         setRequestBody(connection, serializedData);
         sendRequest(connection);
 
@@ -141,7 +150,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         HttpURLConnection connection = createConnection(
                 connectionUrl,
                 "POST",
-                additionalHeaders
+                additionalHeaders,
+                httpTimeout
         );
         setRequestBody(connection, serializedData);
         sendRequest(connection);
@@ -163,7 +173,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         HttpURLConnection connection = createConnection(
                 connectionUrl,
                 "GET",
-                additionalHeaders
+                additionalHeaders,
+                httpTimeout
         );
 
         sendRequest(connection);
@@ -189,7 +200,7 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         return builder.toString();
     }
 
-    private HttpURLConnection createConnection(URL url, String method, Map<String, String> headers) throws IOException {
+    private HttpURLConnection createConnection(URL url, String method, Map<String, String> headers, int timeout) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         if(headers != null) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -197,8 +208,8 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
             }
         }
         connection.setRequestMethod(method);
-        connection.setConnectTimeout(httpTimeout);
-        connection.setReadTimeout(httpTimeout);
+        connection.setConnectTimeout(timeout);
+        connection.setReadTimeout(timeout);
         connection.setRequestProperty("User-Agent", VERSION_PREFIX + 1.0);
         connection.setRequestProperty("Accept", JSON_CONTENT_TYPE);
         return connection;
@@ -235,6 +246,14 @@ public class HttpHandler implements IProvideCagePublicKeyFromHttpApi, IProvideCa
         T parsed;
         try (InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
             parsed = new Gson().fromJson(reader, clazz);
+        }
+        return parsed;
+    }
+
+    private <T> T parseResponseBody(HttpURLConnection connection, Type type) throws IOException {
+        T parsed;
+        try (InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
+            parsed = new Gson().fromJson(reader, type);
         }
         return parsed;
     }
