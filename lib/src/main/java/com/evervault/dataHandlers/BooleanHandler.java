@@ -32,7 +32,7 @@ public class BooleanHandler implements IDataHandler {
     @Override
     public Object encrypt(IProvideEncryptionForObject context, Object data) throws NotPossibleToHandleDataTypeException, InvalidCipherException, NotImplementedException {
         boolean original = (boolean) data;
-stem        String formattedData = original ? "true" : "false";
+        String formattedData = original ? "true" : "false";
 
         return encryptionProvider.encryptData(DataHeader.Boolean, generatedEcdhKey, formattedData.getBytes(StandardCharsets.UTF_8), sharedKey, teamPublicKey);
     }
