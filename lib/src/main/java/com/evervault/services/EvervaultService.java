@@ -296,7 +296,6 @@ public abstract class EvervaultService {
         try {
             FunctionRun<Object> functionRun =
                     functionRunProvider.runFunction(getEvervaultApiUrl(), functionName, payload, Object.class, true, DEFAULT_FUNCTION_RUN_REQUEST_TIMEOUT);
-            System.out.println(functionRun.getStatus());
             return functionRun.getId();
         } catch (Exception e) {
             throw new EvervaultException(e);
