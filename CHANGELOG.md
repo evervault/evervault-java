@@ -1,5 +1,11 @@
 # evervault-java
 
+## 4.2.0
+
+### Minor Changes
+
+- 4dca8da: Add ability to run functions
+
 ## 4.1.1
 
 ### Patch Changes
