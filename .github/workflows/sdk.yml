@@ -19,13 +19,24 @@ jobs:
       EV_RELAY_HOST: strict.relay.evervault.com
     steps:
       - uses: actions/checkout@v7
-      - name: Set up JDK ${{ matrix.java-version }} with ${{ matrix.distribution }}
+      - name: Set up JDK ${{ matrix.java-version }} test toolchain
         uses: actions/setup-java@v5
         with:
           distribution: 'corretto'
           java-version: ${{ matrix.java-version }}
+      # Gradle 9 requires JVM 17+ to run the Gradle process itself, even
+      # though it can still compile/test against older JDKs via toolchains.
+      # This second setup-java call overwrites JAVA_HOME with a JDK new
+      # enough to launch Gradle, while leaving JAVA_HOME_<version>_X64 from
+      # the step above in place so Gradle's toolchain auto-detection can
+      # still find the matrix JDK to actually run the tests on.
+      - name: Set up JDK 21 to run Gradle
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'corretto'
+          java-version: '21'
       - name: unit tests
-        run: ./gradlew clean test --info
+        run: ./gradlew clean test --info -PtestJavaVersion=${{ matrix.java-version }}
         env:
           TEST_EV_APP_ID: ${{ secrets.TEST_EV_APP_ID }}
           TEST_EV_API_KEY: ${{ secrets.TEST_EV_API_KEY }}
