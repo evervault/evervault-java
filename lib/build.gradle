@@ -27,6 +27,7 @@ def getKeyPassword() {
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:6.1.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.1.1'
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
     testImplementation "org.mockito:mockito-core:3.12.4"
     testImplementation "org.slf4j:slf4j-nop:1.7.34"
@@ -43,6 +44,11 @@ java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.named('compileTestJava', JavaCompile) {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.named('test', Test) {
