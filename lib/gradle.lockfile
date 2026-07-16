@@ -8,7 +8,6 @@ com.fasterxml.jackson:jackson-bom:2.13.0=testCompileClasspath,testRuntimeClasspa
 com.github.jknack:handlebars-helpers:4.3.0=testCompileClasspath,testRuntimeClasspath
 com.github.jknack:handlebars:4.3.0=testCompileClasspath,testRuntimeClasspath
 com.github.tomakehurst:wiremock-jre8:2.32.0=testCompileClasspath,testRuntimeClasspath
-com.google.code.findbugs:jsr305:3.0.2=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.google.code.gson:gson:2.8.9=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.google.errorprone:error_prone_annotations:2.47.0=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.google.guava:failureaccess:1.0.3=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
