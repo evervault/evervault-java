@@ -121,8 +121,9 @@ public abstract class EncryptionService extends EncryptionServiceCommon implemen
         try {
             cipher.doFinal(cipherText, len);
         } catch (InvalidCipherTextException e) {
-            // We don't want to expose Bouncy Castle to the user.
-            throw new InvalidCipherException(e);
+            // Cast to Throwable to bind to the non-deprecated overload
+            // (the BC-typed overload is more specific and would otherwise win).
+            throw new InvalidCipherException((Throwable) e);
         }
 
         String formatted = encryptFormatProvider.format(
