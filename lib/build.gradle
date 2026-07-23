@@ -31,9 +31,9 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.12.4"
     testImplementation "org.slf4j:slf4j-nop:1.7.34"
 
-    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.code.gson:gson:2.14.0'
     implementation 'com.google.guava:guava:33.6.0-android'
-    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.84'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.85'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
 
 }
