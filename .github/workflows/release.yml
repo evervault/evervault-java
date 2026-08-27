@@ -35,7 +35,7 @@ jobs:
 
       - name: Create release PR if new changesets are present
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           title: 'New Release'
           commit: 'Release new version'
