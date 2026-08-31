@@ -30,24 +30,25 @@ jobs:
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v7
+        with:
+          node-version: 24
 
       - name: Install changeset dependencies
         run: npm install
 
       - name: Create release PR if new changesets are present
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          title: 'New Release'
-          commit: 'Release new version'
-          version: npm run version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pr-title: 'New Release'
+          commit-message: 'Release new version'
+          version-script: npm run version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create new release if release PR is merged
-        if: steps.changesets.outputs.hasChangesets == 'false'
+        if: steps.changesets.outputs.has-changesets == 'false'
         run: |
-          npx changeset tag && git push origin --tags
+          npx changeset git-tag && git push origin --tags
           COMMIT_TAG=$(git tag --points-at HEAD)
           if [ -n "$COMMIT_TAG" ]; then
             echo "A tag is attached to HEAD. Creating a new release..."
