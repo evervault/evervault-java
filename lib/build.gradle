@@ -29,11 +29,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
     testImplementation "org.mockito:mockito-core:3.12.4"
-    testImplementation "org.slf4j:slf4j-nop:1.7.34"
+    testImplementation "org.slf4j:slf4j-nop:2.0.18"
 
-    implementation 'com.google.code.gson:gson:2.8.9'
-    implementation 'com.google.guava:guava:33.6.0-android'
-    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.84'
+    implementation 'com.google.code.gson:gson:2.14.0'
+    implementation 'com.google.guava:guava:33.7.1-android'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.85.2'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
 
 }
