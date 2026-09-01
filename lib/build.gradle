@@ -26,7 +26,8 @@ def getKeyPassword() {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
     testImplementation "org.mockito:mockito-core:3.12.4"
     testImplementation "org.slf4j:slf4j-nop:2.0.18"
