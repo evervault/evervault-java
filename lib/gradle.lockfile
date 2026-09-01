@@ -1,6 +1,7 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
+# To regenerate this file, run: ./gradlew :lib:dependencies --write-locks
 com.fasterxml.jackson.core:jackson-annotations:2.13.0=testCompileClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.13.0=testCompileClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-databind:2.13.0=testCompileClasspath,testRuntimeClasspath
@@ -67,6 +68,7 @@ org.junit.jupiter:junit-jupiter-params:5.7.2=testCompileClasspath,testRuntimeCla
 org.junit.jupiter:junit-jupiter:5.7.2=testCompileClasspath,testRuntimeClasspath
 org.junit.platform:junit-platform-commons:1.7.2=testCompileClasspath,testRuntimeClasspath
 org.junit.platform:junit-platform-engine:1.7.2=testRuntimeClasspath
+org.junit.platform:junit-platform-launcher:1.7.2=testRuntimeClasspath
 org.junit:junit-bom:5.7.2=testCompileClasspath,testRuntimeClasspath
 org.mockito:mockito-core:3.12.4=testCompileClasspath,testRuntimeClasspath
 org.objenesis:objenesis:3.2=testCompileClasspath,testRuntimeClasspath

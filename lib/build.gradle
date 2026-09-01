@@ -30,6 +30,7 @@ dependencies {
     testImplementation "com.github.tomakehurst:wiremock-jre8:2.32.0"
     testImplementation "org.mockito:mockito-core:3.12.4"
     testImplementation "org.slf4j:slf4j-nop:2.0.18"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'com.google.code.gson:gson:2.14.0'
     implementation 'com.google.guava:guava:33.7.1-android'
@@ -43,6 +44,14 @@ java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+if (project.hasProperty('javaToolchainVersion')) {
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(javaToolchainVersion as int)
+        }
+    }
 }
 
 tasks.named('test', Test) {

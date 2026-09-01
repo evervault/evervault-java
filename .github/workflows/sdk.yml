@@ -24,8 +24,16 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: ${{ matrix.java-version }}
+      - name: Set up JDK 21 to run Gradle
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'corretto'
+          java-version: '21'
       - name: unit tests
-        run: ./gradlew clean test --info
+        run: >-
+          ./gradlew clean test --info
+          -Porg.gradle.java.installations.fromEnv=JAVA_HOME_${{ matrix.java-version }}_X64
+          -PjavaToolchainVersion=${{ matrix.java-version }}
         env:
           TEST_EV_APP_ID: ${{ secrets.TEST_EV_APP_ID }}
           TEST_EV_API_KEY: ${{ secrets.TEST_EV_API_KEY }}
