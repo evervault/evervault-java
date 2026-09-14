@@ -38,6 +38,7 @@ public abstract class EvervaultService {
     protected IProvideFunctionRun functionRunProvider;
     protected final static int NEW_KEY_TIMESTAMP = 15;
     protected final static String RELAY_PORT = "443";
+    private static final String OUTBOUND_RELAY_UNSUPPORTED_WITH_SUPPLIED_KEY = "Outbound Relay needs the team UUID from the Evervault API. Use new Evervault(appId, apiKey) instead of a supplied key.";
     protected final int getCageHash = "getCagePublicKeyFromEndpoint".hashCode();
     protected final int runCageHash = "runCage".hashCode();
     protected final int createRunTokenHash = "createRunToken".hashCode();
@@ -50,6 +51,7 @@ public abstract class EvervaultService {
     protected PublicKey teamKey;
     protected String teamUuid;
     protected Boolean intercept = true;
+    protected boolean suppliedKey = false;
 
     // Virtual method
     protected String getEvervaultApiHost() { return ""; }
@@ -167,6 +169,40 @@ public abstract class EvervaultService {
         }
     }
 
+    protected void setupKeyProviders(IProvideECPublicKey ecPublicKeyProvider,
+                                     IProvideSharedKey sharedKeyProvider,
+                                     IProvideTime timeProvider,
+                                     EvervaultKey key) throws EvervaultException {
+        if (ecPublicKeyProvider == null) {
+            throw new NullPointerException(IProvideECPublicKey.class.getName());
+        }
+
+        if (sharedKeyProvider == null) {
+            throw new NullPointerException(IProvideSharedKey.class.getName());
+        }
+
+        if (timeProvider == null) {
+            throw new NullPointerException(IProvideTime.class.getName());
+        }
+
+        if (key == null) {
+            throw new NullPointerException(EvervaultKey.class.getName());
+        }
+
+        this.timeProvider = timeProvider;
+        this.ecPublicKeyProvider = ecPublicKeyProvider;
+        this.sharedKeyProvider = sharedKeyProvider;
+        this.suppliedKey = true;
+
+        this.teamKey = key.getPublicKey();
+
+        try {
+            generateSharedKey();
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | InvalidKeyException | NotImplementedException | Asn1EncodingException e) {
+            throw new EvervaultException(e);
+        }
+    }
+
     protected void setupEncryption(IProvideEncryptionForObject encryptionProvider) {
         if (encryptionProvider == null) {
             throw new NullPointerException(IProvideSharedKey.class.getName());
@@ -213,10 +249,22 @@ public abstract class EvervaultService {
     //Returns a CredentialsProvider to authenticate an
     // Apache HttpClient with the Evervault Proxy.
     public CredentialsProvider getEvervaultProxyCredentials() {
+        requireOutboundRelaySupport();
+
         return this.credentialsProvider;
     }
 
-    public HttpRoutePlanner getEvervaultHttpRoutePlanner() { return this.httpRoutePlanner; }
+    public HttpRoutePlanner getEvervaultHttpRoutePlanner() {
+        requireOutboundRelaySupport();
+
+        return this.httpRoutePlanner;
+    }
+
+    private void requireOutboundRelaySupport() {
+        if (this.suppliedKey) {
+            throw new IllegalStateException(OUTBOUND_RELAY_UNSUPPORTED_WITH_SUPPLIED_KEY);
+        }
+    }
 
     private void generateSharedKey() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NotImplementedException, Asn1EncodingException {
         currentSharedKeyTimestamp = timeProvider.GetNow();

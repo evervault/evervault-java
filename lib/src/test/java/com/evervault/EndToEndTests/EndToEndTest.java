@@ -3,15 +3,17 @@ package com.evervault.EndToEndTests;
 import com.evervault.Evervault;
 import com.evervault.exceptions.EvervaultException;
 
+import org.junit.jupiter.api.BeforeAll;
+
 public class EndToEndTest {
     protected static Evervault evervault;
 
-    static {
-        try {
-            evervault = new Evervault(System.getenv("TEST_EV_APP_ID"), System.getenv("TEST_EV_API_KEY"));
-        } catch (EvervaultException e) {
-            throw new RuntimeException(e);
+    @BeforeAll
+    static void buildClient() throws EvervaultException {
+        if (evervault != null) {
+            return;
         }
-    }
 
+        evervault = new Evervault(System.getenv("TEST_EV_APP_ID"), System.getenv("TEST_EV_API_KEY"));
+    }
 }

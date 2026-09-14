@@ -5,6 +5,7 @@ import java.util.Base64;
 
 public abstract class Base64Handler {
     private static final Base64.Decoder decoder = Base64.getDecoder();
+    private static final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
     private static final Base64.Encoder encoder = Base64.getEncoder();
 
 //    pythons definition seems to deal the string as if it was ASCII
@@ -20,6 +21,10 @@ public abstract class Base64Handler {
 //    characters.
     public static byte[] decodeBase64String(String contentToDecode) {
         return decoder.decode(contentToDecode.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static byte[] decodeBase64UrlString(String contentToDecode) {
+        return urlDecoder.decode(contentToDecode.getBytes(StandardCharsets.UTF_8));
     }
 
     public static String encodeBase64(byte[] byteArray) {
