@@ -47,7 +47,7 @@ class Jwks {
      */
     Jwk getSoleKey() throws EvervaultException {
         if (keys.size() != 1) {
-            throw invalid(String.format(
+            throw JwkParsing.invalid(String.format(
                     "JWKS holds %d keys; pass the kid of the one to use. Available kids: %s", keys.size(), getKids()));
         }
 
@@ -59,33 +59,33 @@ class Jwks {
         try {
             parsed = JsonParser.parseString(jwksJson);
         } catch (JsonSyntaxException e) {
-            throw invalid("JWKS is not valid JSON: " + e.getMessage());
+            throw JwkParsing.invalid("JWKS is not valid JSON: " + e.getMessage());
         }
 
         if (parsed == null || !parsed.isJsonObject()) {
-            throw invalid("JWKS must be a JSON object containing a 'keys' array");
+            throw JwkParsing.invalid("JWKS must be a JSON object containing a 'keys' array");
         }
 
         JsonElement keysJson = parsed.getAsJsonObject().get("keys");
         if (keysJson == null || !keysJson.isJsonArray()) {
-            throw invalid("JWKS must be a JSON object containing a 'keys' array");
+            throw JwkParsing.invalid("JWKS must be a JSON object containing a 'keys' array");
         }
 
         if (keysJson.getAsJsonArray().size() == 0) {
-            throw invalid("JWKS 'keys' array is empty");
+            throw JwkParsing.invalid("JWKS 'keys' array is empty");
         }
 
         Map<String, JsonObject> keysByKid = new LinkedHashMap<>();
         List<JsonObject> keys = new ArrayList<>();
         for (JsonElement element : keysJson.getAsJsonArray()) {
             if (!element.isJsonObject()) {
-                throw invalid("JWKS 'keys' array contains an entry that is not a JSON object");
+                throw JwkParsing.invalid("JWKS 'keys' array contains an entry that is not a JSON object");
             }
 
             JsonObject keyJson = element.getAsJsonObject();
             keys.add(keyJson);
 
-            String kid = readString(keyJson, "kid");
+            String kid = JwkParsing.readString(keyJson, "kid").orElse(null);
             if (kid == null) {
                 continue;
             }
@@ -94,7 +94,7 @@ class Jwks {
             if (existing == null) {
                 keysByKid.put(kid, keyJson);
             } else if (isEc(keyJson) && isEc(existing)) {
-                throw invalid(String.format("JWKS contains more than one %s key with kid '%s'", Jwk.KEY_TYPE_EC, kid));
+                throw JwkParsing.invalid(String.format("JWKS contains more than one %s key with kid '%s'", Jwk.KEY_TYPE_EC, kid));
             } else if (isEc(keyJson)) {
                 keysByKid.put(kid, keyJson);
             }
@@ -105,28 +105,14 @@ class Jwks {
 
     private EvervaultException missingKid(String kid) {
         if (keys.size() == 1 && keysByKid.isEmpty()) {
-            return invalid(String.format(
+            return JwkParsing.invalid(String.format(
                     "JWKS does not contain a key with kid '%s'; the only key in the set has no kid. Use EvervaultKey.fromJwks(jwksJson) to accept it.", kid));
         }
 
-        return invalid(String.format("JWKS does not contain a key with kid '%s'; available kids: %s", kid, getKids()));
+        return JwkParsing.invalid(String.format("JWKS does not contain a key with kid '%s'; available kids: %s", kid, getKids()));
     }
 
     private static boolean isEc(JsonObject key) {
-        return Jwk.KEY_TYPE_EC.equals(readString(key, "kty"));
-    }
-
-    private static String readString(JsonObject key, String member) {
-        JsonElement value = key.get(member);
-
-        if (value == null || value.isJsonNull() || !value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString() || value.getAsString().isEmpty()) {
-            return null;
-        }
-
-        return value.getAsString();
-    }
-
-    private static EvervaultException invalid(String message) {
-        return new EvervaultException(new IllegalArgumentException(message));
+        return JwkParsing.readString(key, "kty").filter(Jwk.KEY_TYPE_EC::equals).isPresent();
     }
 }
