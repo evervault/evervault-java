@@ -58,5 +58,5 @@ EV_APP_ID=app_xxx EV_API_KEY=ev:key:... ../../gradlew run --args="<kid>"
 | --- | --- | --- |
 | `EV_KEY_ID` | — | `kid` to use, unless the JWKS holds a single key |
 | `EV_JWKS_PATH` | `keys/jwks.json` | JWKS to read |
-| `EV_APP_ID` | `app_offline_example` | App the ciphertext is bound to, required for decryption |
+| `EV_APP_ID` | `app_offline_example` | Evervault App whose credentials decrypt the ciphertext. Must be the app the JWKS came from |
 | `EV_API_KEY` | — | When set, the example also decrypts via HTTP call |
