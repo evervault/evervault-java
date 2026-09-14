@@ -1,18 +1,35 @@
 package com.evervault;
 
+import com.evervault.TestUtils.RelayHostResolver;
+import com.evervault.contracts.IProvideOutboundRelayConfigFromHttpApi;
+import com.evervault.contracts.IScheduleRepeatableTask;
 import com.evervault.exceptions.EvervaultException;
 import com.evervault.models.EvervaultKey;
+import com.evervault.models.OutboundRelayConfigResult;
+import com.evervault.services.CachedOutboundRelayConfigService;
 import com.evervault.services.EncryptionServiceFactory;
 import com.evervault.utils.EcdhCurve;
 
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.protocol.HttpContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.security.PublicKey;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class WhenUsingASuppliedKeyTests {
     private static final String K1_COMPRESSED_KEY = "AwGsgh0ez4PgRYp9byghd6aJTqO+cWitrGUMAbnndywW";
@@ -34,6 +51,23 @@ class WhenUsingASuppliedKeyTests {
             "\"use\":\"enc\",\"kid\":\"" + K1_KID + "\"}";
 
     private static final String JWKS = "{\"keys\":[" + R1_JWK + "," + K1_JWK + "]}";
+
+    @BeforeEach
+    @AfterEach
+    void clearRelayConfigCache() {
+        CachedOutboundRelayConfigService.clearCache();
+    }
+
+    private static void primeRelayConfigCacheWith(String destinationDomain) throws Exception {
+        HashMap<String, OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination> destinations = new HashMap<>();
+        destinations.put(destinationDomain, new OutboundRelayConfigResult.OutboundRelayConfig.OutboundDestination(destinationDomain));
+
+        IProvideOutboundRelayConfigFromHttpApi configProvider = mock(IProvideOutboundRelayConfigFromHttpApi.class);
+        when(configProvider.getOutboundRelayConfig(any())).thenReturn(
+                new OutboundRelayConfigResult(null, new OutboundRelayConfigResult.OutboundRelayConfig(destinations)));
+
+        new CachedOutboundRelayConfigService(configProvider, mock(IScheduleRepeatableTask.class), "https://unused.invalid", new String[0]);
+    }
 
     private static String message(EvervaultException e) {
         return e.getMessage() == null ? "" : e.getMessage();
@@ -305,12 +339,60 @@ class WhenUsingASuppliedKeyTests {
     }
 
     @Test
-    void refusesToHandOutOutboundRelayConfiguration() throws Exception {
+    void refusesToHandOutOutboundRelayConfigurationWithoutATeamUuid() throws Exception {
         Evervault evervault = Evervault.withKey("app_not_a_real_app", EvervaultKey.fromJwks(JWKS, K1_KID));
 
         assertTrue(assertThrows(IllegalStateException.class, evervault::getEvervaultProxyCredentials)
                 .getMessage().contains("Outbound Relay"));
         assertTrue(assertThrows(IllegalStateException.class, evervault::getEvervaultHttpRoutePlanner)
                 .getMessage().contains("Outbound Relay"));
+    }
+
+    @Test
+    void authenticatesWithOutboundRelayWhenGivenATeamUuid() throws Exception {
+        Evervault evervault = Evervault.withKey("app_not_a_real_app", "not-a-real-api-key", EvervaultKey.fromJwks(JWKS, K1_KID), "team_not_a_real_team");
+
+        Credentials credentials = evervault.getEvervaultProxyCredentials()
+                .getCredentials(new AuthScope(evervault.getEvervaultRelayHost(), 443));
+
+        assertEquals("team_not_a_real_team", credentials.getUserPrincipal().getName());
+        assertEquals("not-a-real-api-key", credentials.getPassword());
+    }
+
+    @Test
+    void refusesToHandOutARoutePlannerWhenOutboundRelayIsNotEnabled() throws Exception {
+        Evervault evervault = Evervault.withKey("app_not_a_real_app", "not-a-real-api-key", EvervaultKey.fromJwks(JWKS, K1_KID), "team_not_a_real_team");
+
+        String error = assertThrows(IllegalStateException.class, evervault::getEvervaultHttpRoutePlanner).getMessage();
+
+        assertTrue(error.contains("enableOutboundRelay"), error);
+        assertTrue(error.contains("teamUuid, true"), error);
+    }
+
+    @Test
+    void routesDecryptionDomainsThroughRelayWhenOutboundRelayIsEnabled() throws Exception {
+        primeRelayConfigCacheWith("example.com");
+        Evervault evervault = Evervault.withKey("app_not_a_real_app", "not-a-real-api-key", EvervaultKey.fromJwks(JWKS, K1_KID), "team_not_a_real_team", true);
+
+        HttpRoutePlanner routePlanner = evervault.getEvervaultHttpRoutePlanner();
+
+        HttpHost proxied = routePlanner.determineRoute(new HttpHost("example.com"), mock(HttpRequest.class), mock(HttpContext.class)).getProxyHost();
+        assertEquals(RelayHostResolver.getRelayHost(), proxied.getHostName());
+        assertNull(routePlanner.determineRoute(new HttpHost("other.com"), mock(HttpRequest.class), mock(HttpContext.class)).getProxyHost());
+    }
+
+    @Test
+    void requiresATeamUuidAndApiKeyForOutboundRelay() throws Exception {
+        EvervaultKey key = EvervaultKey.fromJwks(JWKS, K1_KID);
+
+        assertTrue(message(assertThrows(EvervaultException.class,
+                () -> Evervault.withKey("app_not_a_real_app", "not-a-real-api-key", key, null)))
+                .contains("teamUuid"));
+        assertTrue(message(assertThrows(EvervaultException.class,
+                () -> Evervault.withKey("app_not_a_real_app", "not-a-real-api-key", key, "  ")))
+                .contains("teamUuid"));
+        assertTrue(message(assertThrows(EvervaultException.class,
+                () -> Evervault.withKey("app_not_a_real_app", null, key, "team_not_a_real_team")))
+                .contains("apiKey"));
     }
 }

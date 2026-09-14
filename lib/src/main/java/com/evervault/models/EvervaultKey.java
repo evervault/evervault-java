@@ -35,9 +35,6 @@ public class EvervaultKey {
         return kid;
     }
 
-    /**
-     * The public key derived from this JWK
-     */
     public PublicKey getPublicKey() {
         return publicKey;
     }

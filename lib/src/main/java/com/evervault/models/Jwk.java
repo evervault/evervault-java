@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 
 class Jwk {
 
-    private static final String KEY_TYPE_EC = "EC";
+    static final String KEY_TYPE_EC = "EC";
     private static final String KEY_USE_ENCRYPTION = "enc";
     private static final String PRIVATE_KEY_MEMBER = "d";
     private static final String NO_KID = "with no kid";

@@ -59,19 +59,19 @@ public class Evervault extends EvervaultService {
     }
 
     public Evervault(String appId, String apiKey) throws EvervaultException {
-        this(apiKey, appId, EcdhCurve.SECP256K1, null, false, null);
+        this(apiKey, appId, EcdhCurve.SECP256K1, null, false, null, null);
     }
 
     public Evervault(String appId, String apiKey, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, appId, ecdhCurve, null, false, null);
+        this(apiKey, appId, ecdhCurve, null, false, null, null);
     }
 
     public Evervault(String appId, String apiKey, Boolean enableOutboundRelay, EcdhCurve ecdhCurve) throws EvervaultException {
-        this(apiKey, appId, ecdhCurve, null, enableOutboundRelay, null);
+        this(apiKey, appId, ecdhCurve, null, enableOutboundRelay, null, null);
     }
 
     public Evervault(String appId, String apiKey, Boolean enableOutboundRelay) throws EvervaultException {
-        this(apiKey, appId, EcdhCurve.SECP256K1, null, enableOutboundRelay, null);
+        this(apiKey, appId, EcdhCurve.SECP256K1, null, enableOutboundRelay, null, null);
     }
 
     /**
@@ -87,7 +87,36 @@ public class Evervault extends EvervaultService {
      * Evervault API. The API key is used for operations that need the API, such as decryption.
      */
     public static Evervault withKey(String appId, String apiKey, EvervaultKey key) throws EvervaultException {
-        return new Evervault(apiKey, appId, requireKey(key).getCurve(), null, false, key);
+        return new Evervault(apiKey, appId, requireKey(key).getCurve(), null, false, key, null);
+    }
+
+    /**
+     * Builds a client that encrypts with the given key, and that can authenticate with
+     * Outbound Relay using the given team UUID rather than reading it from the Evervault API.
+     */
+    public static Evervault withKey(String appId, String apiKey, EvervaultKey key, String teamUuid) throws EvervaultException {
+        return withKey(appId, apiKey, key, teamUuid, false);
+    }
+
+    /**
+     * Builds a client that encrypts with the given key. Passing a team UUID sets up Outbound
+     * Relay credentials without calling the Evervault API; enableOutboundRelay additionally
+     * routes intercepted requests through Relay, which reads its domain configuration from the API.
+     */
+    public static Evervault withKey(String appId, String apiKey, EvervaultKey key, String teamUuid, Boolean enableOutboundRelay) throws EvervaultException {
+        return new Evervault(apiKey, appId, requireKey(key).getCurve(), null, enableOutboundRelay, key, requireTeamUuid(teamUuid, apiKey));
+    }
+
+    private static String requireTeamUuid(String teamUuid, String apiKey) throws EvervaultException {
+        if (teamUuid == null || teamUuid.trim().isEmpty()) {
+            throw new EvervaultException(new MandatoryParameterException("teamUuid"));
+        }
+
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            throw new EvervaultException(new MandatoryParameterException("apiKey"));
+        }
+
+        return teamUuid;
     }
 
     private static EvervaultKey requireKey(EvervaultKey key) throws EvervaultException {
@@ -98,7 +127,7 @@ public class Evervault extends EvervaultService {
         return key;
     }
 
-    private Evervault(String apiKey, String appUuid, EcdhCurve ecdhCurve, String[] decryptionDomains, Boolean enableOutboundRelay, EvervaultKey key) throws EvervaultException {
+    private Evervault(String apiKey, String appUuid, EcdhCurve ecdhCurve, String[] decryptionDomains, Boolean enableOutboundRelay, EvervaultKey key, String teamUuid) throws EvervaultException {
         setEvervaultApiHost();
         setEvervaultRunHost();
         setEvervaultRelayUrl();
@@ -122,7 +151,7 @@ public class Evervault extends EvervaultService {
         this.setupFunctionRunProvider(httpHandler);
 
         if (key != null) {
-            this.setupKeyProviders(encryptService, encryptService, timeService, key);
+            this.setupKeyProviders(encryptService, encryptService, timeService, key, teamUuid);
         } else {
             this.setupKeyProviders(httpHandler, encryptService, encryptService, timeService, ecdhCurve);
         }
@@ -131,11 +160,11 @@ public class Evervault extends EvervaultService {
 
         this.setupEncryption(encryptForObject);
 
-        if (key == null) {
+        if (key == null || teamUuid != null) {
             this.setupCredentialsProvider(apiKey);
         }
 
-        if (key == null && (decryptionDomains != null || enableOutboundRelay != null && enableOutboundRelay)) {
+        if ((key == null || teamUuid != null) && (decryptionDomains != null || enableOutboundRelay != null && enableOutboundRelay)) {
             this.setupIntercept(decryptionDomains, evervaultIgnoreDomains);
         }
     }

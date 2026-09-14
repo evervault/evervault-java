@@ -7,6 +7,13 @@ EvervaultKey key = EvervaultKey.fromJwks(jwksJson, kid);
 Evervault evervault = Evervault.withKey(appId, key);
 ```
 
+Passing a team UUID additionally sets up Outbound Relay credentials, which would otherwise
+come from the Evervault API:
+
+```java
+Evervault evervault = Evervault.withKey(appId, apiKey, key, teamUuid);
+```
+
 `kid` is enforced when present - use `EvervaultKey.fromJwks(jwksJson)` if the JWK has no `kid`.
 
 Built against the SDK in this repository via `includeBuild('../..')`, using the

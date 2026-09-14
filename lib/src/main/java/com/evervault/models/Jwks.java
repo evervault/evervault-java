@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 class Jwks {
-    private static final String KEY_TYPE_EC = "EC";
-
     private final Map<String, JsonObject> keysByKid;
     private final List<JsonObject> keys;
 
@@ -25,7 +23,7 @@ class Jwks {
     }
 
     /**
-     * The kids in the set, does not include JWK's with no kid
+     * The kids in the set, not including JWKs with no kid
      */
     List<String> getKids() {
         return Collections.unmodifiableList(new ArrayList<>(keysByKid.keySet()));
@@ -96,7 +94,7 @@ class Jwks {
             if (existing == null) {
                 keysByKid.put(kid, keyJson);
             } else if (isEc(keyJson) && isEc(existing)) {
-                throw invalid(String.format("JWKS contains more than one %s key with kid '%s'", KEY_TYPE_EC, kid));
+                throw invalid(String.format("JWKS contains more than one %s key with kid '%s'", Jwk.KEY_TYPE_EC, kid));
             } else if (isEc(keyJson)) {
                 keysByKid.put(kid, keyJson);
             }
@@ -115,7 +113,7 @@ class Jwks {
     }
 
     private static boolean isEc(JsonObject key) {
-        return KEY_TYPE_EC.equals(readString(key, "kty"));
+        return Jwk.KEY_TYPE_EC.equals(readString(key, "kty"));
     }
 
     private static String readString(JsonObject key, String member) {
