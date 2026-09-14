@@ -46,6 +46,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+if (project.hasProperty('javaToolchainVersion')) {
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(javaToolchainVersion as int)
+        }
+    }
+}
+
 tasks.named('test', Test) {
     useJUnitPlatform()
 }
