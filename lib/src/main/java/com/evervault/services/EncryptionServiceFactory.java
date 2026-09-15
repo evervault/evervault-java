@@ -4,9 +4,17 @@ import com.evervault.utils.EcdhCurve;
 
 public abstract class EncryptionServiceFactory {
     public static EncryptionService build(EcdhCurve ecdhCurve) {
-        if(EcdhCurve.SECP256R1.equals(ecdhCurve)) {
-            return new EncryptionServiceBasedOnCurve256R1(new R1StdEncryptionOutputFormat());
+        if (ecdhCurve == null) {
+            throw new IllegalArgumentException("ecdhCurve");
         }
-        return new EncryptionServiceBasedOnCurve256K1(new K1StdEncryptionOutputFormat());
+
+        switch (ecdhCurve) {
+            case SECP256R1:
+                return new EncryptionServiceBasedOnCurve256R1(new R1StdEncryptionOutputFormat());
+            case SECP256K1:
+                return new EncryptionServiceBasedOnCurve256K1(new K1StdEncryptionOutputFormat());
+            default:
+                throw new IllegalArgumentException("No encryption service for curve " + ecdhCurve);
+        }
     }
 }

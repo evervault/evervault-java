@@ -19,16 +19,19 @@ public class WhenDealingWithHttpTimeoutsTests {
     private static final String API_KEY = "Foo";
     private static final String APP_UUID = "Bar";
 
+    private static final int CLIENT_TIMEOUT_MILLIS = 50;
+    private static final int RESPONSE_DELAY_MILLIS = 5000;
+
     @Test
     void triggersExceptionWhenHittingPublicKeyEndpoint(WireMockRuntimeInfo wireMockRuntimeInfo) {
         final String endpoint = "/Foo";
 
-        stubFor(get(urlEqualTo(endpoint))
+        stubFor(get(urlEqualTo(endpoint + "/cages/key"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withFixedDelay(1)));
+                        .withFixedDelay(RESPONSE_DELAY_MILLIS)));
 
-        HttpHandler client = new HttpHandler(API_KEY, APP_UUID, 10);
+        HttpHandler client = new HttpHandler(API_KEY, APP_UUID, CLIENT_TIMEOUT_MILLIS);
         assertThrows(SocketTimeoutException.class, () -> client.getCagePublicKeyFromEndpoint(wireMockRuntimeInfo.getHttpBaseUrl() + endpoint));
     }
 
@@ -36,12 +39,12 @@ public class WhenDealingWithHttpTimeoutsTests {
     void triggersExceptionWhenHittingRunCage(WireMockRuntimeInfo wireMockRuntimeInfo) {
         final String endpoint = "/Foo";
 
-        stubFor(get(urlEqualTo(endpoint))
+        stubFor(post(urlEqualTo(endpoint))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withFixedDelay(1)));
+                        .withFixedDelay(RESPONSE_DELAY_MILLIS)));
 
-        HttpHandler client = new HttpHandler(API_KEY, APP_UUID, 10);
+        HttpHandler client = new HttpHandler(API_KEY, APP_UUID, CLIENT_TIMEOUT_MILLIS);
 
         assertThrows(SocketTimeoutException.class, () -> client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "Foo", "Foo", true, null));
     }

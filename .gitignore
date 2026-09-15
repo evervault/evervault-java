@@ -16,3 +16,8 @@ node_modules
 
 # Ignore VSCode directory
 .vscode
+# Ignore downloaded key material in the examples
+examples/*/keys/
+
+# Secret loading
+.envrc
