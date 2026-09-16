@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.evervault:lib:4.2.0'
+    implementation 'com.evervault:lib:4.3.1'
 }
 
 java {

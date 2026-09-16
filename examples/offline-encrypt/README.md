@@ -16,10 +16,15 @@ Evervault evervault = Evervault.withKey(appId, apiKey, key, teamUuid);
 
 `kid` is enforced when present - use `EvervaultKey.fromJwks(jwksJson)` if the JWK has no `kid`.
 
-Built against the SDK in this repository via `includeBuild('../..')`, using the
-repository's Gradle wrapper rather than carrying its own.
+The example builds against the published SDK from Maven Central (see `build.gradle` for the
+version) and uses the repository's Gradle wrapper rather than shipping its own.
 
-## 1. Download your app's keys
+For local SDK development, uncomment `includeBuild('../..')` in `settings.gradle` to
+build against the working tree instead of the published artifact. Gradle substitutes
+`com.evervault:lib` by group and module, so the version in `build.gradle` is ignored while
+it is on.
+
+## 1. Download your App's keys
 
 ```sh
 mkdir -p keys
@@ -58,5 +63,5 @@ EV_APP_ID=app_xxx EV_API_KEY=ev:key:... ../../gradlew run --args="<kid>"
 | --- | --- | --- |
 | `EV_KEY_ID` | — | `kid` to use, unless the JWKS holds a single key |
 | `EV_JWKS_PATH` | `keys/jwks.json` | JWKS to read |
-| `EV_APP_ID` | `app_offline_example` | Evervault App whose credentials decrypt the ciphertext. Must be the app the JWKS came from |
+| `EV_APP_ID` | `app_offline_example` | Evervault App whose credentials decrypt the ciphertext. Must be the App the JWKS came from |
 | `EV_API_KEY` | — | When set, the example also decrypts via HTTP call |
