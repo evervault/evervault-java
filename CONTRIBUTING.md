@@ -40,10 +40,7 @@ or run the unit tests alone:
 
 ### Java compatibility
 
-`lib` targets Java 8 source and target compatibility, and CI runs the suite on 8, 11, 16, 17,
-and 21. Code that only compiles on a later JDK will pass locally but fail in CI.
-
-To reproduce a specific version you need that JDK installed locally. Toolchain
+Reproducing a specific CI Java version needs that JDK installed locally. Toolchain
 auto-provisioning is not configured, so the build fails with "No matching toolchains" if it
 is missing:
 
@@ -61,13 +58,6 @@ regenerating the lockfiles, or resolution fails:
 ```
 
 Commit the resulting `lib/gradle.lockfile` and `buildscript-gradle.lockfile`.
-
-## Examples
-
-`examples/` holds standalone projects that build against the published artifact and share the
-repository's Gradle wrapper. When changing public API, check the examples still compile, and
-uncomment `includeBuild('../..')` in the example's `settings.gradle` to build it against your
-working tree.
 
 ## Changesets and releases
 
