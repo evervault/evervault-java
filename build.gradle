@@ -9,6 +9,7 @@ plugins {
 }
 
 group 'com.evervault'
+version new groovy.json.JsonSlurper().parseText(file('package.json').text).version
 
 dependencyLocking {
     lockAllConfigurations()
