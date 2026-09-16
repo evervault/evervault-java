@@ -1,5 +1,11 @@
 # evervault-java
 
+## 4.3.1
+
+### Patch Changes
+
+- Update release process from deprecated OSSRH to Maven Central Portal.
+
 ## 4.3.0
 
 ### Minor Changes
