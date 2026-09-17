@@ -1,3 +1,4 @@
 rootProject.name = 'offline-encrypt'
 
-includeBuild('../..')
+// Uncomment this line to use a local build when testing 
+// includeBuild('../..')
