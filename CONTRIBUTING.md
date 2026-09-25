@@ -67,7 +67,7 @@ A PR that should land in a release needs a changeset. Run `pnpm changeset`, pick
 level, and describe the change for the changelog. Do not pick major for a breaking change
 without team approval.
 
-Releasing is two steps, both on `master`:
+Releasing is two steps, both on `main`:
 
 1. Merging a PR that contains changesets prompts the bot to open a "New Release" PR that
    bumps the version in `package.json` and `lib/build.gradle`.
