@@ -6,7 +6,6 @@ import com.evervault.services.HttpHandler;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
-import com.google.gson.internal.LinkedTreeMap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 import java.time.Instant;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -197,7 +197,7 @@ public class WhenPerformingHttpRequestTests {
         CageRunResult result = client.runCage(wireMockRuntimeInfo.getHttpBaseUrl(), "test-cage", data, false, "1.0.0");
 
         Assertions.assertEquals("s0m3Str1ngW1thNumb3rs", result.runId);
-        LinkedTreeMap<String, String> nested = (LinkedTreeMap<String, String>) result.result;
+        Map<String, String> nested = (Map<String, String>) result.result;
 
         assertEquals("someMessage", nested.get("message"));
         assertEquals("someEncryptedData", nested.get("name"));
